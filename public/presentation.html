@@ -816,8 +816,7 @@
         <p class="kicker">07 / Actual working application</p>
         <h2>Let's use the prototype.</h2>
         <div class="actions">
-          <button class="primary" id="loadDemo">
-            Load live demo in this slide</button
+          <button class="primary" id="loadDemo">Show interactive demo</button
           ><a href="/" target="_blank" rel="noopener">Open full app ↗</a
           ><button id="hideDemo">Show evidence screenshot</button>
         </div>
@@ -1033,6 +1032,7 @@
           current === slides.length - 1;
         history.replaceState(null, "", "#slide-" + (current + 1));
         window.scrollTo(0, 0);
+        if (current === 7) loadLiveDemo();
       }
       function toggleNotes() {
         const open = notes.classList.toggle("open");
@@ -1063,12 +1063,13 @@
       };
       document.getElementById("full").onclick = full;
       document.getElementById("print").onclick = () => window.print();
-      document.getElementById("loadDemo").onclick = () => {
+      function loadLiveDemo() {
         const frame = document.getElementById("demoFrame");
         if (!frame.getAttribute("src")) frame.src = "/";
         frame.classList.add("open");
         document.getElementById("demoShot").classList.add("hidden");
-      };
+      }
+      document.getElementById("loadDemo").onclick = loadLiveDemo;
       document.getElementById("hideDemo").onclick = () => {
         document.getElementById("demoFrame").classList.remove("open");
         document.getElementById("demoShot").classList.remove("hidden");
@@ -1094,6 +1095,9 @@
         if (e.key === "Home") show(0);
         if (e.key === "End") show(slides.length - 1);
       });
+      window.addEventListener("hashchange", () =>
+        show(Number((location.hash.match(/slide-(\d+)/) || [])[1] || 1) - 1),
+      );
       show(Number((location.hash.match(/slide-(\d+)/) || [])[1] || 1) - 1);
     </script>
   </body>

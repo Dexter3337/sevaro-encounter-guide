@@ -45,9 +45,7 @@ for (let i = 0; i < 12; i++) {
     });
   }
   if (i === 7) {
-    await page
-      .getByRole("button", { name: "Load live demo in this slide" })
-      .click();
+    await page.getByRole("button", { name: "Show interactive demo" }).click();
     await page
       .frameLocator("#demoFrame")
       .getByRole("heading", { name: "Intake details", exact: true })
