@@ -1,4 +1,4 @@
-import type { Hospital, Source } from "./domain";
+﻿import type { Hospital, Source } from "./domain";
 import { windows } from "./time";
 export const concepts: Record<string, string[]> = {
   "Video Eval Location": [
@@ -164,7 +164,8 @@ export function resolveConcept(
     let score = 0;
     for (const a of aliases) {
       const x = normalize(a);
-      if (n.includes(x)) score = Math.max(score, x.length);
+      if ((" " + n + " ").includes(" " + x + " "))
+        score = Math.max(score, x.length);
     }
     if (score) ranked.push({ field: conceptName(field), score });
   }

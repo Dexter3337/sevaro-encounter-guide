@@ -1,4 +1,4 @@
-import Papa from "papaparse";
+﻿import Papa from "papaparse";
 import { Temporal } from "@js-temporal/polyfill";
 import { hospitalSchema, type Hospital, type Source } from "./domain";
 import { interpretation, normalize } from "./knowledge";
@@ -140,6 +140,12 @@ function fromRecords(
   }
   return [...groups.values()];
 }
+function normalizeTimezone(raw: Record<string, unknown>): string {
+  const zone = raw.timezone ?? raw.time_zone ?? raw.local_timezone;
+  if (zone === undefined || zone === null) return "";
+  const s = String(zone).trim();
+  return s.match(/\((.*?)\)/)?.[1] || s;
+}
 function adaptHospital(raw: Record<string, unknown>): unknown {
   const id = String(raw.id || raw.hospital_id || "");
   const version = String(raw.version || raw.guide_version || "Imported v1");
@@ -148,6 +154,7 @@ function adaptHospital(raw: Record<string, unknown>): unknown {
       ...raw,
       id,
       name: raw.name || raw.hospital_name,
+      timezone: normalizeTimezone(raw),
       version,
       fields: raw.fields.map((x, i) => {
         const r = x as Record<string, unknown>;
@@ -169,6 +176,7 @@ function adaptHospital(raw: Record<string, unknown>): unknown {
       id,
       version,
       name: raw.name || raw.hospital_name,
+      timezone: normalizeTimezone(raw),
       fields: Object.entries(raw.fields).map(([field, v], i) => {
         const r: Record<string, unknown> =
           typeof v === "object" && v !== null
@@ -235,7 +243,7 @@ export function previewImport(
         items = hospitals.map((h) =>
           adaptHospital({
             ...h,
-            timezone: String(h.timezone).match(/\((.*?)\)/)?.[1] || h.timezone,
+            timezone: normalizeTimezone(h),
             fields: records.filter(
               (r) =>
                 (r.hospitalId || r.hospital_id) === (h.id || h.hospital_id),
@@ -251,7 +259,7 @@ export function previewImport(
       else items = [adaptHospital(x)];
     }
     if (!items.length || items.length > 50)
-      throw new Error("Import must contain 1–50 hospitals.");
+      throw new Error("Import must contain 1â€“50 hospitals.");
     const seen = new Set<string>();
     for (const item of items) {
       const h = hospitalSchema.parse(item);
@@ -281,7 +289,7 @@ export function previewImport(
         p.counts[state]++;
         if (state !== "supported")
           p.diagnostics.push(
-            `${h.name} · ${s.field}: ${state}; retained source, limited automatic interpretation.`,
+            `${h.name} Â· ${s.field}: ${state}; retained source, limited automatic interpretation.`,
           );
         if (!s.lastVerified && s.sourceKind === "guide")
           p.diagnostics.push(`${s.field}: verification date unknown.`);
@@ -313,5 +321,5 @@ export function activate(
 export function importSummary(p: Preview) {
   return Object.entries(p.counts)
     .map(([k, v]) => `${v} ${k}`)
-    .join(" · ");
+    .join(" Â· ");
 }
