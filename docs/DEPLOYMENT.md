@@ -23,3 +23,5 @@ git -c credential.username=Dexter3337 push -u origin main
 ```
 
 For future manual deployment run `pnpm build`, then upload the contents of `dist/` or a ZIP containing those contents to the existing Netlify project's upload control. `demo-deploy.zip` is a generated deployment bundle ignored by Git. Keep the root `index.html` and `assets/` together. The site contains only synthetic demo data and presentation assets.
+
+Alignment update published to the existing Netlify project on 10 October 2026 at 13:46 America/New_York. Deployment ID: 6aca79f4dbf40a7f3b0a2b9f. Includes persistent order-display advice, reviewed synthetic transcript candidates, integration-review.html, written audit and refreshed mentor/test evidence. Hosted app and popup were inspected. This remains a public synthetic demo without a live Sevaro/transcript connection. GitHub push remains pending the previously requested authorization; no new credential grant was made.

@@ -56,9 +56,30 @@ it("T08 EEG mentioned in assessment invokes source availability", () => {
       },
     };
   expect(
-    evaluate(h, c, makeEvent(c, "field_changed", "assessment_plan"))[0]
-      .primaryStatus,
+    evaluate(h, c, makeEvent(c, "field_changed", "assessment_plan")).find(
+      (r) => r.title === "EEG",
+    )!.primaryStatus,
   ).toBe("stale");
+});
+it("order guidance is proactive on display and survives unrelated edits", () => {
+  const h = seedHospitals[2];
+  const c = { ...freshContext(h), step: "recommendation" as const };
+  for (const event of [
+    makeEvent(c, "step_changed"),
+    makeEvent(c, "field_changed", "assessment_plan", known("Observe")),
+    makeEvent(c, "clock_changed"),
+  ]) {
+    expect(
+      evaluate(h, c, event)
+        .filter((r) => r.anchor === "thrombolytic_order_placed")
+        .map((r) => r.title),
+    ).toEqual(["Order Entry", "Order Set Name"]);
+  }
+  expect(
+    evaluate(h, { ...c, step: "history" }, makeEvent(c, "step_changed")).some(
+      (r) => r.anchor === "thrombolytic_order_placed",
+    ),
+  ).toBe(false);
 });
 it("T09 creates note-title guidance even before typing", () => {
   const h = seedHospitals[2],
@@ -152,4 +173,23 @@ it("satisfied plan answer cites the plan requirement rather than only the charge
   expect(r.citations.some((s) => s.field === "Consult Completion Rule")).toBe(
     true,
   );
+});
+it("current EEG guidance suppresses negated, historical and question-only text", () => {
+  const h = seedHospitals[3];
+  const c = { ...freshContext(h), step: "recommendation" as const };
+  for (const text of [
+    "No seizure concern and no EEG planned",
+    "Should EEG be obtained?",
+    "History of seizure yesterday",
+    "No EEG planned. Obtain routine EEG now for current seizure concern",
+  ]) {
+    const rs = evaluate(
+      h,
+      { ...c, values: { assessment_plan: known(text) } },
+      makeEvent(c, "field_changed", "assessment_plan"),
+    );
+    expect(rs.some((r) => r.title === "EEG")).toBe(
+      text.startsWith("No EEG planned."),
+    );
+  }
 });

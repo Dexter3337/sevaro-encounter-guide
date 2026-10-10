@@ -958,3 +958,40 @@ button[aria-current="page"] {
     text-align: right;
   }
 }
+.transcript-dialog {
+  max-width: 720px;
+  width: calc(100% - 32px);
+  max-height: 85vh;
+  overflow: auto;
+  border: 1px solid #bed0d2;
+  border-radius: 14px;
+  padding: 28px;
+  color: #18383a;
+}
+.transcript-dialog::backdrop {
+  background: rgb(10 30 32 / 55%);
+}
+.transcript-candidate {
+  margin: 16px 0;
+  padding: 14px;
+  border: 1px solid #d6e3e4;
+  border-radius: 8px;
+}
+.transcript-candidate input {
+  width: auto;
+  margin-right: 8px;
+}
+.transcript-candidate label {
+  display: block;
+  font-weight: 700;
+}
+.transcript-candidate blockquote {
+  margin: 12px 0;
+  padding-left: 12px;
+  border-left: 3px solid #198b88;
+}
+.transcript-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}

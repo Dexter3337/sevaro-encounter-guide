@@ -41,6 +41,12 @@ import {
 import { challengeFixtures } from "./fixtures";
 import { runEvaluation, fixtureContext, percentiles } from "./evaluation";
 import "./style.css";
+import { TranscriptReview } from "./TranscriptReview";
+import {
+  syntheticTranscriptBatch,
+  approvedTranscriptValues,
+  type TranscriptBatch,
+} from "./transcript";
 
 const label = (s: string) =>
   s.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -275,6 +281,7 @@ function App() {
   )!;
   const [tab, setTab] = useState("encounter");
   const [outage, setOutage] = useState(false);
+  const [transcriptBatch, setTranscriptBatch] = useState<TranscriptBatch>();
   const [results, setResults] = useState<Result[]>(() =>
     evaluate(h, c, makeEvent(c, "encounter_opened")),
   );
@@ -375,6 +382,39 @@ function App() {
   }
   function change(id: string, val: Known) {
     commit(c, makeEvent(c, "field_changed", id, val));
+  }
+  function applyTranscript(selected: string[]) {
+    if (!transcriptBatch) return;
+    try {
+      const approved = approvedTranscriptValues(
+        transcriptBatch,
+        latestC.current,
+        selected,
+      );
+      let next = latestC.current;
+      for (const [fieldId, val] of Object.entries(approved)) {
+        const target = registry.find((f) => f.id === fieldId)!;
+        next = { ...next, step: target.step };
+        const event = makeEvent(next, "field_changed", fieldId, val);
+        commit(next, event);
+        next = reduceEvent(next, event);
+        setAudit((a) =>
+          a.map((row) =>
+            row.event.id === event.id
+              ? {
+                  ...row,
+                  action:
+                    "clinician-approved synthetic transcript draft · " +
+                    transcriptBatch.sourceId,
+                }
+              : row,
+          ),
+        );
+      }
+      setTranscriptBatch(undefined);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
   }
   function focus(id: string) {
     if (id === "thrombolytic_order_placed")
@@ -540,6 +580,7 @@ function App() {
         </a>
         <nav className="review-links" aria-label="Review resources">
           <a href="/workflow.html">App workflow</a>
+          <a href="/integration-review.html">Sevaro integration review</a>
           <a href="/presentation.html">Mentor presentation</a>
         </nav>
         <span className="demo-badge">
@@ -578,6 +619,14 @@ function App() {
             <small>Engine {engineVersion}</small>
           </div>
         </nav>
+        {transcriptBatch && (
+          <TranscriptReview
+            batch={transcriptBatch}
+            context={c}
+            close={() => setTranscriptBatch(undefined)}
+            approve={applyTranscript}
+          />
+        )}
         <main>
           <div className="page-heading">
             <div>
@@ -845,6 +894,14 @@ function App() {
                       ))}
                   </nav>
                   <div className="form-body">
+                    <button
+                      className="secondary"
+                      onClick={() =>
+                        setTranscriptBatch(syntheticTranscriptBatch(c))
+                      }
+                    >
+                      Simulate transcript drafts
+                    </button>
                     <div className="form-title">
                       <span className="eyebrow">
                         {label(c.step)} · {c.encounterType}

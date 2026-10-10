@@ -1,0 +1,98 @@
+{
+  "reviewedAt": "2026-10-10T15:21:13.265Z",
+  "scope": "Supplied Challenge 1 and research foundation; no real patient transcript found in the reviewed package",
+  "tables": {
+    "Sources": {
+      "rows": 21,
+      "sha256": "c9d1821f2982f655d001a1df2adfaa44d88dc05a8679b327480e6c871f019d80"
+    },
+    "Synthetic Hospitals": {
+      "rows": 14,
+      "sha256": "1e5745a0452264fec82b33a0ac9834ddb40e2e3d24fd5967c845e461476d4c07"
+    },
+    "Rule Families": {
+      "rows": 16,
+      "sha256": "ab8e533010e4970da7912123cc08a7e30691a0ce66ebfdcafb9815a0c68046e2"
+    },
+    "Guide Fields": {
+      "rows": 34,
+      "sha256": "c6e50b4da92ad7948628e0eb53e5e662d4a39cbdde74bdda1a772aca7bfaeb0e"
+    },
+    "Synthetic Rules": {
+      "rows": 288,
+      "sha256": "25d3f34051c73b23863b70b5f90dc744d21382e10664333bae3942217a7a9a39"
+    },
+    "Caselog Fields": {
+      "rows": 20,
+      "sha256": "7e5beb8a39bfcc7b75437de44b0e9ef67b36bc9c54dfd43a61d7ffb1c18c8f5f"
+    },
+    "Field–Rule Map": {
+      "rows": 11,
+      "sha256": "8a16554cba490e45c5272aec4ae4341dee37f46844329e3521da8c3b62d4da01"
+    },
+    "Requirements": {
+      "rows": 62,
+      "sha256": "4cba4ff4fe4912e0e5201d47a9aced4bffc268042a25629a68a3bdaa28128300"
+    },
+    "Storyboard Notes": {
+      "rows": 2,
+      "sha256": "dc276886b13cd638029a9870dab86e50b23976e2d11176c7c6a19e6af14256dd"
+    },
+    "Development Scenarios": {
+      "rows": 101,
+      "sha256": "b6ae7a3ce1f322fee9f7077bc3a969074186243406364343503a49f7781ecee0"
+    },
+    "Expected Outputs": {
+      "rows": 131,
+      "sha256": "05c834a7f79aab809dce744905204b660749f12d821d71a1ea747e96dc3a5bcc"
+    },
+    "Public Examples": {
+      "rows": 7,
+      "sha256": "37a405fad6f4b48056dfad86002b3d82cf6deccc887d0fbb09506aeb6cc93fbc"
+    },
+    "System Integration": {
+      "rows": 12,
+      "sha256": "867b3ffc3121d6051ac77ed035e8d1f3e8a78bf14ef94a7c9d5ded77c2c52c44"
+    },
+    "Workflow Timing": {
+      "rows": 9,
+      "sha256": "e04a81756a05b960e6c224ced5baa9e49c8debca835cf06fe3a57812b6003b29"
+    },
+    "Event Metadata": {
+      "rows": 10,
+      "sha256": "a955291e1f52245ce841717daefe45fc0c5fe366cf5b898302b324be662659bc"
+    },
+    "Guardrails": {
+      "rows": 15,
+      "sha256": "494433463fc81abc6104b88acdcd750931d3df92a65db30c20b6bb113f0e1083"
+    },
+    "Unknowns and Decisions": {
+      "rows": 22,
+      "sha256": "9b58b28ee477b3e3c5daccd547878219474fa64d1679a90702d8aebb825d47fc"
+    },
+    "Held-Out Scenarios": {
+      "rows": 30,
+      "sha256": "a1c0abac0f333fa5f39830a695f4c5d74785bd4dfbf3ea1f4cf1a280aadaceae"
+    },
+    "Coverage": {
+      "rows": 11,
+      "sha256": "2c48435f6915451d44b25d2e0fb2a63cd0ed55633146b0bfdf1787f0c597cb32"
+    },
+    "Adaptive Interpretation": {
+      "rows": 6,
+      "sha256": "58fb5ecf8669dc3c3e59de0c5a188f35a1b2996d339d5afc760cb403286a28fe"
+    },
+    "Answer Policy": {
+      "rows": 6,
+      "sha256": "d26ca4d0e978a964a938fbf5c0a693f2f1baf02f4b6f183b8c7a679f15a1c89b"
+    },
+    "Implementation Priorities": {
+      "rows": 9,
+      "sha256": "0172c32aea692a07e22763ac4d632cdf67a13d90a065dfc683ecb81124e6b575"
+    },
+    "Trace Links": {
+      "rows": 599,
+      "sha256": "e66468dfc5d9532ce5d78ea4f3825476c6e18fe93f1ceb7651eb7afbbc792cd8"
+    }
+  }
+}

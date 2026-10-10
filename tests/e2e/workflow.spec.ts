@@ -351,3 +351,52 @@ test("loaded core operates without network access", async ({
   expect(errors).toEqual([]);
   await context.setOffline(false);
 });
+test("order guidance exists before focus and remains after unrelated editing", async ({
+  page,
+}) => {
+  await page
+    .getByRole("button", { name: "Recommendation", exact: false })
+    .click();
+  await expect(page.locator(".guidance-panel")).toContainText("Order Entry");
+  await page
+    .getByLabel("Assessment / plan", { exact: true })
+    .fill("Observe clinically");
+  await expect(page.locator(".guidance-panel")).toContainText("Order Entry");
+});
+test("transcript popup requires review, preserves current values, and emits normal guidance", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page
+    .getByRole("button", { name: "Simulate transcript drafts" })
+    .click();
+  const popup = page.getByRole("dialog");
+  await expect(popup).toBeVisible();
+  await expect(
+    popup.getByRole("button", { name: "Apply approved drafts" }),
+  ).toBeDisabled();
+  await expect(popup).toContainText("Current: Not recorded");
+  await popup
+    .getByRole("checkbox", {
+      name: "Approve Large vessel occlusion present: true",
+    })
+    .check();
+  await page.screenshot({
+    path: "reports/transcript-review.png",
+    fullPage: true,
+  });
+  await popup.getByRole("button", { name: "Apply approved drafts" }).click();
+  await expect(popup).not.toBeVisible();
+  await expect(
+    page.getByLabel("Large vessel occlusion present", { exact: true }),
+  ).toHaveValue("yes");
+  await expect(page.getByLabel("CTA done", { exact: true })).toHaveValue(
+    "",
+  );
+  await expect(page.locator(".guidance-panel")).toContainText(
+    "ED provider initiates transfer",
+  );
+  expect(errors).toEqual([]);
+});
+

@@ -334,6 +334,21 @@ export function ask(
   }
   return { result: answerField(h, c, field, instant) };
 }
+// Conservative finite grammar for manual plan text; not a clinical NLP model.
+export function currentEEGConcern(text: string): boolean {
+  return text.split(/[.!?;\n]+/).some((clause) => {
+    if (!/\b(eeg|seizure)\b/i.test(clause)) return false;
+    if (
+      /\b(no|not|denies|denied|without|ruled out|historical|history of|yesterday|previous|prior|should|could|whether)\b/i.test(
+        clause,
+      )
+    )
+      return false;
+    return /\b(request|obtain|order|plan|evaluate|evaluation|concern|suspect|suspected|current|ongoing)\b/i.test(
+      clause,
+    );
+  });
+}
 export function evaluate(h: Hospital, c: Context, e: Event): Result[] {
   if (c.hospitalId !== h.id || c.guideVersion !== h.version)
     throw new Error("Hospital/version mismatch");
@@ -406,12 +421,9 @@ export function evaluate(h: Hospital, c: Context, e: Event): Result[] {
         "Workflow review: ",
       );
     }
-    if (
-      /stroke/i.test(c.consultType) &&
-      (value(c, "thrombolytic_given") === true ||
-        e.type === "step_changed" ||
-        e.fieldId === "thrombolytic_order_placed")
-    ) {
+    // The mock renders this field throughout Recommendation. Display-triggered
+    // guidance remains applicable after unrelated edits; focus is not required.
+    if (/stroke/i.test(c.consultType)) {
       add("Order Entry", "advisory", "thrombolytic_order_placed");
       const permission = getSources(h, "Order Entry").find(
         (s) => s.sourceKind === "guide",
@@ -431,7 +443,7 @@ export function evaluate(h: Hospital, c: Context, e: Event): Result[] {
         }
       }
     }
-    if (/\b(eeg|seizure)\b/i.test(String(value(c, "assessment_plan") || "")))
+    if (currentEEGConcern(String(value(c, "assessment_plan") || "")))
       add("EEG", "info", "assessment_plan");
   }
   if (c.step === "note") add("Required Note Title", "advisory", "note_title");

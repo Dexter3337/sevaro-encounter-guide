@@ -3,7 +3,9 @@
     "argv": [
       "C:\\Users\\rohit\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
       "C:\\Users\\rohit\\Sevaro\\encounter-guide\\node_modules\\.pnpm\\@playwright+test@1.64.0\\node_modules\\@playwright\\test\\cli.js",
-      "test"
+      "test",
+      "-g",
+      "order guidance exists|transcript popup|actual browser latency"
     ],
     "configFile": "C:\\Users\\rohit\\Sevaro\\encounter-guide\\playwright.config.ts",
     "rootDir": "C:/Users/rohit/Sevaro/encounter-guide/tests/e2e",
@@ -103,244 +105,6 @@
       "line": 0,
       "specs": [
         {
-          "title": "N2 live edit, clock boundary, cited evidence; desktop inspection",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 60000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "",
-              "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 1333,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-10-10T08:20:08.726Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "c601ceb5ecfc8efa4a14-319a5837da0d0609aded",
-          "file": "workflow.spec.ts",
-          "line": 17,
-          "column": 1
-        },
-        {
-          "title": "N5 gate blocks, acknowledgement cannot replace charge; recorded state resolves",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 60000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "",
-              "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 834,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-10-10T08:20:10.626Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "c601ceb5ecfc8efa4a14-73578a0df2f5fa2d8a4c",
-          "file": "workflow.spec.ts",
-          "line": 52,
-          "column": 1
-        },
-        {
-          "title": "N7 plan confirmation blocks until explicitly recorded",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 60000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "",
-              "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 810,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-10-10T08:20:11.473Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "c601ceb5ecfc8efa4a14-fce3d31ff3ecd30ad3a0",
-          "file": "workflow.spec.ts",
-          "line": 69,
-          "column": 1
-        },
-        {
-          "title": "V12 conflicting source evidence and V14 missing field",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 60000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "",
-              "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 825,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-10-10T08:20:12.300Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "c601ceb5ecfc8efa4a14-32af5fdd427ba4fb9189",
-          "file": "workflow.spec.ts",
-          "line": 83,
-          "column": 1
-        },
-        {
-          "title": "N8 silence, outage usability and isolated hospital switch",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 60000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "",
-              "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 912,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-10-10T08:20:13.139Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "c601ceb5ecfc8efa4a14-e6996db321486521d5e7",
-          "file": "workflow.spec.ts",
-          "line": 102,
-          "column": 1
-        },
-        {
-          "title": "unfamiliar import, new static field, dynamic mapping, persistence, inert markup, reset",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 60000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "",
-              "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 1772,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-10-10T08:20:14.068Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "c601ceb5ecfc8efa4a14-97beffcb1ab006e621fa",
-          "file": "workflow.spec.ts",
-          "line": 126,
-          "column": 1
-        },
-        {
-          "title": "workbench computes 29 passes; keyboard evidence and narrow layout inspection",
-          "ok": true,
-          "tags": [],
-          "tests": [
-            {
-              "timeout": 60000,
-              "annotations": [],
-              "expectedStatus": "passed",
-              "projectId": "",
-              "projectName": "",
-              "results": [
-                {
-                  "workerIndex": 0,
-                  "parallelIndex": 0,
-                  "status": "passed",
-                  "duration": 1364,
-                  "errors": [],
-                  "stdout": [],
-                  "stderr": [],
-                  "retry": 0,
-                  "startTime": "2026-10-10T08:20:15.861Z",
-                  "annotations": [],
-                  "attachments": []
-                }
-              ],
-              "status": "expected"
-            }
-          ],
-          "id": "c601ceb5ecfc8efa4a14-5eb0d7e84f4806a4b41f",
-          "file": "workflow.spec.ts",
-          "line": 190,
-          "column": 1
-        },
-        {
           "title": "actual browser latency across all required triggers",
           "ok": true,
           "tags": [],
@@ -356,12 +120,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 28792,
+                  "duration": 36970,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-10T08:20:17.240Z",
+                  "startTime": "2026-10-10T17:41:38.270Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -375,7 +139,7 @@
           "column": 1
         },
         {
-          "title": "CSV mapping and explicit guide-version refresh preserve pinned encounter",
+          "title": "order guidance exists before focus and remains after unrelated editing",
           "ok": true,
           "tags": [],
           "tests": [
@@ -390,12 +154,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1114,
+                  "duration": 710,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-10T08:20:46.044Z",
+                  "startTime": "2026-10-10T17:42:15.873Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -403,13 +167,13 @@
               "status": "expected"
             }
           ],
-          "id": "c601ceb5ecfc8efa4a14-10cf99d93ca004fae8ae",
+          "id": "c601ceb5ecfc8efa4a14-26b1ce4a07b685cb60b8",
           "file": "workflow.spec.ts",
-          "line": 279,
+          "line": 354,
           "column": 1
         },
         {
-          "title": "loaded core operates without network access",
+          "title": "transcript popup requires review, preserves current values, and emits normal guidance",
           "ok": true,
           "tags": [],
           "tests": [
@@ -424,12 +188,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 891,
+                  "duration": 1040,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-10-10T08:20:47.172Z",
+                  "startTime": "2026-10-10T17:42:16.595Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -437,9 +201,9 @@
               "status": "expected"
             }
           ],
-          "id": "c601ceb5ecfc8efa4a14-395a3e5d1e9e6d3a5c1a",
+          "id": "c601ceb5ecfc8efa4a14-a6ae6b9079d28c2b5f87",
           "file": "workflow.spec.ts",
-          "line": 329,
+          "line": 366,
           "column": 1
         }
       ]
@@ -447,9 +211,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-10-10T08:20:07.625Z",
-    "duration": 40777.787000000004,
-    "expected": 10,
+    "startTime": "2026-10-10T17:41:36.939Z",
+    "duration": 41220.098,
+    "expected": 3,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

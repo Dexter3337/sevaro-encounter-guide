@@ -1,13 +1,14 @@
 # Measured verification results
 
-Generated from saved runner reports on 2026-10-10T08:20:49.600Z. Synthetic workflow engineering tests only; no clinical validation.
+Generated from saved runner reports on 2026-10-10T17:43:31.665Z. Synthetic workflow engineering tests only; no clinical validation.
 
 | Check | Actual result |
 |---|---|
 | Sponsor questions | 20/20 |
 | Sponsor nudges, including N8 silence | 9/9 |
-| Unit/acceptance/edge tests | 74/74; 0 failed |
-| Production browser tests | 10/10; 0 failed, 0 flaky, 0 skipped |
+| Unit/acceptance/edge tests | 79/79; 0 failed |
+| Current focused browser rerun | 3/3; 0 failed |
+| Full alignment run and retry | Initial 10/12 passed; latency timed out and popup assertion was corrected. Focused rerun 3/3 passed, covering both failures plus order persistence. 12 unique browser paths verified across the two runs. |
 | Independently verified PDF guide rows | 169; 0 mismatches |
 | Unfamiliar hospitals | 4 automatic imports; 19 source records |
 
@@ -19,8 +20,8 @@ Unfamiliar record interpretation: 17 supported, 1 partial, 1 needs_review, 0 uns
 
 | Population | Count | p50 | p95 | Maximum |
 |---|---:|---:|---:|---:|
-| Committed field edits | 120 | 19.9 ms | 30.1 ms | 32.9 ms |
-| Required field/open/completion events | 230 | 25.3 ms | 29.4 ms | 32.9 ms |
+| Committed field edits | 120 | 22.1 ms | 30.7 ms | 35.0 ms |
+| Required field/open/completion events | 230 | 23.0 ms | 30.1 ms | 35.0 ms |
 
 Real adapter evaluation → React commit → two animation-frame callbacks. Paint-ready approximation; measured scheduler delay included. 10 repetitions of N1–N9, with actual committed field edits and completion/open events.
 
@@ -29,6 +30,8 @@ Environment: Chrome 154.0.8037.98; 1440x1000; Windows, Node 24.19.0; Headless Ch
 This starts at the adapter commit handler and ends after React commit plus two requestAnimationFrame callbacks. It is a paint-readiness approximation including browser frame scheduling, not actual pixel tracing, event-dispatch hardware latency or a clinical outcome. Engine-only timings in acceptance.json exclude rendering. The UI never labels those timings as field-to-paint latency.
 
 ## Browser paths exercised
+
+Alignment update: doctor-reviewed scripted transcript candidates, unchanged unapproved fields, wrong/stale encounter rejection, gate-field exclusion, current-plan negation/history handling, and order guidance before focus/after unrelated edits. Initial browser failure details remain in browser-tests-initial-alignment-run.json; focused rerun in browser-tests.json. The latest completed latency run replaces the interrupted attempt. Transcript capture/extraction latency is unmeasured because no live connector is implemented.
 
 N2 real edit and clock branch; N5 charge block/resolve; N7 plan block/resolve; V12 two sources/dates; V14 missing evidence; N8 silence; guide outage with continued editing; isolated hospital switch; unfamiliar JSON/new field/mapping; malformed-import preservation; reload/reset; inert HTML/prompt text; all 29 workbench cases; evidence keyboard activation and 390px responsive overflow; CSV mapping; immutable active-version pin/refresh; loaded core with network disabled; repeated actual latency interactions across N1–N9.
 
