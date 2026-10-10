@@ -195,7 +195,7 @@ export const challengeFixtures: Fixture[] = [
     "SYN-002",
     "Who covers pediatric neurology?",
     "not_in_guide",
-    ["Not available", "absent"],
+    ["not documented", "Availability is unknown"],
     [],
     undefined,
   ),
@@ -253,7 +253,7 @@ export const challengeFixtures: Fixture[] = [
     "SYN-005",
     "What note title is required?",
     "not_in_guide",
-    ["Not available", "absent"],
+    ["not documented", "Availability is unknown"],
     [],
   ),
   n(

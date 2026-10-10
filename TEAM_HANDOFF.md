@@ -1,5 +1,9 @@
 # Sevaro team handoff
 
+## Local proactive voice update — October 10, 2026
+
+The current feature branch adds real browser microphone capture, supported current-fact auto-fill, “Bot” questions and field commands, undo/review, and a redesigned clinical workspace. It also fixes compatibility with the supplied developer kit. Read [VOICE_WORKFLOW.md](docs/VOICE_WORKFLOW.md) and [PROACTIVE_VOICE_RESULTS.md](reports/PROACTIVE_VOICE_RESULTS.md) for the new behavior, demonstration and verification. These changes are local; the hosted links below describe the previously published baseline until a new deployment is made. The microphone may use an online browser speech service; no real call connector or unrestricted clinical NLP is provided.
+
 This repository is the complete working prototype and supplied research handoff for Challenge 1: hospital-specific workflow guidance as an addition to Sevaro Synapse. All encounters and hospital policies are fictional. It is not connected to Sevaro, hospital EHRs or real consultation transcripts.
 
 ## Links to share

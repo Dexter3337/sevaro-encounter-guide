@@ -65,7 +65,7 @@ export function answerField(
   r.effectiveLocal = `${localTime(instant, h.timezone).toPlainDate()} ${localTime(instant, h.timezone).toPlainTime().toString({ smallestUnit: "minute" })} · ${h.timezone}`;
   if (!guide.length) {
     r.primaryStatus = "not_in_guide";
-    r.message = `Not available in ${h.name}'s guide. ${field} is absent; no other hospital was searched.`;
+    r.message = `${field} is not documented in ${h.name}'s guide. Availability is unknown; no other hospital was searched.`;
     r.missingEvidence = {
       hospitalId: h.id,
       version: h.version,
@@ -355,17 +355,19 @@ export function evaluate(h: Hospital, c: Context, e: Event): Result[] {
   const out: Result[] = [];
   const add = (f: string, tier: Tier, anchor?: string, prefix = "") => {
     const r = answerField(h, c, f);
+    // Missing documentation is not a hospital capability or an unsolicited task.
+    // Explicit questions still return the missing-source explanation via ask().
+    if (r.primaryStatus === "not_in_guide" && r.missingEvidence?.absent) return;
     r.tier = tier;
     r.anchor = anchor;
     if (prefix) r.message = prefix + r.message;
     out.push(r);
   };
-  if (
-    c.step === "intake" &&
-    (e.type === "encounter_opened" ||
-      e.type === "step_changed" ||
-      e.type === "guide_changed")
-  ) {
+  // Capability and schedule facts are shown on arrival at the step, before any
+  // value is recorded, so the clinician decides with them rather than being
+  // corrected after. They are state-based, not event-gated: an unrelated edit
+  // never clears them. A recorded value can promote one into an action nudge.
+  if (c.step === "intake") {
     add("Video Eval Location", "info");
     add("Wake Up Protocol", "info");
   }
@@ -399,31 +401,46 @@ export function evaluate(h: Hospital, c: Context, e: Event): Result[] {
       );
   }
   if (c.step === "imaging" && /stroke/i.test(c.consultType)) {
+    // Before anything is recorded, the two capabilities that drive the imaging
+    // decision are named even when the guide omits them, so the clinician
+    // confirms locally instead of assuming. Once a value exists the omission is
+    // dropped: an absent guide row must never argue with what was observed.
+    const untouched =
+      value(c, "cta_done") === undefined &&
+      value(c, "lvo_present") === undefined;
+    const capability = (field: string, anchor: string) => {
+      const r = answerField(h, c, field);
+      if (r.primaryStatus === "not_in_guide" && r.missingEvidence?.absent) {
+        if (!untouched) return;
+        r.message += " Confirm locally before relying on it.";
+      }
+      r.tier = "info";
+      r.anchor = anchor;
+      out.push(r);
+    };
+    // What this hospital can image, and when, before either field is answered.
+    capability("CTA Head/Neck", "cta_done");
+    add("CT Perfusion", "info", "cta_done");
+    add("AI", "info", "cta_done");
+    capability("LVO Protocol", "lvo_present");
+    // A recorded value turns the matching capability into an action nudge.
     if (value(c, "lvo_present") === true)
       add("LVO Protocol", "advisory", "lvo_present");
     if (value(c, "cta_done") === true) {
-      add("CT Perfusion", "info", "cta_done");
-      add("AI", "info", "cta_done");
+      const concern = ctaConcern(h, c);
+      if (concern) out.push(concern);
     }
   }
   if (c.step === "recommendation") {
-    if (value(c, "thrombolytic_given") === true) {
-      add(
-        "Thrombolytic",
-        "advisory",
-        "thrombolytic_given",
-        "Recorded as already given; workflow review: ",
-      );
-      add(
-        "Thrombolytic Mix Model",
-        "advisory",
-        "thrombolytic_given",
-        "Workflow review: ",
-      );
+    // Which agent this hospital stocks and who prepares it is decision support
+    // only until it has been given; afterwards it is noise, so it stops.
+    if (/stroke/i.test(c.consultType) && value(c, "thrombolytic_given") !== true) {
+      add("Thrombolytic", "info", "thrombolytic_given");
+      add("Thrombolytic Mix Model", "info", "thrombolytic_given");
     }
     // The mock renders this field throughout Recommendation. Display-triggered
     // guidance remains applicable after unrelated edits; focus is not required.
-    if (/stroke/i.test(c.consultType)) {
+    if (/stroke/i.test(c.consultType) && value(c, "thrombolytic_order_placed") !== true) {
       add("Order Entry", "advisory", "thrombolytic_order_placed");
       const permission = getSources(h, "Order Entry").find(
         (s) => s.sourceKind === "guide",
@@ -438,15 +455,22 @@ export function evaluate(h: Hospital, c: Context, e: Event): Result[] {
           (s) => s.sourceKind === "guide",
         );
         if (hospitalSet) {
-          out.at(-1)!.message += `. ${clean(hospitalSet.raw)}.`;
-          out.at(-1)!.citations.push(hospitalSet);
+          const permissionResult = out.find((r) => r.title === "Order Entry");
+          if (permissionResult) {
+            permissionResult.message += `. ${clean(hospitalSet.raw)}.`;
+            permissionResult.citations.push(hospitalSet);
+          }
         }
       }
     }
     if (currentEEGConcern(String(value(c, "assessment_plan") || "")))
       add("EEG", "info", "assessment_plan");
   }
-  if (c.step === "note") add("Required Note Title", "advisory", "note_title");
+  if (c.step === "note") {
+    const required = getSources(h, "Required Note Title").find(s => s.sourceKind === "guide");
+    if (!required || String(value(c, "note_title") || "").trim() !== clean(required.raw).trim())
+      add("Required Note Title", "advisory", "note_title");
+  }
   if (
     c.step === "rounding" ||
     (c.encounterType === "Rounding" && e.type === "encounter_opened")
@@ -465,5 +489,31 @@ export function evaluate(h: Hospital, c: Context, e: Event): Result[] {
     if (c.step === m.step && predicate(m.condition, c) === true)
       add(m.sourceField, m.tier, m.fieldId);
   }
-  return [...new Map(out.map((r) => [r.id, r])).values()];
+  return [...new Map(out.map((r) => [r.id, r])).values()]
+    .filter(r => !r.flags.includes("resolved"))
+    .sort((a, b) => nudgePriority(b) - nudgePriority(a));
+}
+
+export function nudgePriority(r: Result): number {
+  if (r.blocksCompletion) return 100;
+  if (r.flags.includes("recorded_capability_conflict")) return 90;
+  // Loud once an LVO is recorded; until then it is capability context.
+  if (r.title === "LVO Protocol" && r.tier !== "info") return 80;
+  if (r.primaryStatus === "conflict") return 70;
+  return r.tier === "advisory" ? 50 : 10;
+}
+
+// Capability and encounter facts are separate. A scan may have been performed
+// elsewhere; never silently turn a recorded Yes into No based on a guide.
+export function ctaConcern(h: Hospital, c: Context): Result | undefined {
+  const r = answerField(h, c, "CTA Head/Neck");
+  if (r.primaryStatus === "conflict") {
+    r.message = `CTA capability sources disagree. Confirm where the scan was performed. ${r.message}`;
+  } else if (r.primaryStatus !== "not_in_guide" && /^\s*(?:no\b|none\b|not available\b|unavailable\b)/i.test(r.message)) {
+    r.message = `CTA is recorded as completed, but this hospital's guide lists it as unavailable. Confirm whether it was performed elsewhere or correct the field. Guide: ${r.message}`;
+  } else return undefined;
+  r.tier = "advisory";
+  r.anchor = "cta_done";
+  r.flags.push("recorded_capability_conflict");
+  return r;
 }

@@ -148,6 +148,7 @@ function adaptHospital(raw: Record<string, unknown>): unknown {
       ...raw,
       id,
       name: raw.name || raw.hospital_name,
+      timezone: raw.timezone || raw.local_timezone || raw.time_zone,
       version,
       fields: raw.fields.map((x, i) => {
         const r = x as Record<string, unknown>;
@@ -169,6 +170,7 @@ function adaptHospital(raw: Record<string, unknown>): unknown {
       id,
       version,
       name: raw.name || raw.hospital_name,
+      timezone: raw.timezone || raw.local_timezone || raw.time_zone,
       fields: Object.entries(raw.fields).map(([field, v], i) => {
         const r: Record<string, unknown> =
           typeof v === "object" && v !== null

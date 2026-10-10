@@ -1,5 +1,13 @@
 # Encounter Guide
 
+## Proactive voice workspace
+
+The latest local version adds a redesigned clinical workspace and live browser microphone input. Say **“CTA is completed. LVO is present.”** to fill supported findings and surface hospital guidance automatically. Say **“Bot, what is the LVO pathway?”**, **“Bot, fill note body with…”**, or **“Bot, undo.”** There is also a typed transcript test, draft-review mode and an activity trail. [Voice workflow and demo](docs/VOICE_WORKFLOW.md).
+
+Live speech requires a supported browser and microphone permission, and may use the browser provider's online speech service. Only synthetic speech should be used. This is a finite fact/command interpreter, not general clinical NLP or a video-call transcript connector. Orders, administration and completion prerequisites still require manual entry. The deterministic guidance core remains local and key-free.
+
+The supplied developer-kit files are now included in `data/official/`. The hospital importer accepts their `local_timezone` key, and the encounter adapter applies their step, field event, provider zone and Boolean state. Updated verification is separate from the original baseline: [Proactive voice results](reports/PROACTIVE_VOICE_RESULTS.md).
+
 A working local Sevaro Challenge 1 prototype: interactive caselog, proactive hospital guidance, grounded free-text questions, explicit hospital/provider time zones, source-quality flags, completion gates, dynamic JSON/CSV imports, and an evaluation workbench. **Illustrative Synapse workflow companion · Synthetic demo.** All hospitals, rules, destinations and encounter information are fictional.
 
 ## Run
@@ -19,7 +27,7 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Dependencies are downloaded during setup. Runtime uses bundled data and local computation. The loaded application works with the network disabled. Offline reload is not promised: there is no service worker. Guides/drafts are stored only under `encounter-guide:v1` in this browser's localStorage. Use synthetic data only; Reset demo clears this prototype key, imported versions, drafts and session reports. Storage is tied to the origin (5173 and 4173 have separate state).
+Dependencies are downloaded during setup. The guidance core uses bundled data and local computation and works with the network disabled after loading. Optional microphone transcription may require the browser provider's network service. Offline reload is not promised: there is no service worker. Guides/drafts are stored only under `encounter-guide:v1` in this browser's localStorage. Use synthetic data only; Reset demo clears this prototype key, imported versions, drafts and session reports. Storage is tied to the origin (5173 and 4173 have separate state).
 
 ```sh
 pnpm typecheck
@@ -73,7 +81,7 @@ Read [docs/DATA_CONTRACT.md](docs/DATA_CONTRACT.md) for accepted shapes and gram
 
 - This is a synthetic workflow prototype, without clinical validation or a real Synapse connection. Recording completion posts no hospital charge and signs no clinical note.
 - Supported concept aliases/schedule grammar are finite. Arbitrary clinical policies, holiday exceptions, complex temporal phrases, DST-disambiguated wall-time questions and every possible judging schema are not automatically understood. Unknown conditional text is quoted with review flags; no branch or executable policy is invented.
-- No LLM/provider, live speech, live transcript connector, PDF-upload interpreter or production access is implemented. A scripted synthetic transcript-candidate popup demonstrates clinician review and safe field application. These optional features were deferred in favor of working deterministic behavior.
+- No LLM/provider, meeting transcript connector, PDF-upload interpreter or production access is implemented. Live microphone speech uses the browser service and a finite parser; the original scripted synthetic review popup remains separately available.
 - Source conflict equivalence is conservative (known context qualifiers, normalized wording); sophisticated semantic reconciliation still needs review. Missing verification is shown explicitly; storyboard update dates are not treated as verification dates.
 - Stale/conflicting/unsupported mandatory facts are shown as uncertain without introducing a new gate; unavailable guides allow mock completion labeled unverified. These are documented prototype policies, not production safety rules.
 - Browser latency is handler-to-commit plus two animation frames, a paint-readiness approximation. Tests measure this computer and browser; they establish no universal hardware/network performance guarantee.

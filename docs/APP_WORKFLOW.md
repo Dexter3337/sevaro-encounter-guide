@@ -1,5 +1,7 @@
 # Encounter Guide: detailed application workflow
 
+Current local update: the proactive voice workspace adds browser microphone capture, supported current-fact auto-fill, Bot questions/commands and revision-bound undo. See [VOICE_WORKFLOW.md](VOICE_WORKFLOW.md) for that added entry path and the updated interface. The manual clinical workflow and source/gate behavior below remain available.
+
 Version 1.0 · Implemented prototype · October 10, 2026
 
 This specification describes the running application. All hospitals and encounters are synthetic. The prototype records local workflow statements; it does not place orders, post charges, connect video, sign clinical notes, or complete a production encounter. The source plan defines the product requirements; the flows below reflect the actual implementation and its documented prototype policies.

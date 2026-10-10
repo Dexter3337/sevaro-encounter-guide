@@ -43,7 +43,12 @@ it("T07 focuses permission guidance without asserting order fact", () => {
     c,
     makeEvent(c, "field_focused", "thrombolytic_order_placed"),
   );
-  expect(rs.map((r) => r.title)).toEqual(["Order Entry", "Order Set Name"]);
+  // Action guidance at this step is the permission pair; the rest of the step
+  // is capability context, which must not be mistaken for something to do.
+  expect(rs.filter((r) => r.tier === "advisory").map((r) => r.title)).toEqual([
+    "Order Entry",
+    "Order Set Name",
+  ]);
   expect(c.values).toEqual({});
 });
 it("T08 EEG mentioned in assessment invokes source availability", () => {
@@ -192,4 +197,25 @@ it("current EEG guidance suppresses negated, historical and question-only text",
       text.startsWith("No EEG planned."),
     );
   }
+});
+it("an undocumented capability is named on arrival but never once a value exists", () => {
+  // SYN-006 documents no CTA row at all.
+  const h = seedHospitals[5];
+  const c = { ...freshContext(h), step: "imaging" as const };
+  const onArrival = evaluate(h, c, makeEvent(c, "step_changed"));
+  const cta = onArrival.find((r) => r.title === "CTA Head/Neck")!;
+  expect(cta.primaryStatus).toBe("not_in_guide");
+  expect(cta.tier).toBe("info");
+  expect(cta.message).toContain("Confirm locally");
+  expect(cta.citations).toHaveLength(0);
+  expect(cta.missingEvidence?.absent).toBe(true);
+  // A recorded observation outranks an omission; the row must not argue with it.
+  for (const recorded of [known(true), known(false)])
+    expect(
+      evaluate(
+        h,
+        { ...c, values: { cta_done: recorded } },
+        makeEvent(c, "field_changed", "cta_done"),
+      ).some((r) => r.title === "CTA Head/Neck"),
+    ).toBe(false);
 });

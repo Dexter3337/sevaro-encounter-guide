@@ -9,7 +9,13 @@ import {
   localInstant,
   predicate,
 } from "../src/domain";
-import { answerField, ask, evaluate, gates } from "../src/engine";
+import {
+  answerField,
+  ask,
+  evaluate,
+  gates,
+  nudgePriority,
+} from "../src/engine";
 import { seedHospitals } from "../src/data";
 import { interpretation } from "../src/knowledge";
 import { ageDays, windows, matchWindow } from "../src/time";
@@ -187,17 +193,26 @@ describe("Independent unfamiliar hospitals and edge behavior", () => {
       ).primaryStatus,
     ).toBe("answered");
   });
-  it("reversing LVO removes relevant card and repeats do not stack", () => {
+  it("reversing LVO drops the action nudge back to context; repeats do not stack", () => {
     const c = {
       ...freshContext(harbor),
       step: "imaging" as const,
       values: { lvo_present: known(true) },
     };
     const e = makeEvent(c, "field_changed", "lvo_present");
-    expect(evaluate(harbor, c, e)).toHaveLength(1);
-    expect(
-      evaluate(harbor, { ...c, values: { lvo_present: known(false) } }, e),
-    ).toHaveLength(0);
+    // One entry either way: the capability row and the action nudge come from
+    // the same source field, so a recorded value promotes it, never adds to it.
+    const recorded = evaluate(harbor, c, e);
+    expect(recorded).toHaveLength(1);
+    expect(recorded[0].tier).toBe("advisory");
+    const reversed = evaluate(
+      harbor,
+      { ...c, values: { lvo_present: known(false) } },
+      e,
+    );
+    expect(reversed).toHaveLength(1);
+    expect(reversed[0].tier).toBe("info");
+    expect(nudgePriority(reversed[0])).toBeLessThan(nudgePriority(recorded[0]));
   });
   it("charge gate requires known true; unknown/no/NA do not pass", () => {
     const c = freshContext(harbor);
@@ -353,18 +368,22 @@ describe("Independent unfamiliar hospitals and edge behavior", () => {
     const a = ask(copper, c, "CT perfusion on Friday at 10:00");
     expect(a.result?.effectiveInstant).toBe("2026-03-20T10:00:00Z");
   });
-  it("retrospective recorded action wording does not promise prevention", () => {
+  it("a recorded past action raises no drug-preparation nudge, but stays answerable on request", () => {
+    const h = seedHospitals[2];
     const c = {
-      ...freshContext(seedHospitals[2]),
+      ...freshContext(h),
       step: "recommendation" as const,
       values: { thrombolytic_given: known(true) },
     };
+    // Preparation guidance cannot change an administration already recorded, so
+    // it is never pushed retrospectively; it remains available when asked for.
     expect(
-      evaluate(
-        seedHospitals[2],
-        c,
-        makeEvent(c, "field_changed", "thrombolytic_given"),
-      ).some((r) => r.message.includes("already given; workflow review")),
-    ).toBe(true);
+      evaluate(h, c, makeEvent(c, "field_changed", "thrombolytic_given")).some(
+        (r) => ["Thrombolytic", "Thrombolytic Mix Model"].includes(r.title),
+      ),
+    ).toBe(false);
+    expect(ask(h, c, "Who mixes the TNK?").result?.title).toBe(
+      "Thrombolytic Mix Model",
+    );
   });
 });

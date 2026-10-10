@@ -1,6 +1,6 @@
 # Import contract and supported interpretation
 
-All inputs must be synthetic. JSON/CSV validation occurs before activation; a failed bundle leaves the current one untouched. The exact official judging schema is unknown. These are documented adapters, not Sevaro API contracts.
+All inputs must be synthetic. JSON/CSV validation occurs before activation; a failed bundle leaves the current one untouched. The supplied developer-kit format is now available in `data/official/` and directly supported, including nested hospital `local_timezone`. Private judging transport and actual Sevaro APIs remain unknown. The encounter adapter applies the supplied step, field event, provider timezone and Boolean completion state with validation.
 
 ## Shapes
 
