@@ -1182,7 +1182,36 @@ h2 {
   border-top: 1px solid #edf1ee;
   padding-top: 8px;
 }
-/* Anchor from a field to its card in the rail; never a second copy of it. */
+/* Guidance sits directly above the field it concerns, reading as attached to
+   it rather than as a separate panel the eye has to find. The gap below it is
+   smaller than the gap above, so it groups with the field that follows. */
+.manual-field,
+.voice-filled {
+  margin-bottom: 22px;
+}
+.manual-field:last-of-type,
+.voice-filled:last-of-type {
+  margin-bottom: 4px;
+}
+.field-guidance {
+  margin-bottom: 8px;
+}
+.field-guidance + .field > label,
+.field-guidance + .field > .field-label {
+  color: #2f4a52;
+}
+.field-guidance > .card {
+  margin-bottom: 7px;
+  box-shadow: 0 2px 8px #133b3d05;
+}
+.field-guidance > .card:last-child,
+.field-guidance > .reference-row:last-child {
+  margin-bottom: 0;
+}
+.field-guidance > .reference-row {
+  background: #fff;
+}
+/* Legacy anchor link, kept for narrow layouts that still link to the rail. */
 .field-nudge-link {
   display: inline-flex;
   align-items: center;

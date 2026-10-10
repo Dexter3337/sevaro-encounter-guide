@@ -743,6 +743,29 @@ function App() {
         type: "text" as const,
       })),
   ].filter((f) => f.step === c.step);
+  // Guidance belongs at the field it concerns, where the clinician is already
+  // looking. Only what has no field on this step stays in the side rail, so
+  // nothing is shown twice.
+  const onStep = new Set(fields.map((f) => f.id));
+  const forField = (id: string) => visible.filter((r) => r.anchor === id);
+  const railGuidance = visible.filter(
+    (r) => !r.anchor || !onStep.has(r.anchor),
+  );
+  const railCards = railGuidance.filter((r) => nudgePriority(r) >= 50);
+  const railRows = railGuidance.filter((r) => nudgePriority(r) < 50);
+  const acknowledge = (r: Result) => {
+    setDismissed((a) => [...a, signature(r)]);
+    setAudit((a) => [
+      ...a,
+      {
+        event: makeEvent(c, "field_focused", r.anchor),
+        hospitalId: h.id,
+        version: h.version,
+        results: [r],
+        action: "acknowledged",
+      },
+    ]);
+  };
   const newer = latest(hs).find(
     (x) => x.id === h.id && x.version !== h.version,
   );
@@ -1157,6 +1180,25 @@ function App() {
                             review anytime
                           </span>
                         )}
+                        {forField(f.id).length > 0 && (
+                          <div
+                            className="field-guidance"
+                            aria-live="polite"
+                            aria-atomic="false"
+                          >
+                            {forField(f.id).map((r) =>
+                              nudgePriority(r) >= 50 ? (
+                                <Card
+                                  key={r.id}
+                                  r={r}
+                                  onDismiss={acknowledge}
+                                />
+                              ) : (
+                                <ReferenceRow key={r.id} r={r} />
+                              ),
+                            )}
+                          </div>
+                        )}
                         <InputField
                           f={f}
                           c={c}
@@ -1166,14 +1208,6 @@ function App() {
                         {f.id === "cta_done" && (
                           <small className="field-context">Record whether the scan was performed, including at another facility. Missing guide information does not mean CTA is unavailable.</small>
                         )}
-                        {actionable
-                          .filter((r) => r.anchor === f.id)
-                          .map((r) => (
-                            <a key={r.id} className={`field-nudge-link ${r.tier}`} href="#priority-guidance">
-                                {r.blocksCompletion ? "Required: " : ""}
-                                {r.title} — review guidance →
-                            </a>
-                          ))}
                       </div>
                     ))}
                     {c.step === "note" && (
@@ -1242,27 +1276,15 @@ function App() {
                       </p>
                       <h2>Your next right step</h2>
                     </div>
-                    <span className="count">{actionable.length}</span>
+                    <span className="count">{visible.length}</span>
                   </div>
                   <div aria-live="polite" aria-atomic="false">
-                    {actionable.length ? (
-                      actionable.map((r) => (
+                    {railCards.length ? (
+                      railCards.map((r) => (
                         <Card
                           key={r.id}
                           r={r}
-                          onDismiss={(r) => {
-                            setDismissed((a) => [...a, signature(r)]);
-                            setAudit((a) => [
-                              ...a,
-                              {
-                                event: makeEvent(c, "field_focused", r.anchor),
-                                hospitalId: h.id,
-                                version: h.version,
-                                results: [r],
-                                action: "acknowledged",
-                              },
-                            ]);
-                          }}
+                          onDismiss={acknowledge}
                           onFix={(id) => {
                             step("sign_off");
                             requestAnimationFrame(() =>
@@ -1271,9 +1293,17 @@ function App() {
                           }}
                         />
                       ))
-                    ) : reference.length && !outage ? (
-                      // Context is already on screen; a full empty state here
-                      // would push it down to say less than the rows below.
+                    ) : visible.length > railRows.length && !outage ? (
+                      // Everything that applies is pinned to its own field, so
+                      // repeating it here would only split the clinician's
+                      // attention between two places.
+                      <p className="empty-line">
+                        <span>←</span>{" "}
+                        {visible.length - railRows.length === 1
+                          ? "1 item is shown with the field it applies to."
+                          : `${visible.length - railRows.length} items are shown with the fields they apply to.`}
+                      </p>
+                    ) : railRows.length && !outage ? (
                       <p className="empty-line">
                         <span>✓</span> Nothing needs action at this step.
                       </p>
@@ -1292,15 +1322,15 @@ function App() {
                         </p>
                       </div>
                     )}
-                    {reference.length > 0 && (
+                    {railRows.length > 0 && (
                       <section className="reference-group">
                         <p className="reference-heading">
                           Hospital reference
                           <span className="reference-count">
-                            {reference.length}
+                            {railRows.length}
                           </span>
                         </p>
-                        {reference.map((r) => (
+                        {railRows.map((r) => (
                           <ReferenceRow key={r.id} r={r} />
                         ))}
                       </section>

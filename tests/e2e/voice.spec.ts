@@ -51,7 +51,7 @@ test("wake word question, named-field dictation and explicit correction share th
   await expect(
     page.getByLabel("Large vessel occlusion present", { exact: true }),
   ).toHaveValue("no");
-  await expect(page.locator(".guidance-panel .card")).toHaveCount(0);
+  await expect(page.locator(".field-guidance .card")).toHaveCount(0);
 });
 test("review mode rejects stale drafts and voice cannot satisfy completion gates", async ({
   page,

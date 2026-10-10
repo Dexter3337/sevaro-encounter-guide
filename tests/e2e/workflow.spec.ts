@@ -23,17 +23,17 @@ test("N2 live edit, clock boundary, cited evidence; desktop inspection", async (
   await page
     .getByLabel("Large vessel occlusion present", { exact: true })
     .selectOption("yes");
-  await expect(page.locator(".guidance-panel .card > p")).toContainText(
+  await expect(page.locator(".field-guidance .card > p")).toContainText(
     "Outside coverage",
   );
-  await expect(page.locator(".guidance-panel .card > p")).toContainText(
+  await expect(page.locator(".field-guidance .card > p")).toContainText(
     "ED provider initiates transfer",
   );
-  await expect(page.locator(".guidance-panel .card > p")).not.toContainText(
+  await expect(page.locator(".field-guidance .card > p")).not.toContainText(
     "teleneurologist activates",
   );
   await page
-    .locator(".guidance-panel")
+    .locator(".field-guidance")
     .getByText("View source evidence", { exact: false })
     .click();
   await expect(page.locator(".evidence-body")).toContainText("PDF p9");
@@ -44,7 +44,7 @@ test("N2 live edit, clock boundary, cited evidence; desktop inspection", async (
     .getByLabel("Encounter instant", { exact: true })
     .fill("2026-03-17T17:00:00Z");
   await page.getByRole("button", { name: "Apply clock" }).click();
-  await expect(page.locator(".guidance-panel")).toContainText(
+  await expect(page.locator(".field-guidance")).toContainText(
     "Within coverage",
   );
   expect(errors).toEqual([]);
@@ -57,7 +57,7 @@ test("N5 gate blocks, acknowledgement cannot replace charge; recorded state reso
   await expect(page.locator(".completion-error")).toContainText(
     "Completion blocked",
   );
-  await expect(page.locator(".guidance-panel")).toContainText("Hard Stop");
+  await expect(page.locator(".field-guidance")).toContainText("Hard Stop");
   await page
     .getByLabel("Encounter charge recorded", { exact: true })
     .selectOption("yes");
@@ -105,7 +105,7 @@ test("N8 silence, outage usability and isolated hospital switch", async ({
   await launch(page, "N8");
   await page.getByLabel("Allergies", { exact: true }).fill("none");
   await expect(
-    page.locator(".guidance-panel > div[aria-live] .card"),
+    page.locator(".field-guidance .card"),
   ).toHaveCount(0);
   await page.locator(".demo-controls > summary").click();
   await page.getByLabel("Simulate guide outage").check();
@@ -142,7 +142,7 @@ test("unfamiliar import, new static field, dynamic mapping, persistence, inert m
   await page
     .getByLabel("Interpreter needed (enter Yes)", { exact: true })
     .fill("Yes");
-  await expect(page.locator(".guidance-panel > div[aria-live]")).toContainText(
+  await expect(page.locator(".caselog")).toContainText(
     "SYN-778",
   );
   await page.reload();
@@ -199,7 +199,7 @@ test("workbench computes 29 passes; keyboard evidence and narrow layout inspecti
   await page
     .getByLabel("Large vessel occlusion present", { exact: true })
     .selectOption("yes");
-  const summary = page.locator(".guidance-panel .evidence summary").first();
+  const summary = page.locator(".field-guidance .evidence summary").first();
   await summary.focus();
   await page.keyboard.press("Enter");
   await expect(summary.locator("..")).toHaveAttribute("open", "");
@@ -337,7 +337,7 @@ test("loaded core operates without network access", async ({
   await page
     .getByLabel("Large vessel occlusion present", { exact: true })
     .selectOption("yes");
-  await expect(page.locator(".guidance-panel .card > p")).toContainText(
+  await expect(page.locator(".field-guidance .card > p")).toContainText(
     "ED provider initiates transfer",
   );
   await page.getByLabel("Guide question").fill("Who mixes the TNK?");
@@ -357,11 +357,11 @@ test("order guidance exists before focus and remains after unrelated editing", a
   await page
     .getByRole("button", { name: "Recommendation", exact: false })
     .click();
-  await expect(page.locator(".guidance-panel")).toContainText("Order Entry");
+  await expect(page.locator(".caselog")).toContainText("Order Entry");
   await page
     .getByLabel("Assessment / plan", { exact: true })
     .fill("Observe clinically");
-  await expect(page.locator(".guidance-panel")).toContainText("Order Entry");
+  await expect(page.locator(".caselog")).toContainText("Order Entry");
 });
 test("transcript popup requires review, preserves current values, and emits normal guidance", async ({
   page,
@@ -394,7 +394,7 @@ test("transcript popup requires review, preserves current values, and emits norm
   await expect(page.getByLabel("CTA done", { exact: true })).toHaveValue(
     "",
   );
-  await expect(page.locator(".guidance-panel")).toContainText(
+  await expect(page.locator(".field-guidance")).toContainText(
     "ED provider initiates transfer",
   );
   expect(errors).toEqual([]);
