@@ -1,0 +1,457 @@
+import { Temporal } from "@js-temporal/polyfill";
+import {
+  type Context,
+  type Event,
+  type Hospital,
+  type Result,
+  type Source,
+  type Tier,
+  value,
+  localTime,
+  predicate,
+} from "./domain";
+import {
+  getSources,
+  clean,
+  scoped,
+  interpretation,
+  resolveConcept,
+} from "./knowledge";
+import {
+  ageDays,
+  windows,
+  matchWindow,
+  daySet,
+  untilOpen,
+  queryInstant,
+} from "./time";
+export const engineVersion = "1.0";
+function base(h: Hospital, c: Context, field: string, ss: Source[]): Result {
+  const flags = new Set<string>();
+  for (const s of ss) {
+    if (s.sourceKind === "guide") {
+      if (!s.lastVerified) flags.add("verification_unknown");
+      else if (ageDays(s.lastVerified, c.instant, h.timezone) > 180)
+        flags.add("stale");
+    }
+    if (interpretation(s) !== "supported") flags.add("interpretation_review");
+  }
+  return {
+    id: `${h.id}:${h.version}:${field}`,
+    hospitalId: h.id,
+    version: h.version,
+    title: field,
+    message: "",
+    primaryStatus: flags.has("stale") ? "stale" : "answered",
+    flags: [...flags],
+    tier: "info",
+    citations: ss,
+    rationale: "Retrieved only from the selected hospital/version.",
+    effectiveInstant: c.instant,
+    blocksCompletion: false,
+    missingRequirements: [],
+  };
+}
+export function answerField(
+  h: Hospital,
+  c: Context,
+  field: string,
+  instant = c.instant,
+): Result {
+  const ss = getSources(h, field),
+    r = base(h, c, field, ss),
+    guide = ss.filter((s) => s.sourceKind === "guide");
+  r.effectiveInstant = instant;
+  r.effectiveLocal = `${localTime(instant, h.timezone).toPlainDate()} ${localTime(instant, h.timezone).toPlainTime().toString({ smallestUnit: "minute" })} · ${h.timezone}`;
+  if (!guide.length) {
+    r.primaryStatus = "not_in_guide";
+    r.message = `Not available in ${h.name}'s guide. ${field} is absent; no other hospital was searched.`;
+    r.missingEvidence = {
+      hospitalId: h.id,
+      version: h.version,
+      field,
+      absent: true,
+    };
+    return r;
+  }
+  let text = scoped(clean(guide[0].raw), c.consultType);
+  r.message = text;
+  const meaningful = (s: Source) =>
+    scoped(clean(s.raw), c.consultType)
+      .toLowerCase()
+      .replace(
+        /\bfor (?:other consults|inpatient consults|stroke alerts|stroke activation)\b/g,
+        "",
+      )
+      .replace(/[^a-z0-9]/g, "");
+  const texts = new Set(ss.map(meaningful));
+  if (texts.size > 1) {
+    r.primaryStatus = "conflict";
+    r.flags.push("conflict");
+    r.message = ss
+      .map(
+        (s) =>
+          `${s.sourceKind === "guide" ? "On-call guide" : "Storyboard"}: ${scoped(clean(s.raw), c.consultType)}`,
+      )
+      .join(" · ");
+    r.rationale =
+      "Applicable source meanings disagree; no source precedence applied.";
+    return r;
+  }
+  const timeDependent = (message: string, unknown = false) => {
+    r.message = message;
+    r.primaryStatus = "time_dependent";
+    r.flags.push("time_dependent");
+    if (unknown) r.flags.push("schedule_unknown");
+  };
+  if (field === "Order Set Name") {
+    const permission = getSources(h, "Order Entry").find(
+      (s) => s.sourceKind === "guide",
+    );
+    if (
+      permission &&
+      /^No .*orders entered by teleneurologist/i.test(clean(permission.raw))
+    ) {
+      r.citations.push(permission);
+      r.message = `${text}. ${clean(permission.raw)}.`;
+    }
+  }
+  if (field === "LVO Protocol") {
+    if (
+      /^Not thrombectomy capable/i.test(text) ||
+      /thrombectomy capable 24\/7/i.test(text)
+    )
+      return r;
+    const ws = windows(text);
+    const outside = text.match(/Outside coverage(?: hours)?,?\s*(.+)$/i)?.[1];
+    if (ws.length && outside && /During coverage/i.test(text)) {
+      const inside = text.match(
+        /During coverage,?\s*(.+?)(?=\s*Outside coverage)/i,
+      )?.[1];
+      if (inside)
+        timeDependent(
+          `${matchWindow(ws, instant, h.timezone) ? "Within coverage" : "Outside coverage"} (${ws.map((w) => w.raw).join("; ")}): ${matchWindow(ws, instant, h.timezone) ? inside : outside}`,
+        );
+    } else if (/staffed|coverage/i.test(text))
+      timeDependent(
+        `${text} Coverage hours are not defined in this guide; the applicable branch is unknown.`,
+        true,
+      );
+    else {
+      r.flags.push("interpretation_review");
+      r.message = `${text} Interpretation requires review; no current branch inferred.`;
+    }
+  }
+  if (field === "Thrombolytic Mix Model" && /staffed hours/i.test(text))
+    timeDependent(
+      `${text}. Staffed pharmacy hours are not defined; do not infer an overnight cutoff.`,
+      true,
+    );
+  if (field === "Rounding Timing") {
+    const ds = getSources(h, "When Do We Round?").filter(
+      (s) => s.sourceKind === "guide",
+    );
+    r.citations.push(...ds);
+    const days = ds[0] && daySet(ds[0].raw);
+    const ws = windows(text, days);
+    const now = localTime(instant, h.timezone);
+    if (ds[0] && /as scheduled/i.test(ds[0].raw))
+      timeDependent(
+        `${ds[0].raw}; ${text}. A scheduled encounter date is not supplied; check the rounding schedule.`,
+        true,
+      );
+    else if (ws.length && days) {
+      const open = matchWindow(ws, instant, h.timezone),
+        minutes = untilOpen(ws, instant, h.timezone);
+      const provider =
+        minutes !== undefined
+          ? localTime(
+              Temporal.Instant.from(instant).add({ minutes }).toString(),
+              c.providerZone,
+            )
+          : undefined;
+      timeDependent(
+        `${open ? "Rounding window open" : "Rounding window closed"}. ${ds[0].raw}; ${text}.${!days.includes(now.dayOfWeek) ? " Check why a rounding encounter exists outside the listed days." : ""}${minutes !== undefined ? ` Opens in ${minutes} minutes (${provider!.toPlainTime().toString({ smallestUnit: "minute" })} ${c.providerZone}).` : ""}`,
+      );
+    } else
+      timeDependent(
+        `${text}. Rounding days or hours are not fully defined.`,
+        true,
+      );
+  }
+  if (
+    ["EEG", "CT Perfusion", "MRI"].includes(field) &&
+    !/^no\b|^none\b|^not applicable\b/i.test(text)
+  ) {
+    const ws = windows(text);
+    const now = localTime(instant, h.timezone);
+    if (ws.length && !/24\/7/.test(text)) {
+      if (matchWindow(ws, instant, h.timezone)) {
+        r.message = `Listed availability at ${now.toPlainDate()} ${now.toPlainTime().toString({ smallestUnit: "minute" })} ${h.timezone}: ${text}.`;
+        if (!r.flags.includes("stale")) {
+          r.primaryStatus = "time_dependent";
+          r.flags.push("time_dependent");
+        }
+      } else if (
+        field === "EEG" &&
+        /Tue\/Thu/i.test(text) &&
+        ![2, 4].includes(now.dayOfWeek)
+      ) {
+        r.primaryStatus = "not_in_guide";
+        r.message = `${text}. ${["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][now.dayOfWeek - 1]} availability is not provided. Do not assume.`;
+        r.missingEvidence = {
+          hospitalId: h.id,
+          version: h.version,
+          field: `${field} on requested weekday`,
+          absent: false,
+        };
+      } else if (/on-call|overnight call/i.test(text))
+        timeDependent(
+          `${text}. Outside the listed staffed window; on-call availability requires confirmation.`,
+          true,
+        );
+      else
+        timeDependent(
+          `Not available in the listed window at this hospital-local time. ${text}.`,
+        );
+    } else if (!ws.length) {
+      timeDependent(
+        `${text}. Availability cannot be resolved from the listed schedule.`,
+        true,
+      );
+    }
+  }
+  if (r.flags.includes("stale"))
+    r.message += ` Possibly out of date (last verified ${guide[0].lastVerified}).`;
+  if (
+    r.flags.includes("interpretation_review") &&
+    !r.flags.includes("schedule_unknown") &&
+    interpretation(guide[0]) === "needs_review"
+  )
+    r.message +=
+      " Interpretation requires review; no unsupported branch was inferred.";
+  r.rationale = `${field} evaluated at ${localTime(instant, h.timezone).toString()}; freshness reference ${localTime(c.instant, h.timezone).toPlainDate()}.`;
+  return r;
+}
+export function gates(h: Hospital, c: Context): Result[] {
+  const out: Result[] = [];
+  for (const [field, requirement] of [
+    ["Charge Entry", "charge_entered"],
+    ["Consult Completion Rule", "plan_confirmed"],
+  ] as const) {
+    const ss = getSources(h, field).filter((s) => s.sourceKind === "guide");
+    if (!ss.length) continue;
+    const raw = clean(ss[0].raw),
+      required =
+        field === "Charge Entry"
+          ? /^Yes\b/i.test(raw)
+          : /do not complete.*until.*hospital provider confirms.*plan/i.test(
+              raw,
+            );
+    const r = answerField(h, c, field);
+    if (
+      r.primaryStatus === "conflict" ||
+      r.flags.includes("stale") ||
+      r.flags.includes("interpretation_review")
+    ) {
+      r.message +=
+        " Prototype policy: uncertain requirement shown for review; no new completion gate introduced.";
+      r.tier = "advisory";
+      out.push(r);
+      continue;
+    }
+    if (!required) continue;
+    if (value(c, requirement) !== true) {
+      r.primaryStatus = "hard_stop";
+      r.tier = "hard_stop";
+      r.blocksCompletion = true;
+      r.missingRequirements = [requirement];
+      r.anchor = requirement;
+      r.message = `${field === "Charge Entry" ? "Record the required encounter charge before sign-off" : "Record confirmation of the patient plan from the hospital provider before completion"}. Guide: ${raw}.`;
+    } else {
+      r.message = `Requirement recorded as satisfied. Guide: ${raw}.`;
+      r.flags.push("resolved");
+    }
+    out.push(r);
+  }
+  return out;
+}
+export function ask(
+  h: Hospital,
+  c: Context,
+  q: string,
+): { result?: Result; clarification?: string; candidates?: string[] } {
+  if (q.length > 2000)
+    return {
+      clarification: "Please shorten the question to 2,000 characters.",
+    };
+  const { field, candidates } = resolveConcept(q, h);
+  if (!field)
+    return {
+      clarification: candidates.length
+        ? "Which guide field do you mean?"
+        : "No unambiguous guide concept matched. Choose a field or use its label.",
+      candidates,
+    };
+  let instant: string;
+  try {
+    instant = queryInstant(q, c.instant, h.timezone);
+  } catch {
+    return {
+      clarification:
+        "The requested date/time is invalid or ambiguous. Use an explicit ISO instant in demo controls.",
+    };
+  }
+  if (/sign off|sign-off|complete consult|can i complete/i.test(q)) {
+    const rs = gates(h, c);
+    const gate = rs.find((r) => r.blocksCompletion);
+    if (gate) return { result: gate };
+    if (rs.length) {
+      const uncertain = rs.find(
+        (r) =>
+          r.primaryStatus === "conflict" ||
+          r.flags.some((f) => ["stale", "interpretation_review"].includes(f)),
+      );
+      const r = {
+        ...(uncertain || rs[0]),
+        title: "Completion requirements",
+        citations: rs.flatMap((r) => r.citations),
+        flags: [...new Set(rs.flatMap((r) => r.flags))],
+      };
+      r.message =
+        (uncertain
+          ? "Completion requirements cannot be fully verified from current source data. "
+          : "Known guide completion requirements are recorded as satisfied. ") +
+        rs.map((r) => r.message).join(" ");
+      return { result: r };
+    }
+    const r = answerField(h, c, field, instant);
+    if (r.primaryStatus !== "not_in_guide")
+      r.message =
+        "No supported guide-based charge or plan requirement is incomplete in the recorded state. Guide: " +
+        r.message;
+    return { result: r };
+  }
+  return { result: answerField(h, c, field, instant) };
+}
+export function evaluate(h: Hospital, c: Context, e: Event): Result[] {
+  if (c.hospitalId !== h.id || c.guideVersion !== h.version)
+    throw new Error("Hospital/version mismatch");
+  const out: Result[] = [];
+  const add = (f: string, tier: Tier, anchor?: string, prefix = "") => {
+    const r = answerField(h, c, f);
+    r.tier = tier;
+    r.anchor = anchor;
+    if (prefix) r.message = prefix + r.message;
+    out.push(r);
+  };
+  if (
+    c.step === "intake" &&
+    (e.type === "encounter_opened" ||
+      e.type === "step_changed" ||
+      e.type === "guide_changed")
+  ) {
+    add("Video Eval Location", "info");
+    add("Wake Up Protocol", "info");
+  }
+  if (c.step === "history" && /stroke/i.test(c.consultType)) {
+    if (value(c, "last_known_well_status") === "Unknown")
+      add(
+        "Wake Up Protocol",
+        "advisory",
+        "last_known_well_status",
+        "Hospital wake-up workflow: ",
+      );
+    const allergy = String(value(c, "allergies") || "");
+    const drug = getSources(h, "Thrombolytic").find(
+      (s) => s.sourceKind === "guide",
+    );
+    if (
+      drug &&
+      !/^\s*(none|no|unknown|n\/a)\s*$/i.test(allergy) &&
+      !/\b(denies|not allergic|no .*allerg\w*|no known|without .*allerg\w*)\b/i.test(
+        allergy,
+      ) &&
+      /allerg|alteplase|tenecteplase|tnk|tpa|thrombolytic/i.test(allergy) &&
+      (/thrombolytic|tnk|tpa/i.test(allergy) ||
+        allergy.toLowerCase().includes(clean(drug.raw).toLowerCase()))
+    )
+      add(
+        "Thrombolytic",
+        "advisory",
+        "allergies",
+        "Review recorded allergy against the synthetic hospital field: ",
+      );
+  }
+  if (c.step === "imaging" && /stroke/i.test(c.consultType)) {
+    if (value(c, "lvo_present") === true)
+      add("LVO Protocol", "advisory", "lvo_present");
+    if (value(c, "cta_done") === true) {
+      add("CT Perfusion", "info", "cta_done");
+      add("AI", "info", "cta_done");
+    }
+  }
+  if (c.step === "recommendation") {
+    if (value(c, "thrombolytic_given") === true) {
+      add(
+        "Thrombolytic",
+        "advisory",
+        "thrombolytic_given",
+        "Recorded as already given; workflow review: ",
+      );
+      add(
+        "Thrombolytic Mix Model",
+        "advisory",
+        "thrombolytic_given",
+        "Workflow review: ",
+      );
+    }
+    if (
+      /stroke/i.test(c.consultType) &&
+      (value(c, "thrombolytic_given") === true ||
+        e.type === "step_changed" ||
+        e.fieldId === "thrombolytic_order_placed")
+    ) {
+      add("Order Entry", "advisory", "thrombolytic_order_placed");
+      const permission = getSources(h, "Order Entry").find(
+        (s) => s.sourceKind === "guide",
+      );
+      if (
+        permission &&
+        !/^No .*orders entered by teleneurologist/i.test(clean(permission.raw))
+      )
+        add("Order Set Name", "advisory", "thrombolytic_order_placed");
+      else if (permission && /No medication orders/i.test(permission.raw)) {
+        const hospitalSet = getSources(h, "Order Set Name").find(
+          (s) => s.sourceKind === "guide",
+        );
+        if (hospitalSet) {
+          out.at(-1)!.message += `. ${clean(hospitalSet.raw)}.`;
+          out.at(-1)!.citations.push(hospitalSet);
+        }
+      }
+    }
+    if (/\b(eeg|seizure)\b/i.test(String(value(c, "assessment_plan") || "")))
+      add("EEG", "info", "assessment_plan");
+  }
+  if (c.step === "note") add("Required Note Title", "advisory", "note_title");
+  if (
+    c.step === "rounding" ||
+    (c.encounterType === "Rounding" && e.type === "encounter_opened")
+  ) {
+    add("Rounding Timing", "info");
+    add("Rounding Orders", "info", "rounding_order_intent");
+  }
+  if (
+    c.step === "sign_off" &&
+    (e.type === "completion_requested" ||
+      e.fieldId === "charge_entered" ||
+      e.fieldId === "plan_confirmed")
+  )
+    out.push(...gates(h, c));
+  for (const m of h.mappings || []) {
+    if (c.step === m.step && predicate(m.condition, c) === true)
+      add(m.sourceField, m.tier, m.fieldId);
+  }
+  return [...new Map(out.map((r) => [r.id, r])).values()];
+}

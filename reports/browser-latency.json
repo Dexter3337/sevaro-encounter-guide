@@ -1,0 +1,2064 @@
+{
+  "summary": {
+    "count": 120,
+    "p50": 19.900000035762787,
+    "p95": 30.100000023841858,
+    "max": 32.90000003576279
+  },
+  "samples": [
+    {
+      "eventId": "20a2b1ed-7404-44ef-befb-1c65184f9392",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 26.69999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "1665976b-21b2-45a1-bbf9-91db9f9cbc1d",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 23.5,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "43d644e8-5435-4a18-9242-69c6ea08d593",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 8.700000047683716,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "571618bb-4089-42bc-b218-7fc5809e0fa5",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 25,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "24da1093-e008-42fd-a6cf-2d4be2b2d6da",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 26.80000001192093,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "6a39499c-c09f-4f19-8ed2-15137aae8dcb",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 9.5,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "87b164ec-6768-4b49-b0b0-4a7c2d0f17e0",
+      "field": "last_known_well_status",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 25.19999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "e5a1538c-6f50-424a-b10b-ff8ec29c958b",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 26.19999998807907,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "77174ce9-77bf-4ba8-bce7-15d84ba2c135",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 15.800000011920929,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "dba79f0d-e470-44b7-b7d9-3a9f0f1ad1ba",
+      "field": "thrombolytic_given",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 25.900000035762787,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "3c21449e-808f-4e7d-a08e-0418dfe0436b",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 23.19999998807907,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "9c41058b-d432-40b2-b4f8-993548e5654f",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 25.19999998807907,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "1ce2bb77-9e07-41a2-a198-a1bae6ce8821",
+      "field": "charge_entered",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 22.799999952316284,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "8ad4f3c0-60fb-4eca-b51a-7bd6004f4a9c",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 23.80000001192093,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "dff93a03-2c73-48a4-af86-4a9d3dfdc402",
+      "field": "cta_done",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 21.19999998807907,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "7cbe04c6-c29e-432f-9995-d373410cdfd9",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 23.100000023841858,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "56c0216e-494a-4fb9-9548-a13554d50666",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 30.5,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "8e5d2d81-524a-4faf-b4af-a29997a5190f",
+      "field": "plan_confirmed",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 25.69999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "32384b6c-311d-46cf-bae9-9ad55423bc67",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 24.80000001192093,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "c1bf099d-125d-4a9e-8a26-ee8eadf1bd3f",
+      "field": "allergies",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 25.19999998807907,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "ca8868b2-b14b-4fed-ab3f-4fedc4f45a46",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 16,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "a59949e8-7a2f-448a-ba50-fea1b1c14d05",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 21.80000001192093,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "0df71716-0ac4-4b81-b7e8-d78878abca04",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 28,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "4e2c871e-2257-422e-abcf-5364106fffc6",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 28,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "f371fea5-92f8-4fbb-add0-b4828dec883a",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 18.69999998807907,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "f9fe5491-c00d-4fb5-8758-14f845259d87",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 31,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "a6f26efc-b056-4502-8cc3-9fae7b23fff0",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 25.5,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "06894557-dc8c-4feb-ba7c-71f36fa07ff6",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 22.30000001192093,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "1bf7b112-32e0-470c-a086-ff498b156619",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 29.899999976158142,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "f601ce0f-4eeb-4dd3-897e-d1d3e2dfed42",
+      "field": "last_known_well_status",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 23.5,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "a28bfee2-032b-491b-ae79-1642760bef8a",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 29.5,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "828d411e-59eb-4b53-b280-08cb369629ec",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 14.199999988079071,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "a0f575e5-023f-44e2-a657-057baf597066",
+      "field": "thrombolytic_given",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 25.80000001192093,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "fc12d6d1-b27a-40be-a62b-2cd15a717751",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 19.19999998807907,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "926ab9d5-fe76-49ec-b3bd-bd7be882b322",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 21.30000001192093,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "90d2b7be-5534-43f6-ac16-9ce1aaf1e233",
+      "field": "charge_entered",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 28.19999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "3a133cae-f638-429d-896b-5823e9d13e59",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 23.099999964237213,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "bb8faa63-e47b-47da-9980-4928085b9016",
+      "field": "cta_done",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 20.19999998807907,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "529a7f22-6508-4a4c-83c0-5f7831c049b5",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 26.399999976158142,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "ffbe09f9-c755-4b9b-b832-6ea04ab2396f",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 12.199999988079071,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "43eb6540-fb3c-4639-ab00-07445b17d912",
+      "field": "plan_confirmed",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 27.600000023841858,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "034af0e5-9c5d-496b-9c59-a41b12bb86ac",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 27.100000023841858,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "f5461ee6-dc75-4755-8fe1-0376220d329a",
+      "field": "allergies",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 25.099999964237213,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "fcdef01c-4b8b-4f98-b781-ad0890e13511",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 18.399999976158142,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "beb93184-17dc-4d80-b204-309bc271b114",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 16.599999964237213,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "bedefd61-709b-4f4a-9307-b1c89d3c9559",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 28.5,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "1f7057e8-406f-422e-836e-c8d8d6d82451",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 27.19999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "c49256ad-2cf0-4116-bc91-99cf7c24ba79",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 23.700000047683716,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "0be83586-273a-47b0-89a1-cce32295db47",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 27.5,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "0dec3e4a-f09b-4db1-a55e-a0719bab3f95",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 25.80000001192093,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "b7c79492-5505-4f3b-b29c-bc8ad1645c7e",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 19,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "e5a6203f-6f2a-488f-a59c-a6d3a5c48b55",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 32.19999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "e975d876-fcba-4afe-a480-292559572e30",
+      "field": "last_known_well_status",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 25.900000035762787,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "03877285-761a-4f42-bdab-c1741c7efbb5",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 19.19999998807907,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "5d7a0883-e1e5-4711-9541-b2613379f154",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 19.100000023841858,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "93bf9ec3-da13-4702-a538-aee9d1a10c49",
+      "field": "thrombolytic_given",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 24.30000001192093,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "3eac6575-2368-42a6-8b7b-8e35a4518b0d",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 17.5,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "651fef8f-f2a7-46ca-9bd8-b85e058042b8",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 25.80000001192093,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "86449654-ed51-4efe-a01f-f9c1100fc626",
+      "field": "charge_entered",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 25.19999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "da51fc73-de60-4cab-a9be-19536c39f34f",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 25.899999976158142,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "2a7a4d25-42d0-4a67-8cc0-549c28820e28",
+      "field": "cta_done",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 26.19999998807907,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "e49dd603-c7b4-4021-854d-2c47e9dc1b18",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 21.299999952316284,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "da810428-0f19-45b3-a11f-73648842b9d3",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 19.80000001192093,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "61fc3ddb-7970-4d78-b3ba-1fb3ce8a1973",
+      "field": "plan_confirmed",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 27.69999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "d026d34c-5c3b-4a63-bd9e-22107f45fbc5",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 27.69999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "83ca46aa-8dc3-461d-a44f-245f339d0d65",
+      "field": "allergies",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 26.799999952316284,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "38da8c87-70e2-466d-a081-d8619affe39c",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 19.600000023841858,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "44583e01-4459-4e14-8a31-51c6c26e0ec2",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 19.900000035762787,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "22d0c18b-afbd-4c9d-913a-a0894c9686de",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 27.599999964237213,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "8a99f1a2-f483-4fda-a76a-5e7f6483ff68",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 28.30000001192093,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "aeaae3cc-1ef4-4a1b-951b-685eb20f6978",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 29.899999976158142,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "67d63c14-7fe1-4e74-be36-b340a8093697",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 16.600000023841858,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "11a96bdc-5a0d-4732-90e2-dfa95790c93d",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 28.599999964237213,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "b01d1159-4d15-4cb9-a820-64326aef216f",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 19.099999964237213,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "97917ae8-45fe-407e-bb7f-d67c7049d047",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 18.80000001192093,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "12c9169c-af0b-4ba4-b327-38f3be8a0e83",
+      "field": "last_known_well_status",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 28.19999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "037d92f0-d3c6-42ac-a473-1678e8a9d262",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 28,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "2a66710f-c55b-4954-96b9-6c0fe39a8cfc",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 9.599999964237213,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "22c92816-ebd5-4bba-bfc7-7267fddbf4ca",
+      "field": "thrombolytic_given",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 28,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "1f5cc065-7884-46ff-b3df-20ce0587a69e",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 30.100000023841858,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "16f42ccb-a160-4e21-a4e2-81c242e69206",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 28,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "418e0166-f02d-47c8-8a4b-d514809c7ddf",
+      "field": "charge_entered",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 26.69999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "9beef99b-85ee-407a-8450-3e544e8553b8",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 26.19999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "5cc2e00b-bced-4e28-8073-e11e2cd114ae",
+      "field": "cta_done",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 24.100000023841858,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "692a53b4-aa1c-45c1-9809-c5372afadf0b",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 26.600000023841858,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "e132dac5-2609-442b-8e46-5dbbb2441ac1",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 18.5,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "f3271d59-22d8-48df-9b71-b1ac3705dd14",
+      "field": "plan_confirmed",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 27.69999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "0a9b17a7-6158-4866-96b1-9a6f706befc7",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 21.899999976158142,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "d144b264-3b97-406d-8e4f-a8e1b375f913",
+      "field": "allergies",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 27,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "b9255fdb-22cc-46b1-8dd7-92008f274e39",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 19.30000001192093,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "02a9e350-ff52-4f90-93ae-158cb1d96fa1",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 16.400000035762787,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "29b9b1dc-e3b0-4748-bc8d-16adca41c5d0",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 26.69999998807907,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "957e02cd-08c4-4b64-b7f4-5f76f85eff25",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 26.400000035762787,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "dd554007-5553-4e15-a82e-f91aae02dd96",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 18.30000001192093,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "ac0226c9-6541-4e8e-b5a9-c7fae35d03d3",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 25.600000023841858,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "dd690041-217b-455e-a602-1f8c05850ce6",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 27.69999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "fa0276cd-04e8-443f-87d0-a222c0ee7b5a",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 19.19999998807907,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "a767a859-3e29-49ad-9443-fbce8e78b699",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 32.90000003576279,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "0c4baf9c-53b4-4c3c-9fab-2ac4bef9e7d3",
+      "field": "last_known_well_status",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 26.600000023841858,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "35201bcd-0654-4c2a-854e-e0e130163929",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 17.600000023841858,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "4fc6b471-f3ef-4768-abca-adaabe6c7228",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 20.600000023841858,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "53aee831-1c2a-497f-bdd7-f616d4711c72",
+      "field": "thrombolytic_given",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 27.30000001192093,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "5b96090d-7693-4d49-9d8f-7fbe5e825861",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 28,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "4166b2c6-4f82-4e61-9704-e638fda636f1",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 13.400000035762787,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "02999dd9-36fc-487f-9b44-515a73cdba3a",
+      "field": "charge_entered",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 26.899999976158142,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "a126b7c2-199d-41b0-8b8d-2c98d4526b57",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 27,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "c4c6b870-05ce-419a-815b-1e7cf7097019",
+      "field": "cta_done",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 26.19999998807907,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "8ef4cd54-fa91-459b-b614-3d23f3f76ac2",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 19.899999976158142,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "b635ee4b-3cbd-47ad-b76c-3c65fb80d96e",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 8.5,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "a79aa3c4-c90d-4511-ab88-40bbb457ec2e",
+      "field": "plan_confirmed",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 28.100000023841858,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "0f2c4d87-d464-43f5-9052-075a052e544b",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 26.399999976158142,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "493e864d-7983-4fc0-8d08-5db05ce756db",
+      "field": "allergies",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 27.299999952316284,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "bbf8f5d3-214a-4eba-9b9e-0a2a332c383d",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 24.30000001192093,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "7843bbef-624a-4e5f-958e-ef96e4d5af93",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 23.400000035762787,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "f081bef1-3df9-441c-972c-42d847299ae6",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 26.900000035762787,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "f14bc67a-7db8-4eb9-932f-372b95436c11",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 27.099999964237213,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "ff0b26fe-9a2b-4683-a104-1fb5dca3e7bb",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 25.100000023841858,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "1ad47d79-31f2-48e9-86e3-9bf5efdceb48",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 13.5,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "959c7a24-85ae-4c8d-90aa-ab308212532a",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 28.19999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "f2d0b287-4f60-40e7-9c0e-a49d4717366d",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 19.100000023841858,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "e3647365-a891-4de0-829e-ebd399512ca8",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 19.299999952316284,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "3b364fb6-86fc-4068-9767-06c9f4f84ebb",
+      "field": "last_known_well_status",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 27.200000047683716,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "df3db70a-2f3f-489d-849d-2fdfe2a2d9c2",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 20,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "788ddae8-d51c-427b-a4ca-cc60db77e4e5",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 24.69999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "a4831404-eaa5-46eb-b8d0-471c50e29845",
+      "field": "thrombolytic_given",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 27.5,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "6a380a73-1837-4b50-8691-c2d15ddc8070",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 27.599999964237213,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "0b8b96af-835a-44ee-8d4e-c205df8cd67a",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 11.899999976158142,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "67291f64-dce8-476d-9d51-20d27bdfe75b",
+      "field": "charge_entered",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 26.69999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "054f9281-c624-4c73-b478-f4a0a4294c47",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 25.600000023841858,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "e535ee30-1c2e-423d-b50f-5af5e310001e",
+      "field": "cta_done",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 23.900000035762787,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "aba9b18d-1af6-4f8f-a2c5-790c744f6155",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 18.30000001192093,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "5a04bda5-93d8-47aa-874e-5cbb861c3529",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 5.699999988079071,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "ee079a9e-2846-4863-8935-b0712c45b3cd",
+      "field": "plan_confirmed",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 27.100000023841858,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "b987990e-508e-402e-92a9-5912dd0e8b6f",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 26,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "6971d139-2366-472b-9b65-5b625e37984e",
+      "field": "allergies",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 17.5,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "de3ee96c-8a48-4574-96ff-d9964a628173",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 29.200000047683716,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "6d42c15b-2d53-4ee1-a54b-9419d930ee29",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 28.399999976158142,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "da295ab9-cdbe-46e8-8655-ffa880431c54",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 25.600000023841858,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "4f40e83a-2933-47d1-a5ee-70f6ec924a3e",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 27.099999964237213,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "db6b0d8b-75c3-4c4e-927b-195b55a5fa1c",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 18.69999998807907,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "c03466be-e15e-45fe-9807-7507f59fe379",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 19.900000035762787,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "7a673a55-7dff-42b3-8521-72a0d8e6bbfc",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 28,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "c671a4ee-54a7-417f-97a4-afd01b9df581",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 18.599999964237213,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "ad9e6060-a4e8-4382-83b7-649844dd7865",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 23.19999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "c6d4779c-2086-4e34-93bb-cf4e17b72d38",
+      "field": "last_known_well_status",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 25.19999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "6f59b8ce-7763-4318-8cd7-379ea5e39a90",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 18.399999976158142,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "d28cd0ce-fc6a-48d7-8c6f-b664c2f4e8d3",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 7.700000047683716,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "2939d95b-4ae4-4e30-8236-7f9dcee34e9a",
+      "field": "thrombolytic_given",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 27.19999998807907,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "cced1e10-eeba-472d-a92f-508856d107d1",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 29.399999976158142,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "77740edb-fe59-45b5-aee9-9d9f22f11441",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 6.800000011920929,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "fbc1e1c5-a573-4659-827d-2bacc5f53180",
+      "field": "charge_entered",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 28.100000023841858,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "811d469d-1cc1-4093-81a1-66e9198cb339",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 26.599999964237213,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "b9fdbe14-a38c-4490-adf2-a8e8454f2754",
+      "field": "cta_done",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 26.900000035762787,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "4afeb775-4646-46a7-9461-40abf40adc19",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 29.900000035762787,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "9be1ff0a-bed3-4a46-a3b5-15d9338f175b",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 23.899999976158142,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "cbd5ebf0-9a46-433d-9e02-4a33eb84288e",
+      "field": "plan_confirmed",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 25.299999952316284,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "ca4006d6-d631-4042-a21a-4f9f98494139",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 24.900000035762787,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "85ea23ea-3b97-4447-8fab-b82c73a6fada",
+      "field": "allergies",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 24.399999976158142,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "3118a0b8-1213-4d11-ac7e-c27efd4409d9",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 28.30000001192093,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "6deaf891-1e6d-45cf-8975-339843f0e0e4",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 28.099999964237213,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "09f87a2f-be83-4ebe-8562-5f0e9911d4f0",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 28,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "e4000b2c-c5b8-49cd-afad-1983c64ac2c1",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 27.69999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "211c5d06-9760-4897-85d4-768ca6eb640e",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 20,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "272ac8c3-130b-4c51-b058-fb28ac0f8c66",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 22.700000047683716,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "b9299934-d69b-46e2-9ab9-5d752422b859",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 28.5,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "37f4985c-5fd6-48ea-9dce-c4a680fa1c85",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 32.5,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "05ef5a2a-61c8-48b2-acc2-4f322bfddd32",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 26,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "92aae852-8656-4132-84e2-cb3121601783",
+      "field": "last_known_well_status",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 27,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "44e2f621-6b90-4ecf-9b93-012a82a94941",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 20.399999976158142,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "2e92a502-5187-430e-9703-5f9857e6235d",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 18.80000001192093,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "babcabb7-007d-47bb-a04a-93baec73f032",
+      "field": "thrombolytic_given",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 28.600000023841858,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "236f1dc8-12d0-42ea-97e6-d6a9bfd01998",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 18.5,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "95cf7e12-c8b7-4b93-b754-104fbd9183d7",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 6.600000023841858,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "c385dfac-4f49-4898-8952-f9c1783b6e6f",
+      "field": "charge_entered",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 27,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "47c4a276-237f-44db-8d30-6f97f60be0a8",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 25.700000047683716,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "037914b1-e7ab-4092-a2af-3bf190e57c9f",
+      "field": "cta_done",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 25.900000035762787,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "80de6d61-d745-4024-aa27-c8bfea2dd94c",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 23.30000001192093,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "555d2f10-3ef0-42c5-85d6-49775703412d",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 4.900000035762787,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "ec730e48-3e32-44fa-806e-db3542bc364a",
+      "field": "plan_confirmed",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 28.399999976158142,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "d8780868-40c4-4b9b-bd18-709a102606d6",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 28,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "2cd1a247-3e4b-4d5c-8728-a1ef12a48581",
+      "field": "allergies",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 22.69999998807907,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "5b83f661-5f72-447c-99ca-c8a99e7f78c3",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 18.5,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "94a48d0b-95e7-4779-978b-84e8c9573107",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 17.700000047683716,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "049c83a6-7288-4c7e-92f0-ff7ee58ef2a7",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 27.69999998807907,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "94b91af0-aefc-4f31-bc53-cc499d979b06",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 27,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "5d4aea4b-0538-47e3-b393-ee5fd634e183",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 19.69999998807907,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "dce4a6e0-1193-422d-872b-d601ec35ac5f",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 13.099999964237213,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "fcce3baf-a99c-4576-ae6a-28662d449667",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 26.899999976158142,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "bfe4419f-6435-4417-af96-72160e7558b5",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 18.5,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "52e2bb86-cb32-4d41-9287-00c235228091",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 24.69999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "003f8db6-426f-4f84-b290-d8435d6d7476",
+      "field": "last_known_well_status",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 25.900000035762787,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "67442ddb-d671-434a-b77d-779cc3f054d4",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 20.400000035762787,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "e400e276-06da-40a5-a0bc-667fd7ec5aa6",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 32.59999996423721,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "083cf729-337e-475c-ad97-13b142cc560a",
+      "field": "thrombolytic_given",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 26.400000035762787,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "650921b1-cec1-48a3-b5f6-04da722b6cc7",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 23.5,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "35cdcf2b-258f-4f12-bcf0-566e7c07b5cd",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 5.700000047683716,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "78ad4c47-8020-449b-911d-7e4dd0ec6ea1",
+      "field": "charge_entered",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 27.69999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "4c8c3faf-e93a-491b-a8f5-75816fdd4a67",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 25,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "2f6189a5-8411-402e-a3e0-6c1d1dfe6048",
+      "field": "cta_done",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 26.600000023841858,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "f1552423-1c93-4b80-93ea-b23a4871150b",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 17.5,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "ee2ee329-1810-444c-a5be-a266adddf234",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 25.30000001192093,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "c900b2dd-18c9-492a-a616-e012f7466b6b",
+      "field": "plan_confirmed",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 26.399999976158142,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "c2a435ad-51f0-495e-9983-a571f20e1667",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 25.799999952316284,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "69a88919-1181-4ac0-ad43-5e37fbb60f14",
+      "field": "allergies",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 25.5,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "7daeb934-0ce7-415b-a676-e53763ad74c3",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 18.5,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "da2a379a-06e2-41f4-afb1-b73d6da59743",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 24.80000001192093,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "ab6feafc-510c-4ff2-b170-2b65e9bdc3f5",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 27,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "8bbcc8ff-e049-4e9a-8ca4-cb85ce20ee12",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 27.899999976158142,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "38bface0-bd6e-4665-8e45-e987830d4740",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 20.19999998807907,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "e58e1fd2-a9d4-45c9-9f52-f7cc4728238b",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 20.400000035762787,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "99118c9a-379d-4c70-b46a-6d577097293a",
+      "field": "lvo_present",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 26.5,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "36bae0bd-fcca-4c61-aacb-cc41418446f7",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 19.69999998807907,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "cbc943da-5a70-4897-b1c7-a1cbbb04c3ae",
+      "field": "lvo_present",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 23.399999976158142,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "1db3a616-baa5-4ee1-aeb2-d1aa9092f420",
+      "field": "last_known_well_status",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 24.69999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "a4d154c1-4a4d-4efa-a97b-e2a890c54298",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 25.400000035762787,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "0da55ea6-02ce-4622-9b0b-988342888ad9",
+      "field": "last_known_well_status",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 6.699999988079071,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "edaa4f0f-cfef-42af-b2d8-a950aeffa2da",
+      "field": "thrombolytic_given",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 27.399999976158142,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "1ebc1f8a-f1c0-4edb-9c65-b8cd0b727cce",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 18,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "7862168e-12d9-4ff6-959b-3ec3090d2255",
+      "field": "thrombolytic_given",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 5.899999976158142,
+      "cards": 3,
+      "committed": true
+    },
+    {
+      "eventId": "7c4f728c-da9e-422b-8009-eb0eee85ab0b",
+      "field": "charge_entered",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 27.700000047683716,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "fa858599-aa47-4c6b-b618-06cad2fa73a9",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 27.80000001192093,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "2a6f9c08-fd9a-45f7-8134-bb48c17c374e",
+      "field": "cta_done",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 25.399999976158142,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "0d8d6d25-f248-4981-94e3-86105cb36743",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 19.600000023841858,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "3270aa2c-fffb-4773-835b-9beef9ca2570",
+      "field": "cta_done",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 4.5,
+      "cards": 2,
+      "committed": true
+    },
+    {
+      "eventId": "67f35581-89b4-41ef-bb68-10d08ef24eca",
+      "field": "plan_confirmed",
+      "type": "completion_requested",
+      "revision": 1,
+      "ms": 27.69999998807907,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "90fba296-7ff6-4d22-85c5-d49cf63fdfea",
+      "type": "completion_requested",
+      "revision": 2,
+      "ms": 26,
+      "cards": 1,
+      "committed": true
+    },
+    {
+      "eventId": "edf3eec2-7b0d-428a-8415-6133a8de815c",
+      "field": "allergies",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 23.700000047683716,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "207610a4-b3bb-4b53-ae8e-52a515df349c",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 2,
+      "ms": 27.69999998807907,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "cf128a77-e46e-4d4b-8b3b-161708bf5dd1",
+      "field": "allergies",
+      "type": "field_changed",
+      "revision": 3,
+      "ms": 10.300000011920929,
+      "cards": 0,
+      "committed": true
+    },
+    {
+      "eventId": "371e4536-d04b-47c4-8a2e-fe844db65222",
+      "type": "encounter_opened",
+      "revision": 1,
+      "ms": 26.799999952316284,
+      "cards": 2,
+      "committed": true
+    }
+  ],
+  "environment": {
+    "browser": "154.0.8037.98",
+    "viewport": "1440x1000",
+    "host": "Windows, Node 24.19.0",
+    "server": "http://127.0.0.1:4173",
+    "mode": "Headless Chrome, single worker, foreground page"
+  },
+  "allRequired": {
+    "count": 230,
+    "p50": 25.30000001192093,
+    "p95": 29.399999976158142,
+    "max": 32.90000003576279
+  },
+  "method": "Real adapter evaluation → React commit → two animation-frame callbacks. Paint-ready approximation; measured scheduler delay included. 10 repetitions of N1–N9, with actual committed field edits and completion/open events."
+}

@@ -1,0 +1,24 @@
+[
+  {
+    "id": "SB-001",
+    "hospitalId": "SYN-002",
+    "field": "Video Eval Location",
+    "raw": "Patient room",
+    "sourceKind": "storyboard",
+    "sourceName": "Sevaro_Rutgers_Health_Hack_Challenge_1_Guided_Workflow_v2.pdf",
+    "version": "Challenge v2",
+    "updatedAt": "2025-09-14",
+    "locator": "PDF p10 · storyboard"
+  },
+  {
+    "id": "SB-002",
+    "hospitalId": "SYN-005",
+    "field": "Thrombolytic",
+    "raw": "Tenecteplase",
+    "sourceKind": "storyboard",
+    "sourceName": "Sevaro_Rutgers_Health_Hack_Challenge_1_Guided_Workflow_v2.pdf",
+    "version": "Challenge v2",
+    "updatedAt": "2026-01-20",
+    "locator": "PDF p10 · storyboard"
+  }
+]

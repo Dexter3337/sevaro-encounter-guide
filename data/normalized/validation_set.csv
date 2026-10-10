@@ -1,0 +1,21 @@
+id,hospital,question,status,contains,sources,local,kind,flags
+V01,SYN-001,Where should I perform the video evaluation?,answered,Emergency department patient room,Video Eval Location,2026-03-17T14:00,question,
+V02,SYN-002,What is the LVO workflow?,answered,ED provider activates transfer center | Metro Neuroscience Institute,LVO Protocol,2026-03-17T14:00,question,
+V03,SYN-003,Can I place inpatient neurology orders during rounding?,answered,inpatient neurology orders permitted,Rounding Orders,2026-03-17T09:00,question,
+V04,SYN-004,Is EEG available on Friday?,not_in_guide,Friday availability is not provided | Do not assume,EEG,2026-03-20T10:00,question,stale
+V05,SYN-005,Does the hospital have CT perfusion?,answered,No,CT Perfusion,2026-03-17T14:00,question,
+V06,SYN-006,What is the LVO pathway after 1900 on a weekday?,time_dependent,Outside coverage | ED provider initiates transfer,LVO Protocol,2026-03-17T19:30,question,
+V07,SYN-007,Which order set should I use?,answered,Not applicable | No orders entered by teleneurologist,Order Set Name | Order Entry,2026-03-17T14:00,question,
+V08,SYN-001,Patient has an LVO. What do I do?,time_dependent,activates the synthetic neurovascular response line | Outside coverage hours | Coverage hours are not defined,LVO Protocol,2026-03-17T22:30,question,schedule_unknown
+V09,SYN-006,Patient has an LVO. Do I activate the EVT team?,time_dependent,Outside coverage | ED provider initiates transfer,LVO Protocol,2026-03-21T10:00,question,
+V10,SYN-007,Can I sign off now?,hard_stop,required encounter charge | before sign-off,Charge Entry,2026-03-17T14:00,question,
+V11,SYN-005,Can I change the antiplatelet during rounding?,answered,hospitalist co-sign,Rounding Orders,2026-03-17T10:00,question,
+V12,SYN-002,Where do I do the video eval for a stroke alert?,conflict,CT holding bay | Storyboard: Patient room,Video Eval Location,2026-03-17T14:00,question,conflict
+V13,SYN-004,Is EEG available on Thursday?,stale,Listed availability | 2025-06-10,EEG,2026-03-19T10:00,question,stale
+V14,SYN-002,Who covers pediatric neurology?,not_in_guide,Not available | absent,,2026-03-17T14:00,question,
+V15,SYN-005,Which thrombolytic order set do I search for?,answered,"Search ""Stroke TeleCare"" - ""Suncrest Acute Stroke - TNK [SYN-55190]""",Order Set Name,2026-03-17T14:00,question,
+V16,SYN-007,Can I get CT perfusion on Saturday?,time_dependent,Not available | Mon-Fri 0700-1900,CT Perfusion,2026-03-21T11:00,question,
+V17,SYN-002,Is the rounding window open? (Provider is in Eastern time.),time_dependent,Opens in 15 minutes | 10:30 America/New_York,Rounding Timing | When Do We Round?,2026-03-17T08:15,question,
+V18,SYN-006,Who mixes the TNK?,time_dependent,pharmacist | nursing | Staffed pharmacy hours are not defined | 2025-08-15,Thrombolytic Mix Model,2026-03-18T20:00,question,stale | schedule_unknown
+V19,SYN-003,What should I title the note?,answered,Neurology Consult - Remote,Required Note Title,2026-03-17T14:00,question,
+V20,SYN-005,What note title is required?,not_in_guide,Not available | absent,,2026-03-17T14:00,question,

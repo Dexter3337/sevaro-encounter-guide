@@ -1,0 +1,320 @@
+[
+  {
+    "id": "V01",
+    "hospital": "SYN-001",
+    "question": "Where should I perform the video evaluation?",
+    "status": "answered",
+    "contains": [
+      "Emergency department patient room"
+    ],
+    "sources": [
+      "Video Eval Location"
+    ],
+    "local": "2026-03-17T14:00",
+    "kind": "question"
+  },
+  {
+    "id": "V02",
+    "hospital": "SYN-002",
+    "question": "What is the LVO workflow?",
+    "status": "answered",
+    "contains": [
+      "ED provider activates transfer center",
+      "Metro Neuroscience Institute"
+    ],
+    "sources": [
+      "LVO Protocol"
+    ],
+    "local": "2026-03-17T14:00",
+    "kind": "question"
+  },
+  {
+    "id": "V03",
+    "hospital": "SYN-003",
+    "question": "Can I place inpatient neurology orders during rounding?",
+    "status": "answered",
+    "contains": [
+      "inpatient neurology orders permitted"
+    ],
+    "sources": [
+      "Rounding Orders"
+    ],
+    "local": "2026-03-17T09:00",
+    "kind": "question"
+  },
+  {
+    "id": "V04",
+    "hospital": "SYN-004",
+    "question": "Is EEG available on Friday?",
+    "status": "not_in_guide",
+    "contains": [
+      "Friday availability is not provided",
+      "Do not assume"
+    ],
+    "sources": [
+      "EEG"
+    ],
+    "local": "2026-03-20T10:00",
+    "kind": "question",
+    "flags": [
+      "stale"
+    ]
+  },
+  {
+    "id": "V05",
+    "hospital": "SYN-005",
+    "question": "Does the hospital have CT perfusion?",
+    "status": "answered",
+    "contains": [
+      "No"
+    ],
+    "sources": [
+      "CT Perfusion"
+    ],
+    "local": "2026-03-17T14:00",
+    "kind": "question"
+  },
+  {
+    "id": "V06",
+    "hospital": "SYN-006",
+    "question": "What is the LVO pathway after 1900 on a weekday?",
+    "status": "time_dependent",
+    "contains": [
+      "Outside coverage",
+      "ED provider initiates transfer"
+    ],
+    "sources": [
+      "LVO Protocol"
+    ],
+    "local": "2026-03-17T19:30",
+    "kind": "question",
+    "forbidden": [
+      "teleneurologist activates"
+    ]
+  },
+  {
+    "id": "V07",
+    "hospital": "SYN-007",
+    "question": "Which order set should I use?",
+    "status": "answered",
+    "contains": [
+      "Not applicable",
+      "No orders entered by teleneurologist"
+    ],
+    "sources": [
+      "Order Set Name",
+      "Order Entry"
+    ],
+    "local": "2026-03-17T14:00",
+    "kind": "question"
+  },
+  {
+    "id": "V08",
+    "hospital": "SYN-001",
+    "question": "Patient has an LVO. What do I do?",
+    "status": "time_dependent",
+    "contains": [
+      "activates the synthetic neurovascular response line",
+      "Outside coverage hours",
+      "Coverage hours are not defined"
+    ],
+    "sources": [
+      "LVO Protocol"
+    ],
+    "local": "2026-03-17T22:30",
+    "kind": "question",
+    "flags": [
+      "schedule_unknown"
+    ]
+  },
+  {
+    "id": "V09",
+    "hospital": "SYN-006",
+    "question": "Patient has an LVO. Do I activate the EVT team?",
+    "status": "time_dependent",
+    "contains": [
+      "Outside coverage",
+      "ED provider initiates transfer"
+    ],
+    "sources": [
+      "LVO Protocol"
+    ],
+    "local": "2026-03-21T10:00",
+    "kind": "question",
+    "forbidden": [
+      "teleneurologist activates"
+    ]
+  },
+  {
+    "id": "V10",
+    "hospital": "SYN-007",
+    "question": "Can I sign off now?",
+    "status": "hard_stop",
+    "contains": [
+      "required encounter charge",
+      "before sign-off"
+    ],
+    "sources": [
+      "Charge Entry"
+    ],
+    "local": "2026-03-17T14:00",
+    "kind": "question",
+    "block": true
+  },
+  {
+    "id": "V11",
+    "hospital": "SYN-005",
+    "question": "Can I change the antiplatelet during rounding?",
+    "status": "answered",
+    "contains": [
+      "hospitalist co-sign"
+    ],
+    "sources": [
+      "Rounding Orders"
+    ],
+    "local": "2026-03-17T10:00",
+    "kind": "question"
+  },
+  {
+    "id": "V12",
+    "hospital": "SYN-002",
+    "question": "Where do I do the video eval for a stroke alert?",
+    "status": "conflict",
+    "contains": [
+      "CT holding bay",
+      "Storyboard: Patient room"
+    ],
+    "sources": [
+      "Video Eval Location"
+    ],
+    "local": "2026-03-17T14:00",
+    "kind": "question",
+    "flags": [
+      "conflict"
+    ]
+  },
+  {
+    "id": "V13",
+    "hospital": "SYN-004",
+    "question": "Is EEG available on Thursday?",
+    "status": "stale",
+    "contains": [
+      "Listed availability",
+      "2025-06-10"
+    ],
+    "sources": [
+      "EEG"
+    ],
+    "local": "2026-03-19T10:00",
+    "kind": "question",
+    "flags": [
+      "stale"
+    ]
+  },
+  {
+    "id": "V14",
+    "hospital": "SYN-002",
+    "question": "Who covers pediatric neurology?",
+    "status": "not_in_guide",
+    "contains": [
+      "Not available",
+      "absent"
+    ],
+    "sources": [],
+    "local": "2026-03-17T14:00",
+    "kind": "question"
+  },
+  {
+    "id": "V15",
+    "hospital": "SYN-005",
+    "question": "Which thrombolytic order set do I search for?",
+    "status": "answered",
+    "contains": [
+      "Search \"Stroke TeleCare\" - \"Suncrest Acute Stroke - TNK [SYN-55190]\""
+    ],
+    "sources": [
+      "Order Set Name"
+    ],
+    "local": "2026-03-17T14:00",
+    "kind": "question"
+  },
+  {
+    "id": "V16",
+    "hospital": "SYN-007",
+    "question": "Can I get CT perfusion on Saturday?",
+    "status": "time_dependent",
+    "contains": [
+      "Not available",
+      "Mon-Fri 0700-1900"
+    ],
+    "sources": [
+      "CT Perfusion"
+    ],
+    "local": "2026-03-21T11:00",
+    "kind": "question"
+  },
+  {
+    "id": "V17",
+    "hospital": "SYN-002",
+    "question": "Is the rounding window open? (Provider is in Eastern time.)",
+    "status": "time_dependent",
+    "contains": [
+      "Opens in 15 minutes",
+      "10:30 America/New_York"
+    ],
+    "sources": [
+      "Rounding Timing",
+      "When Do We Round?"
+    ],
+    "local": "2026-03-17T08:15",
+    "kind": "question"
+  },
+  {
+    "id": "V18",
+    "hospital": "SYN-006",
+    "question": "Who mixes the TNK?",
+    "status": "time_dependent",
+    "contains": [
+      "pharmacist",
+      "nursing",
+      "Staffed pharmacy hours are not defined",
+      "2025-08-15"
+    ],
+    "sources": [
+      "Thrombolytic Mix Model"
+    ],
+    "local": "2026-03-18T20:00",
+    "kind": "question",
+    "flags": [
+      "stale",
+      "schedule_unknown"
+    ]
+  },
+  {
+    "id": "V19",
+    "hospital": "SYN-003",
+    "question": "What should I title the note?",
+    "status": "answered",
+    "contains": [
+      "Neurology Consult - Remote"
+    ],
+    "sources": [
+      "Required Note Title"
+    ],
+    "local": "2026-03-17T14:00",
+    "kind": "question"
+  },
+  {
+    "id": "V20",
+    "hospital": "SYN-005",
+    "question": "What note title is required?",
+    "status": "not_in_guide",
+    "contains": [
+      "Not available",
+      "absent"
+    ],
+    "sources": [],
+    "local": "2026-03-17T14:00",
+    "kind": "question"
+  }
+]

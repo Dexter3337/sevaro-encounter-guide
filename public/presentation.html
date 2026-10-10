@@ -1,0 +1,1099 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Encounter Guide · Mentor presentation</title>
+    <style>
+      :root {
+        --ink: #eaf3f1;
+        --muted: #a8c0c4;
+        --mint: #77e5c5;
+        --gold: #f6c775;
+        --bg: #08252d;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          18px/1.5 system-ui,
+          sans-serif;
+      }
+      button,
+      a {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      header {
+        height: 66px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 4vw;
+        border-bottom: 1px solid #2b4850;
+        font-size: 13px;
+        letter-spacing: 0.12em;
+      }
+      a {
+        color: var(--mint);
+      }
+      header a {
+        letter-spacing: 0;
+      }
+      main {
+        min-height: calc(100vh - 140px);
+      }
+      .slide {
+        display: none;
+        max-width: 1360px;
+        margin: auto;
+        padding: 5vh 5vw 3vh;
+        min-height: calc(100vh - 140px);
+        position: relative;
+      }
+      .slide.active {
+        display: block;
+      }
+      .kicker {
+        color: var(--mint);
+        font-size: 13px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        margin: 0 0 24px;
+      }
+      h1,
+      h2 {
+        font-weight: 580;
+        letter-spacing: -0.055em;
+        line-height: 1.08;
+        margin: 0 0 24px;
+      }
+      h1 {
+        font-size: clamp(46px, 6.5vw, 94px);
+        max-width: 1000px;
+      }
+      h2 {
+        font-size: clamp(34px, 4.8vw, 68px);
+        max-width: 1050px;
+      }
+      .lead {
+        font-size: clamp(20px, 2vw, 28px);
+        color: var(--muted);
+        max-width: 940px;
+        margin: 0 0 34px;
+      }
+      strong {
+        color: var(--ink);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+      }
+      .two {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .card {
+        background: #12343c;
+        border: 1px solid #34515a;
+        padding: 26px;
+        border-radius: 16px;
+      }
+      .card h3 {
+        margin: 0 0 12px;
+        font-size: 24px;
+        line-height: 1.15;
+      }
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 18px;
+      }
+      .card .num {
+        color: var(--mint);
+        display: block;
+        font-size: 13px;
+        margin-bottom: 26px;
+      }
+      .metric {
+        font-size: clamp(42px, 5vw, 68px);
+        color: var(--mint);
+        line-height: 1;
+        margin-bottom: 16px;
+      }
+      .foot {
+        font-size: 14px;
+        color: var(--muted);
+        margin-top: 28px;
+      }
+      .flow {
+        display: flex;
+        align-items: stretch;
+        gap: 10px;
+        margin: 36px 0;
+      }
+      .flow .card {
+        flex: 1;
+        padding: 20px;
+        font-size: 18px;
+        min-width: 0;
+      }
+      .flow .card b {
+        display: block;
+        color: var(--mint);
+        font-size: 13px;
+        margin-bottom: 18px;
+      }
+      .arrow {
+        align-self: center;
+        color: var(--mint);
+        font-size: 24px;
+      }
+      .active .card,
+      .active .lead,
+      .active h1,
+      .active h2,
+      .active .kicker {
+        animation: enter 0.65s both;
+      }
+      .active .card:nth-child(2) {
+        animation-delay: 0.13s;
+      }
+      .active .card:nth-child(3) {
+        animation-delay: 0.26s;
+      }
+      .active .card:nth-child(4) {
+        animation-delay: 0.39s;
+      }
+      .active .card:nth-child(5) {
+        animation-delay: 0.52s;
+      }
+      .active .lead {
+        animation-delay: 0.1s;
+      }
+      @keyframes enter {
+        from {
+          opacity: 0;
+          transform: translateY(22px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .signal {
+        height: 130px;
+        margin: 38px 0;
+        overflow: hidden;
+        position: relative;
+        border-bottom: 1px solid #36545b;
+      }
+      .signal svg {
+        width: 100%;
+        height: 100%;
+      }
+      .signal path {
+        fill: none;
+        stroke: var(--mint);
+        stroke-width: 3;
+        stroke-dasharray: 1400;
+        stroke-dashoffset: 1400;
+      }
+      .active .signal path {
+        animation: draw 2s 0.4s forwards;
+      }
+      @keyframes draw {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+      .packet {
+        width: 12px;
+        height: 12px;
+        background: var(--mint);
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        box-shadow: 0 0 28px #77e5c5;
+      }
+      .active .packet {
+        animation: travel 4s infinite;
+      }
+      @keyframes travel {
+        0% {
+          left: 0;
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          left: 98%;
+          opacity: 0;
+        }
+      }
+      .clock {
+        border: 2px solid var(--mint);
+        border-radius: 50%;
+        width: 160px;
+        height: 160px;
+        position: relative;
+        margin: 0 auto 24px;
+      }
+      .clock:before {
+        content: "";
+        width: 3px;
+        height: 53px;
+        position: absolute;
+        background: var(--mint);
+        left: 77px;
+        top: 25px;
+        transform-origin: bottom;
+      }
+      .active .clock:before {
+        animation: rotate 6s ease-in-out infinite alternate;
+      }
+      @keyframes rotate {
+        to {
+          transform: rotate(210deg);
+        }
+      }
+      .clock:after {
+        content: "";
+        position: absolute;
+        left: 77px;
+        top: 77px;
+        width: 38px;
+        height: 3px;
+        background: var(--gold);
+        transform: rotate(25deg);
+        transform-origin: left;
+      }
+      .pill {
+        display: inline-block;
+        padding: 7px 12px;
+        border-radius: 100px;
+        border: 1px solid #507079;
+        font-size: 14px;
+        margin: 6px 5px 0 0;
+      }
+      .warn {
+        border-color: #c49b57;
+        color: var(--gold);
+      }
+      .stop {
+        border-left: 4px solid #fb9292;
+      }
+      .resolve {
+        border-left: 4px solid var(--mint);
+      }
+      .bar {
+        height: 9px;
+        background: #24444c;
+        border-radius: 9px;
+        overflow: hidden;
+        margin: 26px 0;
+      }
+      .bar span {
+        display: block;
+        height: 100%;
+        background: var(--mint);
+        width: 6%;
+      }
+      .active .bar span {
+        animation: measure 1.5s 0.3s both;
+      }
+      @keyframes measure {
+        from {
+          width: 0;
+        }
+        to {
+          width: 6%;
+        }
+      }
+      .screenshot {
+        width: 100%;
+        max-height: 48vh;
+        object-fit: contain;
+        object-position: left;
+        border-radius: 12px;
+        border: 1px solid #45636b;
+        background: white;
+      }
+      .actions {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin: 22px 0;
+      }
+      .actions a,
+      .actions button,
+      .controls button {
+        padding: 10px 16px;
+        border: 1px solid #45636b;
+        border-radius: 8px;
+        background: #153a43;
+        color: var(--ink);
+        text-decoration: none;
+      }
+      .actions .primary {
+        background: var(--mint);
+        color: #0b2e36;
+        border-color: var(--mint);
+      }
+      footer {
+        position: sticky;
+        bottom: 0;
+        background: #08252df5;
+        border-top: 1px solid #2b4850;
+        padding: 12px 4vw;
+        display: flex;
+        gap: 18px;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 13px;
+      }
+      .controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .controls button {
+        padding: 6px 12px;
+        font-size: 13px;
+      }
+      #progress {
+        position: fixed;
+        height: 3px;
+        background: var(--mint);
+        left: 0;
+        bottom: 0;
+        transition: width 0.4s;
+      }
+      #notes {
+        display: none;
+        background: #153a43;
+        padding: 20px 4vw;
+        border-top: 1px solid #45636b;
+        color: #cfdfdf;
+      }
+      #notes.open {
+        display: block;
+      }
+      .demo-frame {
+        display: none;
+        width: 100%;
+        height: 70vh;
+        border: 1px solid #45636b;
+        border-radius: 12px;
+        background: white;
+      }
+      .demo-frame.open {
+        display: block;
+      }
+      body.motion-off *,
+      body.motion-off *:before {
+        animation: none !important;
+        transition: none !important;
+      }
+      .hidden {
+        display: none !important;
+      }
+      .journey {
+        border-top: 1px solid #45636b;
+        padding: 18px 0;
+        display: grid;
+        grid-template-columns: 80px 1fr;
+        gap: 14px;
+      }
+      .journey b {
+        color: var(--mint);
+      }
+      @media (max-width: 760px) {
+        header {
+          font-size: 10px;
+          padding: 0 18px;
+        }
+        .slide {
+          padding: 32px 20px;
+        }
+        .grid,
+        .two {
+          grid-template-columns: 1fr;
+        }
+        .flow {
+          flex-direction: column;
+        }
+        .arrow {
+          transform: rotate(90deg);
+        }
+        footer {
+          flex-wrap: wrap;
+        }
+        .card {
+          padding: 20px;
+        }
+        main,
+        .slide {
+          min-height: auto;
+        }
+        .signal {
+          height: 90px;
+        }
+        .controls {
+          flex-wrap: wrap;
+        }
+        .screenshot {
+          max-height: none;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *:before {
+          animation: none !important;
+          transition: none !important;
+        }
+        .signal path {
+          stroke-dashoffset: 0;
+        }
+      }
+      @media print {
+        body {
+          background: white;
+          color: #15343a;
+        }
+        header,
+        footer,
+        #notes,
+        .actions,
+        #progress {
+          display: none;
+        }
+        .slide {
+          display: block;
+          break-after: page;
+          min-height: 0;
+          padding: 30px;
+        }
+        .card {
+          background: #f1f5f4;
+          border: 1px solid #ccc;
+          color: #15343a;
+        }
+        .card p,
+        .lead,
+        .foot {
+          color: #35535b;
+        }
+        strong {
+          color: #15343a;
+        }
+        h1 {
+          font-size: 54px;
+        }
+        h2 {
+          font-size: 42px;
+        }
+        .metric,
+        .kicker,
+        .card .num,
+        .flow .card b {
+          color: #176c5e;
+        }
+        .signal path {
+          stroke: #176c5e;
+          stroke-dashoffset: 0;
+        }
+        .demo-frame {
+          display: none !important;
+        }
+        .slide * {
+          animation: none !important;
+          opacity: 1 !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span>ENCOUNTER GUIDE / SEVARO CHALLENGE 1</span>
+      <nav>
+        <a href="/workflow.html" target="_blank" rel="noopener"
+          >Detailed workflow</a
+        >
+        · <a href="/" target="_blank" rel="noopener">Demo</a>
+      </nav>
+    </header>
+    <main>
+      <section
+        class="slide active"
+        data-title="Opening"
+        data-notes="20 sec. Introduce this as an illustrative workflow companion. All hospitals and cases are synthetic. The purpose is to bring hospital instructions into the moment of workflow, with inspectable evidence."
+      >
+        <p class="kicker">Mentor review · Working prototype</p>
+        <h1>The right hospital guidance.<br />At the moment it matters.</h1>
+        <p class="lead">
+          A caselog companion that connects encounter context, hospital rules
+          and source evidence.
+        </p>
+        <div class="signal">
+          <svg
+            viewBox="0 0 1100 130"
+            role="img"
+            aria-label="Animated signal connecting workflow to guidance"
+          >
+            <path
+              d="M0 80 H180 L210 80 L235 35 L270 115 L305 15 L345 80 H530 L560 80 L595 45 L620 95 L650 80 H1100"
+            />
+          </svg>
+        </div>
+        <span class="pill">Interactive caselog</span
+        ><span class="pill">Cited guidance</span
+        ><span class="pill">Local deterministic core</span>
+        <p class="foot">
+          Illustrative Synapse workflow companion. Synthetic demo; no clinical
+          or production access.
+        </p>
+      </section>
+      <section
+        class="slide"
+        data-title="Problem statement"
+        data-notes="50 sec. State the design problem rather than claiming measured clinical harm. A provider changes hospitals and context but has to find the right local rules, coverage hours and ordering responsibilities. Our challenge is to reduce lookup friction while making uncertainty visible."
+      >
+        <p class="kicker">01 / Problem statement</p>
+        <h2>Hospital rules change.<br />The encounter keeps moving.</h2>
+        <p class="lead">
+          How can a provider find and apply the correct local workflow without
+          repeatedly leaving the caselog?
+        </p>
+        <div class="grid">
+          <div class="card">
+            <span class="num">CONTEXT</span>
+            <h3>Different hospitals</h3>
+            <p>
+              Ordering responsibility, video location, drug preparation and
+              completion rules vary.
+            </p>
+          </div>
+          <div class="card">
+            <span class="num">TIME</span>
+            <h3>Different coverage</h3>
+            <p>
+              Staffed windows, overnight schedules and hospital timezones change
+              the relevant action.
+            </p>
+          </div>
+          <div class="card">
+            <span class="num">TRUST</span>
+            <h3>Different source quality</h3>
+            <p>
+              Missing, stale or conflicting instructions should remain visible
+              rather than turn into confident answers.
+            </p>
+          </div>
+        </div>
+        <p class="foot">
+          Design problem derived from the supplied challenge and synthetic
+          hospital guides; no patient-outcome claim.
+        </p>
+      </section>
+      <section
+        class="slide"
+        data-title="Product response"
+        data-notes="40 sec. Explain the three connected surfaces. Proactive guidance is context triggered, questions search only the selected hospital, and completion uses explicit supported requirements. This is not a chat-only demo."
+      >
+        <p class="kicker">02 / Product response</p>
+        <h2>Record once.<br />Review guidance in context.</h2>
+        <div class="grid">
+          <div class="card">
+            <span class="num">01</span>
+            <h3>Caselog</h3>
+            <p>
+              Editable encounter fields with guidance beside the relevant step.
+            </p>
+          </div>
+          <div class="card">
+            <span class="num">02</span>
+            <h3>Hospital knowledge</h3>
+            <p>
+              Original-source citations, grounded questions and visible quality
+              flags.
+            </p>
+          </div>
+          <div class="card">
+            <span class="num">03</span>
+            <h3>Review and evaluate</h3>
+            <p>
+              Explicit completion gates, unfamiliar hospital imports and
+              independent scenario checks.
+            </p>
+          </div>
+        </div>
+        <div class="flow">
+          <div class="card"><b>INPUT</b>Encounter context</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>GROUNDING</b>Pinned hospital guide</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>OUTPUT</b>Action + evidence + uncertainty</div>
+        </div>
+      </section>
+      <section
+        class="slide"
+        data-title="Clinical workflow"
+        data-notes="60 sec. Walk the six stages. Steps are freely navigable and draft values persist. Stroke versus General Neuro and Acute versus Rounding determine relevance. Tri-state inputs preserve unknown and not-applicable rather than treating them as No."
+      >
+        <p class="kicker">03 / App workflow</p>
+        <h2>One encounter. Six working stages.</h2>
+        <div class="flow">
+          <div class="card"><b>01</b>Intake</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>02</b>History</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>03</b>Imaging</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>04</b>Recommendation</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>05</b>Note</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>06</b>Sign-off</div>
+        </div>
+        <div class="grid">
+          <div class="card">
+            <h3>Start with context</h3>
+            <p>
+              Hospital, consult type, encounter type, guide version and explicit
+              local time.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Guidance follows events</h3>
+            <p>
+              Opening steps, editing fields, focusing order context and
+              requesting completion.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Rounding has its own branch</h3>
+            <p>
+              Days, timing and order responsibility come from rounding sources.
+            </p>
+          </div>
+        </div>
+        <p class="foot">
+          Workflow navigation is flexible. This prototype does not enforce every
+          caselog field before moving on.
+        </p>
+      </section>
+      <section
+        class="slide"
+        data-title="Evidence loop"
+        data-notes="45 sec. Demonstrate why a card can be inspected. An event is evaluated against the pinned version; output includes hospital, field, original text, locator and verification date. Acknowledgement hides an unchanged advisory, never bypasses a gate."
+      >
+        <p class="kicker">04 / Motion of information</p>
+        <h2>Every useful prompt has a source.</h2>
+        <div class="flow">
+          <div class="card"><b>EVENT</b>Field edited</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>CONTEXT</b>Hospital + step + time</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>RULE</b>Deterministic evaluation</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>EVIDENCE</b>Cited guidance card</div>
+        </div>
+        <div class="signal"><div class="packet"></div></div>
+        <div class="grid two">
+          <div class="card">
+            <h3>Proactive when relevant</h3>
+            <p>
+              LVO, CTA, unknown last-known-well, allergy, orders, EEG, notes and
+              rounding.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Quiet when irrelevant</h3>
+            <p>
+              General Neuro with allergies “none” produces no guidance in the
+              deliberate silence scenario.
+            </p>
+          </div>
+        </div>
+      </section>
+      <section
+        class="slide"
+        data-title="Time and trust"
+        data-notes="50 sec. Point out hospital timezone, not provider display timezone. N2 changes transfer versus EVT activation at the coverage boundary. Stale and time-dependent can coexist. Undefined pharmacy staffed hours remain unknown; no hours are borrowed from LVO."
+      >
+        <p class="kicker">05 / Time and source quality</p>
+        <h2>The clock is part of the workflow.</h2>
+        <div class="grid">
+          <div class="card">
+            <div
+              class="clock"
+              role="img"
+              aria-label="Animated hospital-local clock"
+            ></div>
+            <h3>Hospital-local decisions</h3>
+            <p>
+              Explicit instant + IANA zone. Overnight and weekday coverage are
+              evaluated together.
+            </p>
+          </div>
+          <div class="card">
+            <span class="num">SOURCE HEALTH</span>
+            <h3>Uncertainty is visible</h3>
+            <p>
+              Stale, conflict, missing verification and interpretation-review
+              flags preserve what we do not know.
+            </p>
+            <span class="pill warn">Stale</span
+            ><span class="pill warn">Conflict</span
+            ><span class="pill warn">Schedule unknown</span>
+          </div>
+          <div class="card">
+            <span class="num">QUESTIONS</span>
+            <h3>Grounded answers</h3>
+            <p>
+              Resolve the field and requested time. Search this
+              hospital/version. Cite a source, ask clarification or show
+              absence.
+            </p>
+          </div>
+        </div>
+      </section>
+      <section
+        class="slide"
+        data-title="Completion gates"
+        data-notes="45 sec. Charge and provider plan gates need explicit Yes in the corresponding field. Text or acknowledgement is insufficient. State the limitation clearly: only supported fresh unambiguous source requirements hard block; unknown or stale requirements yield advisory uncertainty under the prototype policy."
+      >
+        <p class="kicker">06 / Completion workflow</p>
+        <h2>Confirmation must be explicit.</h2>
+        <div class="grid two">
+          <div class="card stop">
+            <span class="num">REQUIREMENT UNMET</span>
+            <h3>Block and explain</h3>
+            <p>
+              Identify the charge or provider-confirmation requirement, cite its
+              source and link to the field to fix.
+            </p>
+          </div>
+          <div class="card resolve">
+            <span class="num">REQUIREMENT RECORDED</span>
+            <h3>Reevaluate and complete</h3>
+            <p>
+              Evaluate the latest revision. Record mock completion only after
+              supported gates are satisfied.
+            </p>
+          </div>
+        </div>
+        <div class="flow">
+          <div class="card"><b>REQUEST</b>Complete</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>CHECK</b>Source + explicit field</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>RESULT</b>Fix blocker / mock success</div>
+        </div>
+        <p class="foot">
+          Unverifiable requirements show uncertainty and do not create invented
+          hard stops. No EHR note signature or charge posting occurs.
+        </p>
+      </section>
+      <section
+        class="slide"
+        data-title="Live demo"
+        data-notes="3–5 min. Click Load live demo or open full app. Reset. Imaging → LVO Yes at default 19:30 Central; expand source. Demo controls → instant 2026-03-17T17:00:00Z → Apply clock: now EVT branch. Launch N5 → Complete blocked → charge Yes → Complete succeeds. Launch V12 for conflict; ask pediatric question at SYN-002 for missing field. Launch N8 for silence. Return to slides with focus outside iframe and Next."
+      >
+        <p class="kicker">07 / Actual working application</p>
+        <h2>Let's use the prototype.</h2>
+        <div class="actions">
+          <button class="primary" id="loadDemo">
+            Load live demo in this slide</button
+          ><a href="/" target="_blank" rel="noopener">Open full app ↗</a
+          ><button id="hideDemo">Show evidence screenshot</button>
+        </div>
+        <img
+          id="demoShot"
+          class="screenshot"
+          src="/desktop-n2.png"
+          alt="Previously verified desktop encounter showing time-dependent LVO guidance and original source evidence"
+        /><iframe
+          id="demoFrame"
+          class="demo-frame"
+          title="Interactive Encounter Guide synthetic demo"
+        ></iframe>
+        <p class="foot">
+          Live app is fully interactive. Screenshot is a recorded local
+          verification fallback, not a recording of the current hosted session.
+        </p>
+      </section>
+      <section
+        class="slide"
+        data-title="Unfamiliar hospital import"
+        data-notes="60–90 sec. Download the synthetic JSON. Guide library → upload or paste → Preview → Activate. Select ORBIT-91, set 2026-03-18T02:30:00Z, Imaging LVO Yes. Coast Center transfer is from new Pacific guide. Ask interpreter connection procedure; Intake Interpreter needed Yes triggers imported mapping. Import a version and show explicit Refresh."
+      >
+        <p class="kicker">08 / Dynamic hospital data</p>
+        <h2>A new hospital.<br />No rebuild. No restart.</h2>
+        <div class="flow">
+          <div class="card"><b>01</b>JSON / CSV</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>02</b>Validate + preview</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>03</b>Activate version</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>04</b>Select / Refresh</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>05</b>Cited guidance</div>
+        </div>
+        <div class="grid two">
+          <div class="card">
+            <h3>Unfamiliar fields work</h3>
+            <p>
+              New interpreter instructions become searchable; declarative
+              mappings add a field and proactive card.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Invalid imports stay inactive</h3>
+            <p>
+              Atomic validation retains known-good data. Existing encounters
+              stay pinned until Refresh.
+            </p>
+          </div>
+        </div>
+        <div class="actions">
+          <a href="/unfamiliar-hospitals.json" download
+            >Download synthetic JSON</a
+          ><a href="/mapped-import.csv" download>Download CSV example</a>
+        </div>
+      </section>
+      <section
+        class="slide"
+        data-title="Measured evaluation"
+        data-notes="45 sec. Evaluation runs real product code against independent expected results. These figures are the recorded local production baseline, not a hosted Vercel measurement. Field p95 30.1 ms, all required max 32.9 ms, on documented Windows Chrome environment. Show export and latency panel if time permits."
+      >
+        <p class="kicker">09 / Verification evidence</p>
+        <h2>Working behavior.<br />Inspectable results.</h2>
+        <div class="grid">
+          <div class="card">
+            <div class="metric">29 / 29</div>
+            <h3>Sponsor examples</h3>
+            <p>
+              20 grounded questions + 9 proactive scenarios, including
+              deliberate silence.
+            </p>
+          </div>
+          <div class="card">
+            <div class="metric">74 / 74</div>
+            <h3>Unit checks</h3>
+            <p>
+              Sponsor acceptance, unfamiliar hospitals, time/data-quality edges
+              and triggers.
+            </p>
+          </div>
+          <div class="card">
+            <div class="metric">10 / 10</div>
+            <h3>Browser workflows</h3>
+            <p>
+              Production build, imports, gates, mobile/keyboard, offline loaded
+              core and latency.
+            </p>
+          </div>
+        </div>
+        <div class="bar"><span></span></div>
+        <p class="lead">
+          <strong>30.1 ms field-change p95</strong> against the prototype's 500
+          ms target.
+        </p>
+        <p class="foot">
+          Recorded local Chrome production baseline; 120 field-change samples.
+          Not a hosted-network benchmark or clinical validation.
+          <a href="/TEST_RESULTS.md" download>Full test evidence</a>
+        </p>
+      </section>
+      <section
+        class="slide"
+        data-title="Team contribution"
+        data-notes="30 sec. Share GitHub and hosted links. Anyone can fork and send a PR; direct write access needs account invitations. Drafts/imports are local to each browser, so teammates share source changes rather than live case state. CI and deployment config are committed."
+      >
+        <p class="kicker">10 / Team handoff</p>
+        <h2>Shared code.<br />Reproducible review.</h2>
+        <div class="flow">
+          <div class="card"><b>CONTRIBUTE</b>Fork / branch</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>VERIFY</b>Tests + build</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>REVIEW</b>Pull request</div>
+          <span class="arrow">→</span>
+          <div class="card"><b>SHARE</b>Hosted demo</div>
+        </div>
+        <div class="actions">
+          <a
+            class="primary"
+            href="https://github.com/Dexter3337/sevaro-encounter-guide"
+            target="_blank"
+            rel="noopener"
+            >GitHub repository ↗</a
+          ><a href="/workflow.html" target="_blank" rel="noopener"
+            >Detailed workflow ↗</a
+          ><a href="/" target="_blank" rel="noopener">Hosted app ↗</a>
+        </div>
+        <p class="lead">
+          No paid API or hospital credentials needed for the deterministic core.
+        </p>
+        <p class="foot">
+          Case drafts and imported guides are browser-local; the demo has no
+          shared clinical database or collaboration backend.
+        </p>
+      </section>
+      <section
+        class="slide"
+        data-title="Mentor discussion"
+        data-notes="45 sec. Ask mentors to critique relevance, uncertainty policy, guide governance and integration boundary. Be candid: clinical effectiveness has not been established. The prototype proves source-grounded workflow behavior on supplied and synthetic cases."
+      >
+        <p class="kicker">11 / Mentor discussion</p>
+        <h2>What should we validate next?</h2>
+        <div class="grid">
+          <div class="card">
+            <span class="num">WORKFLOW</span>
+            <h3>Relevance and restraint</h3>
+            <p>
+              Which prompts help at the point of work? Which should stay silent
+              or require explicit review?
+            </p>
+          </div>
+          <div class="card">
+            <span class="num">GOVERNANCE</span>
+            <h3>Guide ownership</h3>
+            <p>
+              Who verifies local rules, resolves conflicting sources and
+              approves changes?
+            </p>
+          </div>
+          <div class="card">
+            <span class="num">INTEGRATION</span>
+            <h3>Production boundary</h3>
+            <p>
+              Authentication, audited storage, host events and clinically
+              validated failure policies need separate design.
+            </p>
+          </div>
+        </div>
+        <p class="lead" style="margin-top: 32px">
+          Today: a runnable, cited, testable synthetic workflow prototype.
+        </p>
+        <p class="foot">
+          Finite rule/question grammar. No LLM, speech, real EHR write, patient
+          use or production safety guarantee.
+        </p>
+      </section>
+    </main>
+    <aside id="notes" aria-label="Speaker notes"></aside>
+    <footer>
+      <span id="counter" aria-live="polite"></span>
+      <div class="controls">
+        <button id="prev" aria-label="Previous slide">←</button
+        ><button id="next" aria-label="Next slide">→</button
+        ><button id="toggleNotes" aria-pressed="false">Speaker notes</button
+        ><button id="motion" aria-pressed="true">Motion on</button
+        ><button id="full">Fullscreen</button
+        ><button id="print">Print / PDF</button>
+      </div>
+      <span>← → navigate · N notes · F fullscreen</span>
+    </footer>
+    <div id="progress"></div>
+    <script>
+      const slides = [...document.querySelectorAll(".slide")],
+        notes = document.getElementById("notes"),
+        counter = document.getElementById("counter"),
+        progress = document.getElementById("progress");
+      let current = 0;
+      function show(index) {
+        current = Math.max(0, Math.min(slides.length - 1, index));
+        slides.forEach((s, i) => s.classList.toggle("active", i === current));
+        counter.textContent =
+          String(current + 1).padStart(2, "0") +
+          " / " +
+          slides.length +
+          " · " +
+          slides[current].dataset.title;
+        notes.textContent = slides[current].dataset.notes;
+        progress.style.width = ((current + 1) / slides.length) * 100 + "%";
+        document.getElementById("prev").disabled = current === 0;
+        document.getElementById("next").disabled =
+          current === slides.length - 1;
+        history.replaceState(null, "", "#slide-" + (current + 1));
+        window.scrollTo(0, 0);
+      }
+      function toggleNotes() {
+        const open = notes.classList.toggle("open");
+        document
+          .getElementById("toggleNotes")
+          .setAttribute("aria-pressed", String(open));
+      }
+      async function full() {
+        try {
+          if (document.fullscreenElement) await document.exitFullscreen();
+          else await document.documentElement.requestFullscreen();
+        } catch {
+          document.getElementById("full").textContent =
+            "Use browser fullscreen";
+        }
+      }
+      document.getElementById("prev").onclick = () => show(current - 1);
+      document.getElementById("next").onclick = () => show(current + 1);
+      document.getElementById("toggleNotes").onclick = toggleNotes;
+      document.getElementById("motion").onclick = () => {
+        const off = document.body.classList.toggle("motion-off");
+        document.getElementById("motion").textContent = off
+          ? "Motion off"
+          : "Motion on";
+        document
+          .getElementById("motion")
+          .setAttribute("aria-pressed", String(!off));
+      };
+      document.getElementById("full").onclick = full;
+      document.getElementById("print").onclick = () => window.print();
+      document.getElementById("loadDemo").onclick = () => {
+        const frame = document.getElementById("demoFrame");
+        if (!frame.getAttribute("src")) frame.src = "/";
+        frame.classList.add("open");
+        document.getElementById("demoShot").classList.add("hidden");
+      };
+      document.getElementById("hideDemo").onclick = () => {
+        document.getElementById("demoFrame").classList.remove("open");
+        document.getElementById("demoShot").classList.remove("hidden");
+      };
+      document.addEventListener("keydown", (e) => {
+        if (
+          /INPUT|TEXTAREA|SELECT/.test(e.target.tagName) ||
+          e.ctrlKey ||
+          e.metaKey ||
+          e.altKey
+        )
+          return;
+        if (e.key === "ArrowRight" || e.key === "PageDown") {
+          e.preventDefault();
+          show(current + 1);
+        }
+        if (e.key === "ArrowLeft" || e.key === "PageUp") {
+          e.preventDefault();
+          show(current - 1);
+        }
+        if (e.key.toLowerCase() === "n") toggleNotes();
+        if (e.key.toLowerCase() === "f") full();
+        if (e.key === "Home") show(0);
+        if (e.key === "End") show(slides.length - 1);
+      });
+      show(Number((location.hash.match(/slide-(\d+)/) || [])[1] || 1) - 1);
+    </script>
+  </body>
+</html>

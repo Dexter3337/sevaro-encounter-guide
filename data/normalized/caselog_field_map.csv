@@ -1,0 +1,12 @@
+id,step,trigger,source_fields,tier
+T01,intake,encounter_opened,Video Eval Location; Wake Up Protocol,info
+T02,history,last_known_well_status = Unknown,Wake Up Protocol,advisory
+T03,history,relevant positive thrombolytic allergy,Thrombolytic,advisory
+T04,imaging,cta_done = true,CT Perfusion; AI,info
+T05,imaging,lvo_present = true,LVO Protocol,advisory
+T06,recommendation,thrombolytic_given = true,Thrombolytic; Thrombolytic Mix Model; Order Entry; Order Set Name,advisory
+T07,recommendation,order field displayed/focused,Order Entry; Order Set Name,advisory
+T08,recommendation,EEG or seizure in assessment_plan,EEG,info
+T09,note,note created/displayed,Required Note Title,advisory
+T10,sign_off,completion_requested,Charge Entry; Consult Completion Rule,hard_stop
+T11,rounding,encounter opened,When Do We Round?; Rounding Timing; Rounding Orders,info

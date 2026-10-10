@@ -1,0 +1,32 @@
+{
+  "archive": [
+    {
+      "entry": "Sevaro/Sevaro_Rutgers_Health_Hack_Challenge_1_Guided_Workflow_v2.pdf",
+      "sha256": "0336f10e7a63e2951970b6cf0c13bf9f4ed7a006a2e0c367b6987effe85ce4bb",
+      "deduplicated": true
+    },
+    {
+      "entry": "Sevaro/Sevaro_Rutgers_Health_Hack_Challenge_2_Operations_Command_Center_v2.pdf",
+      "sha256": "52eadb6f8dcabb3c224c5dbfe16841af8445c91d53261400ccbcfedd5f6b0368",
+      "deduplicated": true
+    }
+  ],
+  "pdf_sha256": "0336f10e7a63e2951970b6cf0c13bf9f4ed7a006a2e0c367b6987effe85ce4bb",
+  "pdf_rows": 169,
+  "seed_rows": 169,
+  "mismatches": [],
+  "counts": {
+    "SYN-001": 25,
+    "SYN-002": 22,
+    "SYN-003": 26,
+    "SYN-004": 25,
+    "SYN-005": 23,
+    "SYN-006": 24,
+    "SYN-007": 24
+  },
+  "notes": [
+    "Unofficial reconstruction verified against all extracted PDF table rows.",
+    "N scenarios use inferred dates: Tue 2026-03-17; Sun 2026-03-22.",
+    "Guide default verification date applies only to sponsor seed. Storyboard updated date is distinct."
+  ]
+}

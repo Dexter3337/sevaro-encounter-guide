@@ -1,0 +1,165 @@
+[
+  {
+    "id": "N1",
+    "hospital": "SYN-002",
+    "step": "imaging",
+    "field": "lvo_present",
+    "val": true,
+    "local": "2026-03-17T14:00",
+    "tier": "advisory",
+    "contains": [
+      "Not thrombectomy capable",
+      "ED provider activates transfer center",
+      "Metro Neuroscience Institute"
+    ],
+    "sources": [
+      "LVO Protocol"
+    ],
+    "kind": "nudge"
+  },
+  {
+    "id": "N2",
+    "hospital": "SYN-006",
+    "step": "imaging",
+    "field": "lvo_present",
+    "val": true,
+    "local": "2026-03-17T19:30",
+    "tier": "advisory",
+    "contains": [
+      "Outside coverage",
+      "ED provider initiates transfer"
+    ],
+    "sources": [
+      "LVO Protocol"
+    ],
+    "kind": "nudge",
+    "forbidden": [
+      "teleneurologist activates"
+    ]
+  },
+  {
+    "id": "N3",
+    "hospital": "SYN-003",
+    "step": "history",
+    "field": "last_known_well_status",
+    "val": "Unknown",
+    "local": "2026-03-17T03:10",
+    "tier": "advisory",
+    "contains": [
+      "wake-up workflow: Yes"
+    ],
+    "sources": [
+      "Wake Up Protocol"
+    ],
+    "kind": "nudge"
+  },
+  {
+    "id": "N4",
+    "hospital": "SYN-004",
+    "step": "recommendation",
+    "field": "thrombolytic_given",
+    "val": true,
+    "local": "2026-03-17T16:00",
+    "tier": "advisory",
+    "contains": [
+      "No medication orders entered by teleneurologist",
+      "Hospital provider uses local stroke order set"
+    ],
+    "sources": [
+      "Order Entry"
+    ],
+    "kind": "nudge",
+    "forbidden": [
+      "Search \"",
+      "Select order set"
+    ]
+  },
+  {
+    "id": "N5",
+    "hospital": "SYN-007",
+    "step": "sign_off",
+    "field": "charge_entered",
+    "val": false,
+    "local": "2026-03-17T14:00",
+    "tier": "hard_stop",
+    "contains": [
+      "required encounter charge"
+    ],
+    "sources": [
+      "Charge Entry"
+    ],
+    "kind": "nudge",
+    "event": "completion_requested",
+    "block": true
+  },
+  {
+    "id": "N6",
+    "hospital": "SYN-005",
+    "step": "imaging",
+    "field": "cta_done",
+    "val": true,
+    "local": "2026-03-17T14:00",
+    "tier": "info",
+    "contains": [
+      "No",
+      "ClarityLVO"
+    ],
+    "sources": [
+      "CT Perfusion",
+      "AI"
+    ],
+    "kind": "nudge"
+  },
+  {
+    "id": "N7",
+    "hospital": "SYN-004",
+    "step": "sign_off",
+    "field": "plan_confirmed",
+    "val": false,
+    "local": "2026-03-17T15:00",
+    "tier": "hard_stop",
+    "contains": [
+      "confirmation of the patient plan from the hospital provider"
+    ],
+    "sources": [
+      "Consult Completion Rule"
+    ],
+    "kind": "nudge",
+    "event": "completion_requested",
+    "consult": "General Neuro",
+    "block": true
+  },
+  {
+    "id": "N8",
+    "hospital": "SYN-002",
+    "step": "history",
+    "field": "allergies",
+    "val": "none",
+    "local": "2026-03-17T14:00",
+    "tier": "info",
+    "contains": [],
+    "sources": [],
+    "kind": "nudge",
+    "consult": "General Neuro",
+    "silence": true
+  },
+  {
+    "id": "N9",
+    "hospital": "SYN-001",
+    "step": "rounding",
+    "local": "2026-03-22T08:00",
+    "tier": "info",
+    "contains": [
+      "Monday-Friday",
+      "Check why a rounding encounter exists"
+    ],
+    "sources": [
+      "Rounding Timing",
+      "When Do We Round?"
+    ],
+    "kind": "nudge",
+    "encounter": "Rounding",
+    "consult": "General Neuro",
+    "event": "encounter_opened"
+  }
+]

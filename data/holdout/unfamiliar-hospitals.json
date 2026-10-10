@@ -1,0 +1,29 @@
+{"hospitals":[
+ {"id":"ORBIT-91","name":"Harbor Lantern · Synthetic","timezone":"America/Los_Angeles","version":"demo-v1","fields":{
+  "LVO Protocol":{"value":"Thrombectomy capable Monday through Friday, 7 am to 7 pm. During coverage, remote neurologist calls the fictional Harbor EVT desk. Outside coverage, local emergency physician arranges transfer to fictional Coast Center.","lastVerified":"2026-02-10"},
+  "Charge Entry":{"value":"Yes - encounter charge required before sign-off","lastVerified":"2026-02-10"},
+  "Video Eval Location":{"value":"Bay 8 for stroke alerts; ward room for other consults","lastVerified":"2026-02-10"},
+  "Interpreter connection procedure":{"value":"Call the fictional language desk at extension SYN-778; request the mobile interpreter cart.","lastVerified":"2026-02-10"},
+  "Transport clearance":{"value":"If the weather beacon is violet, obtain alternate clearance.","lastVerified":"2026-02-10"}
+ },"mappings":[{"id":"language-hint","fieldId":"interpreter_needed","label":"Interpreter needed (enter Yes)","step":"intake","sourceField":"Interpreter connection procedure","condition":{"op":"equals","field":"interpreter_needed","value":"Yes"},"tier":"info"}]},
+ {"id":"QUARTZ-82","name":"Cobalt Mesa · Synthetic","timezone":"America/Phoenix","version":"demo-v1","fields":{
+  "LVO Protocol":{"value":"Not thrombectomy capable. Local emergency physician contacts the fictional Mesa Transfer Desk.","lastVerified":"2026-02-10"},
+  "CT Perfusion":{"value":"No","lastVerified":"2026-02-10"},
+  "Required Note Title":{"value":"Remote Specialty Review","lastVerified":"2026-02-10"},
+  "Order Entry":{"value":"No medication orders entered by teleneurologist","lastVerified":"2026-02-10"},
+  "Order Set Name":{"value":"Local physician uses the fictional Mesa workflow","lastVerified":"2026-02-10"}
+ }},
+ {"id":"KITE-73","name":"North Glass · Synthetic","timezone":"America/New_York","version":"demo-v1","fields":{
+  "EEG":{"value":"Mon-Fri 2200-0600; weekend on-call","lastVerified":"2026-02-10"},
+  "When Do We Round?":{"value":"Monday, Wednesday, Friday","lastVerified":"2026-02-10"},
+  "Rounding Timing":{"value":"0900-1100 Eastern Time","lastVerified":"2026-02-10"},
+  "Rounding Orders":{"value":"No routine orders","lastVerified":"2026-02-10"},
+  "Charge Entry":{"value":"No","lastVerified":"2026-02-10"}
+ }},
+ {"id":"EMBER-64","name":"Copper Meadow · Synthetic","timezone":"Europe/London","version":"demo-v1","fields":{
+  "CT Perfusion":{"value":"Daily 0800-1200; Daily 1400-1800","lastVerified":"2026-02-10"},
+  "Thrombolytic Mix Model":{"value":"Pharmacist prepares during staffed hours; ward nursing mixes overnight","lastVerified":"2025-07-01"},
+  "Consult Completion Rule":{"value":"Do not complete the consult until the hospital provider confirms the patient plan","lastVerified":"2026-02-10"},
+  "Device connection instructions":"Use the fictional green adapter and select Demo Cart 4."
+ }}
+]}

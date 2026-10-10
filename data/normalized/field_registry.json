@@ -1,0 +1,93 @@
+{
+  "version": "1.0",
+  "fields": [
+    {
+      "id": "reason_for_consult",
+      "label": "Reason for consult",
+      "step": "intake",
+      "type": "textarea"
+    },
+    {
+      "id": "last_known_well_status",
+      "label": "Last known well",
+      "step": "history",
+      "type": "select",
+      "options": [
+        "Known",
+        "Unknown"
+      ]
+    },
+    {
+      "id": "last_known_well_time",
+      "label": "Last known well time",
+      "step": "history",
+      "type": "datetime"
+    },
+    {
+      "id": "allergies",
+      "label": "Allergies",
+      "step": "history",
+      "type": "text"
+    },
+    {
+      "id": "cta_done",
+      "label": "CTA done",
+      "step": "imaging",
+      "type": "tri"
+    },
+    {
+      "id": "lvo_present",
+      "label": "Large vessel occlusion present",
+      "step": "imaging",
+      "type": "tri"
+    },
+    {
+      "id": "thrombolytic_given",
+      "label": "Thrombolytic given",
+      "step": "recommendation",
+      "type": "tri"
+    },
+    {
+      "id": "thrombolytic_order_placed",
+      "label": "Thrombolytic order placed in EHR",
+      "step": "recommendation",
+      "type": "tri"
+    },
+    {
+      "id": "assessment_plan",
+      "label": "Assessment / plan",
+      "step": "recommendation",
+      "type": "textarea"
+    },
+    {
+      "id": "note_title",
+      "label": "Note title",
+      "step": "note",
+      "type": "text"
+    },
+    {
+      "id": "note_body",
+      "label": "Note body",
+      "step": "note",
+      "type": "textarea"
+    },
+    {
+      "id": "charge_entered",
+      "label": "Encounter charge recorded",
+      "step": "sign_off",
+      "type": "tri"
+    },
+    {
+      "id": "plan_confirmed",
+      "label": "Hospital provider confirmed patient plan",
+      "step": "sign_off",
+      "type": "tri"
+    },
+    {
+      "id": "rounding_order_intent",
+      "label": "Rounding order intent",
+      "step": "rounding",
+      "type": "textarea"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "4d77f169-c84f-49ea-afe1-ee060fdcd1f8",
+  "hospitalId": "SYN-006",
+  "guideVersion": "Challenge v2",
+  "consultType": "Stroke",
+  "encounterType": "Acute",
+  "step": "intake",
+  "instant": "2026-03-18T00:30:00Z",
+  "providerZone": "America/New_York",
+  "revision": 0,
+  "values": {}
+}
