@@ -1,0 +1,64 @@
+{
+  "verifiedAt": "2026-10-10T18:03:47.636Z",
+  "base": "https://dynamic-cat-513c19.netlify.app",
+  "deployId": "6aca7d040f83c27abae6c32d",
+  "sourceCommit": "b5be83d7b97961c93a9a93a4923a22e689392413",
+  "results": [
+    {
+      "file": "TEAM_HANDOFF.md",
+      "status": 200,
+      "bytes": 6830,
+      "sha256": "e4b4c8e22da1914e383b8512e0f26e4242db42a2523d64e412cf9dfda5e80dba"
+    },
+    {
+      "file": "assets/index-C7Urv-mc.js",
+      "status": 200,
+      "bytes": 138757,
+      "sha256": "78fbc7b909bfc23890ed1b39ef83e7a93262dc2e7e45c441789be0ad4c4d74ff"
+    },
+    {
+      "file": "assets/index-Coh6w6-U.css",
+      "status": 200,
+      "bytes": 12865,
+      "sha256": "0c34dc664b61ea310feb0ba92e6091b4154e23d83ea343283b91c03eb6c19468"
+    },
+    {
+      "file": "assets/react-AWWEvfi3.js",
+      "status": 200,
+      "bytes": 221270,
+      "sha256": "af3313c67e6ecc5c2d859dbe06fc22c0b51991518e50eb09ca0fbf72dd813926"
+    },
+    {
+      "file": "assets/temporal-D0rLQFhn.js",
+      "status": 200,
+      "bytes": 154124,
+      "sha256": "8f98c49253b033be879509fb6e0361a925998e2fe2a1c65a4d2bbd69f1a50605"
+    },
+    {
+      "file": "assets/validation-B2tG9pNO.js",
+      "status": 200,
+      "bytes": 89651,
+      "sha256": "f52a4a47d019b67e27f487553477f750d3e8ce8dc8304484e3ba4a37724fe6f7"
+    },
+    {
+      "file": "index.html",
+      "status": 200,
+      "check": "Expected page content present; Netlify adds hosting badge/comment and rewrites extensionless links."
+    },
+    {
+      "file": "presentation.html",
+      "status": 200,
+      "check": "Expected page content present; Netlify adds hosting badge/comment and rewrites extensionless links."
+    },
+    {
+      "file": "workflow.html",
+      "status": 200,
+      "check": "Expected page content present; Netlify adds hosting badge/comment and rewrites extensionless links."
+    },
+    {
+      "file": "integration-review.html",
+      "status": 200,
+      "check": "Expected page content present; Netlify adds hosting badge/comment and rewrites extensionless links."
+    }
+  ]
+}
