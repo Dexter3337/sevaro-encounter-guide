@@ -11,7 +11,9 @@
     "test:acceptance": "vitest run tests/acceptance.test.ts",
     "test:e2e": "playwright test",
     "evaluate": "tsx scripts/evaluate.ts",
-    "preview": "vite preview --host 127.0.0.1"
+    "preview": "vite preview --host 127.0.0.1",
+    "verify:presentation": "node scripts/verify_presentation.mjs",
+    "verify:embedded-demo": "node scripts/verify_embedded_demo.mjs"
   },
   "dependencies": {
     "@js-temporal/polyfill": "^0.5.1",
