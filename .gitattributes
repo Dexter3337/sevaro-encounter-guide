@@ -1,0 +1,8 @@
+# Preserve supplied research/source bytes, including PDFs without NUL markers.
+research/** -text
+outputs/** -text
+Sevaro_Challenge_1_Standalone_Build_Plan.md -text
+*.pdf binary
+*.zip binary
+*.xlsx binary
+*.png binary
