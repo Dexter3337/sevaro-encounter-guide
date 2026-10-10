@@ -8,3 +8,7 @@ playwright-report/
 .env.*
 !.env.example
 *.zip
+
+# Original user-supplied source/research archives included for team handoff
+!Sevaro Track.zip
+!outputs/01a124a6/Sevaro_Challenge_1_Research_Package.zip

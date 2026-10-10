@@ -1,0 +1,1322 @@
+[
+  {
+    "page": 1,
+    "tables": [
+      [
+        [
+          "Field",
+          "Example",
+          "Why it matters"
+        ],
+        [
+          "hospital_id",
+          "SYN-006",
+          "Which guide applies. Answers must never come from another hospital."
+        ],
+        [
+          "consult_type / encounter_type",
+          "Stroke / Acute",
+          "Some rules only apply to stroke alerts or to rounding"
+        ],
+        [
+          "caselog_step",
+          "Imaging",
+          "Where in the workflow the provider is"
+        ],
+        [
+          "field_event",
+          "lvo_present = true",
+          "The specific action that may trigger a nudge"
+        ],
+        [
+          "local_time + local_timezone",
+          "19:30 America/Chicago",
+          "Many rules depend on day and time at the hospital"
+        ],
+        [
+          "provider_timezone",
+          "America/New_York",
+          "Providers often work in a different time zone from the hospital"
+        ]
+      ]
+    ]
+  },
+  {
+    "page": 2,
+    "tables": [
+      [
+        [
+          "Field",
+          "Example",
+          "Why it matters"
+        ],
+        [
+          "charge_entered",
+          "false",
+          "Encounter state needed for sign-off checks"
+        ]
+      ],
+      [
+        [
+          "#",
+          "Step",
+          "Caselog field",
+          "Trigger",
+          "Guide fields",
+          "Default tier"
+        ],
+        [
+          "1",
+          "Intake",
+          "Reason for consult / hospital\nselected",
+          "Encounter opened for a\nhospital",
+          "Video Eval Location; Wake Up Protocol",
+          "Info"
+        ],
+        [
+          "2",
+          "History",
+          "Last known well = Unknown",
+          "Toggle set to Unknown",
+          "Wake Up Protocol",
+          "Advisory"
+        ],
+        [
+          "3",
+          "History",
+          "Allergies",
+          "Thrombolytic allergy\nentered",
+          "Thrombolytic",
+          "Advisory"
+        ],
+        [
+          "4",
+          "Imaging",
+          "CTA done = Yes",
+          "CTA result being entered",
+          "CT Perfusion; AI",
+          "Info"
+        ],
+        [
+          "5",
+          "Imaging",
+          "Large vessel occlusion\npresent = Yes",
+          "Set to Yes",
+          "LVO Protocol (evaluate against local\ntime)",
+          "Advisory"
+        ],
+        [
+          "6",
+          "Recommendation",
+          "Thrombolytic given = Yes",
+          "Set to Yes",
+          "Thrombolytic; Thrombolytic Mix Model;\nOrder Entry; Order Set Name",
+          "Advisory"
+        ],
+        [
+          "7",
+          "Recommendation",
+          "Thrombolytic order placed in\nEHR?",
+          "Field displayed",
+          "Order Entry; Order Set Name",
+          "Advisory"
+        ],
+        [
+          "8",
+          "Recommendation",
+          "Assessment / plan",
+          "Seizure or EEG\nmentioned",
+          "EEG (evaluate against local time)",
+          "Info"
+        ],
+        [
+          "9",
+          "Note",
+          "Note title",
+          "Note being created",
+          "Required Note Title",
+          "Advisory"
+        ],
+        [
+          "10",
+          "Sign-off",
+          "Complete consult",
+          "Provider clicks Complete",
+          "Charge Entry; Consult Completion Rule",
+          "Hard stop"
+        ],
+        [
+          "11",
+          "Rounding",
+          "Rounding encounter opened",
+          "Encounter type =\nRounding",
+          "Rounding Timing; Rounding Orders",
+          "Info"
+        ]
+      ],
+      [
+        [
+          "Tier",
+          "Behavior",
+          "Example"
+        ],
+        [
+          "Hard stop",
+          "Blocks the action until the provider acknowledges or fixes it",
+          "Charge must be entered before sign-off"
+        ],
+        [
+          "Advisory",
+          "Visible next to the field; does not block",
+          "This hospital is not thrombectomy capable; ED provider starts\nthe transfer"
+        ],
+        [
+          "Info",
+          "Available on hover or in a side panel",
+          "CT perfusion is not available here"
+        ]
+      ]
+    ]
+  },
+  {
+    "page": 3,
+    "tables": [
+      [
+        [
+          "Status",
+          "When",
+          "What the provider should see"
+        ],
+        [
+          "Answered",
+          "The field exists and is current",
+          "The value, with source field"
+        ],
+        [
+          "Not in guide",
+          "The field is missing for this hospital",
+          "\"Not available in the hospital guide.\" Never fill it from another\nhospital."
+        ],
+        [
+          "Time-dependent",
+          "The answer depends on the local day or time",
+          "The answer for now, and the rule used to decide it"
+        ],
+        [
+          "Stale",
+          "The field was last verified more than 180 days before\nthe encounter",
+          "The value, clearly flagged as possibly out of date"
+        ],
+        [
+          "Conflict",
+          "The guide and the hospital storyboard disagree",
+          "Both values with their sources; never silently pick one"
+        ],
+        [
+          "Hard stop",
+          "A required step is incomplete",
+          "What is missing and what to do"
+        ]
+      ],
+      [
+        [
+          "File",
+          "Contents"
+        ],
+        [
+          "hospital_guides.json",
+          "All seven guides, one record per field with value and last-verified date"
+        ],
+        [
+          "storyboard_notes.json",
+          "Second-source values that may agree or conflict with the guide"
+        ],
+        [
+          "caselog_field_map.csv",
+          "Caselog steps, fields, triggers and mapped guide fields"
+        ],
+        [
+          "encounter_context_example.json",
+          "Example of the context object your system receives"
+        ],
+        [
+          "validation_set.csv",
+          "V01-V20 questions with expected status and answer"
+        ],
+        [
+          "nudge_scenarios.json",
+          "N1-N9 encounter scenarios with expected nudges"
+        ]
+      ]
+    ]
+  },
+  {
+    "page": 4,
+    "tables": [
+      [
+        [
+          "Guide Field",
+          "Synthetic Value"
+        ],
+        [
+          "Local Time Zone",
+          "Central (America/Chicago)"
+        ],
+        [
+          "Video Eval Location",
+          "Emergency department patient room"
+        ],
+        [
+          "Thrombolytic",
+          "Alteplase"
+        ],
+        [
+          "Thrombolytic Mix Model",
+          "Pharmacy prepares and delivers to bedside"
+        ],
+        [
+          "LVO Protocol",
+          "Thrombectomy capable during staffed neurointerventional coverage. Teleneurologist alerts ED provider\nand activates the synthetic neurovascular response line. Outside coverage hours, use the transfer\npathway."
+        ],
+        [
+          "Wake Up Protocol",
+          "Yes"
+        ],
+        [
+          "Order Entry",
+          "Thrombolytic order set and post-treatment monitoring orders only"
+        ],
+        [
+          "Order Set Name",
+          "Search \"Acute Stroke Remote\" - \"CRMC Acute Ischemic Stroke - Alteplase [SYN-41021]\""
+        ],
+        [
+          "Charge Entry",
+          "No"
+        ],
+        [
+          "Required Note Title",
+          "Tele-Neurology Consult"
+        ],
+        [
+          "Rounding Process",
+          "Hospitalist service sends daily census to the rounding queue by 0630 Central Time"
+        ],
+        [
+          "When Do We Round?",
+          "Monday-Friday"
+        ],
+        [
+          "Rounding Timing",
+          "0700-1100 Central Time"
+        ],
+        [
+          "Rounding Orders",
+          "No routine orders"
+        ],
+        [
+          "General Neurology",
+          "Local group covers outpatient; Sevaro covers inpatient tele-neurology"
+        ],
+        [
+          "Pediatric Neurology",
+          "Regional children's center via transfer line"
+        ],
+        [
+          "EEG",
+          "Mon-Sat 0700-1900"
+        ],
+        [
+          "CT Head",
+          "24/7"
+        ],
+        [
+          "CTA Head/Neck",
+          "24/7"
+        ],
+        [
+          "CT Perfusion",
+          "24/7"
+        ],
+        [
+          "MRI",
+          "Daily 0600-2300; overnight on-call"
+        ],
+        [
+          "AI",
+          "RapidView Neuro - synthetic"
+        ],
+        [
+          "EHR",
+          "MedAxis - synthetic"
+        ],
+        [
+          "PACS",
+          "NovaPACS - synthetic"
+        ],
+        [
+          "VPN",
+          "SecureBridge - synthetic"
+        ]
+      ]
+    ]
+  },
+  {
+    "page": 5,
+    "tables": [
+      [
+        [
+          "Guide Field",
+          "Synthetic Value"
+        ],
+        [
+          "Local Time Zone",
+          "Mountain (America/Denver)"
+        ],
+        [
+          "Video Eval Location",
+          "CT holding bay for stroke alerts; patient room for other consults"
+        ],
+        [
+          "Thrombolytic",
+          "Tenecteplase"
+        ],
+        [
+          "Thrombolytic Mix Model",
+          "ED nurse mixes from stroke kit after verification"
+        ],
+        [
+          "LVO Protocol",
+          "Not thrombectomy capable. Teleneurologist communicates suspected LVO to ED provider. ED provider\nactivates transfer center. Synthetic preferred destination: Metro Neuroscience Institute."
+        ],
+        [
+          "Wake Up Protocol",
+          "No"
+        ],
+        [
+          "Order Entry",
+          "Thrombolytic order entry only"
+        ],
+        [
+          "Order Set Name",
+          "Search \"Neuro TNK\" - \"BWRH Stroke - Tenecteplase [SYN-88210]\""
+        ],
+        [
+          "Charge Entry",
+          "Yes"
+        ],
+        [
+          "Rounding Process",
+          "Charge nurse initiates rounding request in Synapse"
+        ],
+        [
+          "When Do We Round?",
+          "Daily"
+        ],
+        [
+          "Rounding Timing",
+          "0830-1200 Mountain Time"
+        ],
+        [
+          "Rounding Orders",
+          "No"
+        ],
+        [
+          "Cardiovascular Services",
+          "Mon-Fri 0700-1800; weekend on-call"
+        ],
+        [
+          "Carotid Ultrasound",
+          "Daily 0800-1700"
+        ],
+        [
+          "Cardiac Monitoring",
+          "Inpatient telemetry 24/7; outpatient monitor via cardiology clinic"
+        ],
+        [
+          "EEG",
+          "Mon-Fri 0700-1700"
+        ],
+        [
+          "TEE",
+          "Mon-Fri 0800-1600"
+        ],
+        [
+          "PT/OT/ST",
+          "PT daily; OT Mon-Sat; ST Mon-Fri"
+        ],
+        [
+          "Specialty Labs",
+          "ReferenceLab North - synthetic"
+        ],
+        [
+          "EHR",
+          "CareSphere - synthetic"
+        ],
+        [
+          "PACS",
+          "ImageHarbor - synthetic"
+        ]
+      ]
+    ]
+  },
+  {
+    "page": 6,
+    "tables": [
+      [
+        [
+          "Guide Field",
+          "Synthetic Value"
+        ],
+        [
+          "Local Time Zone",
+          "Pacific (America/Los_Angeles)"
+        ],
+        [
+          "Video Eval Location",
+          "Patient room"
+        ],
+        [
+          "Thrombolytic",
+          "Tenecteplase"
+        ],
+        [
+          "Thrombolytic Mix Model",
+          "Pharmacy verifies; ED nurse mixes and administers"
+        ],
+        [
+          "LVO Protocol",
+          "Thrombectomy capable 24/7. Teleneurologist communicates LVO concern to ED provider and activates the\nsynthetic Neurointerventional Hotline."
+        ],
+        [
+          "Wake Up Protocol",
+          "Yes"
+        ],
+        [
+          "Order Entry",
+          "Full acute stroke order set permitted"
+        ],
+        [
+          "Order Set Name",
+          "Search \"RUMC Stroke Pathway\" - \"Acute Stroke / TNK / EVT Evaluation [SYN-73004]\""
+        ],
+        [
+          "Charge Entry",
+          "No"
+        ],
+        [
+          "Required Note Title",
+          "Neurology Consult - Remote"
+        ],
+        [
+          "Rounding Process",
+          "Scheduled inpatient list appears automatically in Synapse"
+        ],
+        [
+          "When Do We Round?",
+          "Daily"
+        ],
+        [
+          "Rounding Timing",
+          "0600-1400 Pacific Time"
+        ],
+        [
+          "Rounding Orders",
+          "Yes - inpatient neurology orders permitted"
+        ],
+        [
+          "General Neurology",
+          "Sevaro inpatient; university faculty outpatient"
+        ],
+        [
+          "Pediatric Neurology",
+          "In-house pediatric neurology 24/7"
+        ],
+        [
+          "EEG",
+          "Routine and continuous EEG 24/7"
+        ],
+        [
+          "CT Head",
+          "24/7"
+        ],
+        [
+          "CTA Head/Neck",
+          "24/7"
+        ],
+        [
+          "CT Perfusion",
+          "24/7"
+        ],
+        [
+          "MRI",
+          "24/7"
+        ],
+        [
+          "AI",
+          "NeuroSignal AI - synthetic"
+        ],
+        [
+          "EHR",
+          "Epic synthetic training tenant"
+        ],
+        [
+          "EHR Department Login Location",
+          "RUMC TELE NEUROLOGY"
+        ],
+        [
+          "PACS",
+          "VisionGrid - synthetic"
+        ],
+        [
+          "VPN",
+          "CloudGate Health - synthetic"
+        ]
+      ]
+    ]
+  },
+  {
+    "page": 7,
+    "tables": [
+      [
+        [
+          "Guide Field",
+          "Synthetic Value"
+        ],
+        [
+          "Local Time Zone",
+          "Eastern (America/New_York)"
+        ],
+        [
+          "Video Eval Location",
+          "Emergency department patient room"
+        ],
+        [
+          "Thrombolytic",
+          "Alteplase"
+        ],
+        [
+          "Thrombolytic Mix Model",
+          "Pharmacy mixes; courier delivers to ED"
+        ],
+        [
+          "LVO Protocol",
+          "Not thrombectomy capable. Teleneurologist communicates LVO concern to primary provider. Primary\nprovider contacts the synthetic Regional Transfer Hub; destination depends on bed availability."
+        ],
+        [
+          "Wake Up Protocol",
+          "No"
+        ],
+        [
+          "Order Entry",
+          "No medication orders entered by teleneurologist"
+        ],
+        [
+          "Order Set Name",
+          "Hospital provider uses local stroke order set"
+        ],
+        [
+          "Charge Entry",
+          "No"
+        ],
+        [
+          "Required Note Title",
+          "Neuro Tele Consult"
+        ],
+        [
+          "Consult Completion Rule",
+          "Do not complete the consult in Synapse until the hospital provider confirms the patient plan"
+        ],
+        [
+          "Rounding Process",
+          "House supervisor calls Sevaro operations to initiate rounding"
+        ],
+        [
+          "When Do We Round?",
+          "Tuesday, Thursday, Saturday"
+        ],
+        [
+          "Rounding Timing",
+          "0730-1030 Eastern Time"
+        ],
+        [
+          "Rounding Orders",
+          "No"
+        ],
+        [
+          "General Neurology",
+          "Sevaro is the only inpatient neurology service"
+        ],
+        [
+          "Pediatric Neurology",
+          "Transfer to regional pediatric center"
+        ],
+        [
+          "Cardiovascular Services",
+          "Mon-Fri 0800-1700"
+        ],
+        [
+          "Carotid Ultrasound",
+          "Mon-Fri 0700-1600"
+        ],
+        [
+          "Cardiac Monitoring",
+          "Inpatient telemetry; outpatient monitoring arranged after discharge"
+        ],
+        [
+          "EEG",
+          "Tue/Thu 0800-1500 [last verified 2025-06-10]"
+        ],
+        [
+          "TEE",
+          "Tue-Fri 0800-1500"
+        ],
+        [
+          "Stress Testing",
+          "Mon-Fri 0700-1400"
+        ],
+        [
+          "PT/OT/ST",
+          "PT daily; OT Mon-Fri; ST Mon/Wed/Fri"
+        ],
+        [
+          "Specialty Labs",
+          "Apex Reference Labs - synthetic"
+        ]
+      ]
+    ]
+  },
+  {
+    "page": 8,
+    "tables": [
+      [
+        [
+          "Guide Field",
+          "Synthetic Value"
+        ],
+        [
+          "Local Time Zone",
+          "Eastern (America/New_York)"
+        ],
+        [
+          "Video Eval Location",
+          "CT room for stroke activation; ICU or patient room for inpatient consults"
+        ],
+        [
+          "Thrombolytic",
+          "Tenecteplase"
+        ],
+        [
+          "Thrombolytic Mix Model",
+          "Pharmacy prepares after teleneurology recommendation"
+        ],
+        [
+          "LVO Protocol",
+          "Not thrombectomy capable. Teleneurologist informs ED provider and then calls the synthetic Transfer\nCommand Center. Synthetic preferred destination: Capital Neurovascular Center."
+        ],
+        [
+          "Wake Up Protocol",
+          "Yes"
+        ],
+        [
+          "Order Entry",
+          "Thrombolytic and imaging orders permitted"
+        ],
+        [
+          "Order Set Name",
+          "Search \"Stroke TeleCare\" - \"Suncrest Acute Stroke - TNK [SYN-55190]\""
+        ],
+        [
+          "Charge Entry",
+          "Yes"
+        ],
+        [
+          "Rounding Process",
+          "Hospitalist coordinator schedules rounding in Synapse one day in advance"
+        ],
+        [
+          "When Do We Round?",
+          "As scheduled"
+        ],
+        [
+          "Rounding Timing",
+          "0700-1700 Eastern Time"
+        ],
+        [
+          "Rounding Orders",
+          "Medication changes require hospitalist co-sign"
+        ],
+        [
+          "VPN",
+          "NorthPass - synthetic"
+        ],
+        [
+          "EHR",
+          "MedConnect One - synthetic"
+        ],
+        [
+          "EHR Department Login Location",
+          "SCMP REMOTE NEURO"
+        ],
+        [
+          "CT Head",
+          "24/7"
+        ],
+        [
+          "CTA Head/Neck",
+          "24/7"
+        ],
+        [
+          "CT Perfusion",
+          "No"
+        ],
+        [
+          "AI",
+          "ClarityLVO - synthetic"
+        ],
+        [
+          "MRI",
+          "Mon-Fri 0500-2300; weekend 0700-1900; overnight call"
+        ],
+        [
+          "PACS",
+          "ClearImage Enterprise - synthetic"
+        ],
+        [
+          "EEG",
+          "Mon-Fri 0800-1800; weekend on-call"
+        ]
+      ]
+    ]
+  },
+  {
+    "page": 9,
+    "tables": [
+      [
+        [
+          "Guide Field",
+          "Synthetic Value"
+        ],
+        [
+          "Local Time Zone",
+          "Central (America/Chicago)"
+        ],
+        [
+          "Video Eval Location",
+          "Patient room; portable cart to CT when requested"
+        ],
+        [
+          "Thrombolytic",
+          "Tenecteplase"
+        ],
+        [
+          "Thrombolytic Mix Model",
+          "ED pharmacist prepares during staffed hours; nursing mixes overnight [last verified 2025-08-15]"
+        ],
+        [
+          "LVO Protocol",
+          "Thrombectomy capable Mon-Fri 0700-1900. During coverage, teleneurologist activates the synthetic EVT\nteam. Outside coverage, ED provider initiates transfer to a regional comprehensive stroke center."
+        ],
+        [
+          "Wake Up Protocol",
+          "Yes"
+        ],
+        [
+          "Order Entry",
+          "Thrombolytic order set only"
+        ],
+        [
+          "Order Set Name",
+          "Search \"HVH Telestroke\" - \"Acute Ischemic Stroke - Tenecteplase [SYN-66018]\""
+        ],
+        [
+          "Charge Entry",
+          "No"
+        ],
+        [
+          "Required Note Title",
+          "MD Progress Note - Neuro"
+        ],
+        [
+          "Rounding Process",
+          "Unit clerk sends request through hospital workflow queue"
+        ],
+        [
+          "When Do We Round?",
+          "Monday-Saturday"
+        ],
+        [
+          "Rounding Timing",
+          "0800-1500 Central Time"
+        ],
+        [
+          "Rounding Orders",
+          "No"
+        ],
+        [
+          "General Neurology",
+          "Local neurologist until 1700; Sevaro nights and overflow"
+        ],
+        [
+          "Pediatric Neurology",
+          "Children's specialty network; phone consultation first"
+        ],
+        [
+          "Cardiovascular Services",
+          "Daily 0700-1900"
+        ],
+        [
+          "Carotid Ultrasound",
+          "Mon-Sat 0700-1800"
+        ],
+        [
+          "Cardiac Monitoring",
+          "Telemetry 24/7; outpatient patch monitor"
+        ],
+        [
+          "EEG",
+          "Daily 0700-1900; continuous EEG unavailable"
+        ],
+        [
+          "TEE",
+          "Mon-Fri 0700-1700"
+        ],
+        [
+          "Stress Testing",
+          "Mon-Sat 0700-1500"
+        ],
+        [
+          "PT/OT/ST",
+          "PT/OT daily; ST Mon-Sat"
+        ],
+        [
+          "Specialty Labs",
+          "Meridian Diagnostics - synthetic"
+        ]
+      ]
+    ]
+  },
+  {
+    "page": 10,
+    "tables": [
+      [
+        [
+          "Guide Field",
+          "Synthetic Value"
+        ],
+        [
+          "Local Time Zone",
+          "Eastern (America/New_York)"
+        ],
+        [
+          "Video Eval Location",
+          "Patient room"
+        ],
+        [
+          "Thrombolytic",
+          "Alteplase"
+        ],
+        [
+          "Thrombolytic Mix Model",
+          "ED nursing prepares from pharmacy-issued kit"
+        ],
+        [
+          "LVO Protocol",
+          "Not thrombectomy capable. Teleneurologist communicates LVO concern to ED provider; ED provider calls\nsynthetic Statewide Transfer Access."
+        ],
+        [
+          "Wake Up Protocol",
+          "No"
+        ],
+        [
+          "Order Entry",
+          "No orders entered by teleneurologist"
+        ],
+        [
+          "Order Set Name",
+          "Not applicable"
+        ],
+        [
+          "Charge Entry",
+          "Yes - tele-neurology encounter charge before sign-off"
+        ],
+        [
+          "Required Note Title",
+          "Tele-Neurology Encounter"
+        ],
+        [
+          "Rounding Process",
+          "Hospitalist sends secure message to initiate rounding"
+        ],
+        [
+          "When Do We Round?",
+          "Monday-Friday"
+        ],
+        [
+          "Rounding Timing",
+          "0900-1300 Eastern Time"
+        ],
+        [
+          "Rounding Orders",
+          "No"
+        ],
+        [
+          "VPN",
+          "EdgeConnect Health - synthetic"
+        ],
+        [
+          "EHR",
+          "ClinixPro - synthetic"
+        ],
+        [
+          "EHR Department Login Location",
+          "SOHC NEUROLOGY REMOTE"
+        ],
+        [
+          "CT Head",
+          "24/7"
+        ],
+        [
+          "CTA Head/Neck",
+          "24/7"
+        ],
+        [
+          "CT Perfusion",
+          "Mon-Fri 0700-1900"
+        ],
+        [
+          "AI",
+          "None"
+        ],
+        [
+          "MRI",
+          "Daily 0700-2200; no overnight coverage"
+        ],
+        [
+          "PACS",
+          "RadiantView - synthetic"
+        ],
+        [
+          "EEG",
+          "Mon-Fri 0900-1600"
+        ]
+      ],
+      [
+        [
+          "Hospital",
+          "Field",
+          "Storyboard value",
+          "Updated",
+          "Note"
+        ],
+        [
+          "SYN-002",
+          "Video Eval Location",
+          "Patient room",
+          "2025-09-14",
+          "Hospital storyboard card shown in the caselog header.\nDisagrees with the on-call guide for stroke alerts."
+        ],
+        [
+          "SYN-005",
+          "Thrombolytic",
+          "Tenecteplase",
+          "2026-01-20",
+          "Agrees with the guide. Included so teams do not flag every\nsecond source as a conflict."
+        ]
+      ],
+      [
+        [
+          "#",
+          "Hospital",
+          "Provider question",
+          "Local time",
+          "Status",
+          "Expected grounded response"
+        ],
+        [
+          "V01",
+          "SYN-001",
+          "Where should I perform the video\nevaluation?",
+          "Tue 2026-03-17\n14:00",
+          "answered",
+          "Emergency department patient room."
+        ],
+        [
+          "V02",
+          "SYN-002",
+          "What is the LVO workflow?",
+          "Tue 2026-03-17\n14:00",
+          "answered",
+          "ED provider activates transfer center; synthetic preferred\ndestination is Metro Neuroscience Institute."
+        ],
+        [
+          "V03",
+          "SYN-003",
+          "Can I place inpatient neurology\norders during rounding?",
+          "Tue 2026-03-17\n09:00",
+          "answered",
+          "Yes, according to this synthetic hospital configuration."
+        ],
+        [
+          "V04",
+          "SYN-004",
+          "Is EEG available on Friday?",
+          "Fri 2026-03-20\n10:00",
+          "not in guide",
+          "The guide only lists Tue/Thu; Friday availability is not\nprovided. Do not assume."
+        ]
+      ]
+    ]
+  },
+  {
+    "page": 11,
+    "tables": [
+      [
+        [
+          "#",
+          "Hospital",
+          "Provider question",
+          "Local time",
+          "Status",
+          "Expected grounded response"
+        ],
+        [
+          "V05",
+          "SYN-005",
+          "Does the hospital have CT\nperfusion?",
+          "Tue 2026-03-17\n14:00",
+          "answered",
+          "No."
+        ],
+        [
+          "V06",
+          "SYN-006",
+          "What is the LVO pathway after\n1900 on a weekday?",
+          "Tue 2026-03-17\n19:30",
+          "time dependent",
+          "The staffed thrombectomy window has ended; ED\nprovider initiates transfer."
+        ],
+        [
+          "V07",
+          "SYN-007",
+          "Which order set should I use?",
+          "Tue 2026-03-17\n14:00",
+          "answered",
+          "Not applicable; the teleneurologist does not enter orders."
+        ],
+        [
+          "V08",
+          "SYN-001",
+          "Patient has an LVO. What do I do?",
+          "Tue 2026-03-17\n22:30",
+          "time dependent",
+          "Pathway depends on staffed neurointerventional\ncoverage, but the guide does not give coverage hours.\nState both branches and say coverage hours are not in\nthe guide. Do not borrow hours from another hospital."
+        ],
+        [
+          "V09",
+          "SYN-006",
+          "Patient has an LVO. Do I activate\nthe EVT team?",
+          "Sat 2026-03-21\n10:00",
+          "time dependent",
+          "No. Coverage is Mon-Fri only. ED provider initiates\ntransfer to a regional comprehensive stroke center."
+        ],
+        [
+          "V10",
+          "SYN-007",
+          "Can I sign off now?",
+          "Tue 2026-03-17\n14:00",
+          "hard stop",
+          "Not until the tele-neurology encounter charge is entered."
+        ],
+        [
+          "V11",
+          "SYN-005",
+          "Can I change the antiplatelet\nduring rounding?",
+          "Tue 2026-03-17\n10:00",
+          "answered",
+          "Medication changes require hospitalist co-sign."
+        ],
+        [
+          "V12",
+          "SYN-002",
+          "Where do I do the video eval for a\nstroke alert?",
+          "Tue 2026-03-17\n14:00",
+          "conflict",
+          "On-call guide: CT holding bay for stroke alerts.\nStoryboard: patient room. Show both with sources; do\nnot silently pick one."
+        ],
+        [
+          "V13",
+          "SYN-004",
+          "Is EEG available on Thursday?",
+          "Thu 2026-03-19\n10:00",
+          "stale",
+          "Guide lists Tue/Thu 0800-1500, so yes, but this field was\nlast verified 2025-06-10. Flag it as possibly out of date."
+        ],
+        [
+          "V14",
+          "SYN-002",
+          "Who covers pediatric neurology?",
+          "Tue 2026-03-17\n14:00",
+          "not in guide",
+          "Not available in this hospital's guide. Do not use another\nhospital's answer."
+        ],
+        [
+          "V15",
+          "SYN-005",
+          "Which thrombolytic order set do I\nsearch for?",
+          "Tue 2026-03-17\n14:00",
+          "answered",
+          "Search \"Stroke TeleCare\" - \"Suncrest Acute Stroke -\nTNK [SYN-55190]\"."
+        ],
+        [
+          "V16",
+          "SYN-007",
+          "Can I get CT perfusion on\nSaturday?",
+          "Sat 2026-03-21\n11:00",
+          "time dependent",
+          "No. CT perfusion is Mon-Fri 0700-1900 only."
+        ],
+        [
+          "V17",
+          "SYN-002",
+          "Is the rounding window open?\n(Provider is in Eastern time.)",
+          "Tue 2026-03-17\n08:15 local (10:15\nET)",
+          "time dependent",
+          "Not yet. Window is 0830-1200 Mountain; it opens in 15\nminutes (10:30 ET)."
+        ],
+        [
+          "V18",
+          "SYN-006",
+          "Who mixes the TNK?",
+          "Wed 2026-03-18\n20:00",
+          "time dependent",
+          "Guide says pharmacist during staffed hours, nursing\novernight, but staffed pharmacy hours are not defined.\nField last verified 2025-08-15, so also flag it as stale. Say\nwhat is unknown; do not guess the cutoff."
+        ],
+        [
+          "V19",
+          "SYN-003",
+          "What should I title the note?",
+          "Tue 2026-03-17\n14:00",
+          "answered",
+          "Neurology Consult - Remote."
+        ],
+        [
+          "V20",
+          "SYN-005",
+          "What note title is required?",
+          "Tue 2026-03-17\n14:00",
+          "not in guide",
+          "Not available in this hospital's guide."
+        ]
+      ],
+      [
+        [
+          "#",
+          "Hospital",
+          "Type",
+          "Step",
+          "Field event",
+          "Local time",
+          "Expected nudge"
+        ],
+        [
+          "N1",
+          "SYN-002",
+          "Stroke",
+          "Imaging",
+          "LVO present = Yes",
+          "Tue 14:00\nMountain",
+          "Advisory: not thrombectomy capable. Tell the ED\nprovider; they activate the transfer center.\nPreferred destination: Metro Neuroscience\nInstitute."
+        ],
+        [
+          "N2",
+          "SYN-006",
+          "Stroke",
+          "Imaging",
+          "LVO present = Yes",
+          "Tue 19:30\nCentral",
+          "Advisory: outside the EVT window (Mon-Fri\n0700-1900). ED provider initiates transfer. Must\nnot suggest activating the EVT team."
+        ],
+        [
+          "N3",
+          "SYN-003",
+          "Stroke",
+          "History",
+          "Last known well =\nUnknown",
+          "Tue 03:10\nPacific",
+          "Advisory: wake-up protocol is in use at this\nhospital."
+        ],
+        [
+          "N4",
+          "SYN-004",
+          "Stroke",
+          "Recommendation",
+          "Thrombolytic given =\nYes",
+          "Tue 16:00\nEastern",
+          "Advisory: teleneurologist does not enter\nmedication orders; hospital provider uses the\nlocal order set. No order-set name nudge."
+        ],
+        [
+          "N5",
+          "SYN-007",
+          "Stroke",
+          "Sign-off",
+          "Complete clicked;\ncharge not entered",
+          "Tue 14:00\nEastern",
+          "Hard stop: tele-neurology encounter charge\nrequired before sign-off."
+        ],
+        [
+          "N6",
+          "SYN-005",
+          "Stroke",
+          "Imaging",
+          "CTA done = Yes",
+          "Tue 14:00\nEastern",
+          "Info: CT perfusion not available; AI is ClarityLVO."
+        ]
+      ]
+    ]
+  },
+  {
+    "page": 12,
+    "tables": [
+      [
+        [
+          "#",
+          "Hospital",
+          "Type",
+          "Step",
+          "Field event",
+          "Local time",
+          "Expected nudge"
+        ],
+        [
+          "N7",
+          "SYN-004",
+          "General\nNeuro",
+          "Sign-off",
+          "Complete clicked",
+          "Tue 15:00\nEastern",
+          "Hard stop: do not complete until the hospital\nprovider confirms the plan."
+        ],
+        [
+          "N8",
+          "SYN-002",
+          "General\nNeuro",
+          "History",
+          "Allergies entered: none",
+          "Tue 14:00\nMountain",
+          "No nudge. Nothing in the guide applies; staying\nquiet is the correct behavior."
+        ],
+        [
+          "N9",
+          "SYN-001",
+          "Rounding",
+          "Rounding",
+          "Encounter opened",
+          "Sun 08:00\nCentral",
+          "Info: this hospital rounds Monday-Friday only;\ncheck why a Sunday rounding encounter exists."
+        ]
+      ]
+    ]
+  }
+]

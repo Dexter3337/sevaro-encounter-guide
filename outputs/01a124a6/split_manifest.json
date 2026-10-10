@@ -1,0 +1,34 @@
+{
+  "schema_status": "Unofficial research/test schema",
+  "frozen_date": "2026-10-10",
+  "development_hospitals": [
+    "DEV-101",
+    "DEV-102",
+    "DEV-103"
+  ],
+  "held_out_hospitals": [
+    "HOLD-201",
+    "HOLD-202",
+    "HOLD-203",
+    "HOLD-901"
+  ],
+  "baseline_hospitals": [
+    "SYN-001",
+    "SYN-002",
+    "SYN-003",
+    "SYN-004",
+    "SYN-005",
+    "SYN-006",
+    "SYN-007"
+  ],
+  "held_out_shared_baseline_stress_tests": [
+    "HOLD-SCOPE",
+    "HOLD-APPOINTMENT"
+  ],
+  "split_policy": "Hold new hospitals, wording and adversarial sequences out of parser development. Two explicitly labeled baseline stress cases share source hospitals. Author-created expected outcomes are independent of runtime, not clinician blinded adjudication. Do not feed oracle file to tested system.",
+  "files": {
+    "development_inputs.jsonl": "51c530774960ed66eeebd25c3fc9a777f11bfadb6225d5f57f5352baab916705",
+    "held_out_inputs.jsonl": "fee82357d508850fb1f48f843cc1f53e5f7ebdabc39b405307a8585605516b7a",
+    "expected_outputs.jsonl": "37271503e324c9e63794b3338642f3333561aff78bf1ab6bb9af7abd6710f5f4"
+  }
+}

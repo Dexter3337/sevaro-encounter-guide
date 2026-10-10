@@ -1,0 +1,18 @@
+[
+  {
+    "storyboard_id": "SB-001",
+    "hospital_id": "SYN-002",
+    "field": "Video Eval Location",
+    "value": "Patient room",
+    "updated": "2025-09-14",
+    "note": "Hospital storyboard card shown in the caselog header. Disagrees with the on-call guide for stroke alerts."
+  },
+  {
+    "storyboard_id": "SB-002",
+    "hospital_id": "SYN-005",
+    "field": "Thrombolytic",
+    "value": "Tenecteplase",
+    "updated": "2026-01-20",
+    "note": "Agrees with the guide. Included so teams do not flag every second source as a conflict."
+  }
+]

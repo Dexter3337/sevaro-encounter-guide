@@ -1,0 +1,24 @@
+{
+  "checked": "Research data structure and source reconstruction only; no runtime/clinical effectiveness tests",
+  "errors": [],
+  "unique_scenarios": 131,
+  "development": 101,
+  "held_out": 30,
+  "source_guide_records": 169,
+  "guide_concepts": 34,
+  "requirement_links": 147,
+  "trace_links": 599,
+  "source_record_check": "169 records reconciled to PDF table row count",
+  "limitations": [
+    "Excel desktop interaction not tested",
+    "No companion execution or measured event-to-paint latency",
+    "No independent clinician oracle adjudication"
+  ],
+  "workbook_cells_compared": 17738,
+  "workbook_sheets": 24,
+  "exported_values_match": true,
+  "overview_counts_match": true,
+  "source_guide_exact_value_date_comparisons": 169,
+  "formula_error_scan": "0 matches",
+  "visual_review": "Rendered all 24 sheets and reviewed previews; source URL values verified after removing unsupported formula"
+}

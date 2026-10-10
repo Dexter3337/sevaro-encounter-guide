@@ -1,0 +1,268 @@
+﻿guide_field_id,name,synonyms,meaning,data_type,possible_states,source_actor_system,availability_timing,workflow,rule_family_ids,observed_values,classification,source_id,locator,interpretation_limit,test_ids,value_state_boundary
+GF-001,Local Time Zone,No approved alias supplied,Hospital civil-time region used to interpret schedules,IANA zone string,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-04; RF-14,"Central (America/Chicago)
+Mountain (America/Denver)
+Pacific (America/Los_Angeles)
+Eastern (America/New_York)",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-001
+DEV-PHOENIX
+HOLD-TZINVALID",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-002,Video Eval Location,video evaluation site,"Physical evaluation location, possibly scoped to consult type",Literal location or conditional branches,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-01; RF-02; RF-14,"Emergency department patient room
+CT holding bay for stroke alerts; patient room for other consults
+Patient room
+CT room for stroke activation; ICU or patient room for inpatient consults
+Patient room; portable cart to CT when requested",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-002
+V01
+V12
+BT-01
+DEV-TYPE
+HOLD-ALIAS
+HOLD-SCOPE
+HOLD-UNKNOWNTYPE",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-003,Thrombolytic,clot-busting agent; TNK only when explicitly Tenecteplase,Site-listed medication name; does not determine patient eligibility,Medication name string,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-01; RF-14,"Alteplase
+Tenecteplase",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-003
+N4
+BT-03
+BT-06
+DEV-AGREE",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-004,Thrombolytic Mix Model,No approved alias supplied,Responsible actors and preparation/verification/handoff sequence,Actor/action sequence and conditional branches,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-06; RF-14,"Pharmacy prepares and delivers to bedside
+ED nurse mixes from stroke kit after verification
+Pharmacy verifies; ED nurse mixes and administers
+Pharmacy mixes; courier delivers to ED
+Pharmacy prepares after teleneurology recommendation
+ED pharmacist prepares during staffed hours; nursing mixes overnight
+ED nursing prepares from pharmacy-issued kit",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-004
+V18
+N4
+BT-06",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-005,LVO Protocol,LVO workflow; EVT escalation,"Site capability, escalation actor and transfer/activation pathway",Capability + actor/action + coverage branches,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-05; RF-14,"Thrombectomy capable during staffed neurointerventional coverage. Teleneurologist alerts ED provider and activates the synthetic neurovascular response line. Outside coverage hours, use the transfer pathway.
+Not thrombectomy capable. Teleneurologist communicates suspected LVO to ED provider. ED provider activates transfer center. Synthetic preferred destination: Metro Neuroscience Institute.
+Thrombectomy capable 24/7. Teleneurologist communicates LVO concern to ED provider and activates the synthetic Neurointerventional Hotline.
+Not thrombectomy capable. Teleneurologist communicates LVO concern to primary provider. Primary provider contacts the synthetic Regional Transfer Hub; destination depends on bed availability.
+Not thrombectomy capable. Teleneurologist informs ED provider and then calls the synthetic Transfer Command Center. Synthetic preferred destination: Capital Neurovascular Center.
+Thrombectomy capable Mon-Fri 0700-1900. During coverage, teleneurologist activates the synthetic EVT team. Outside coverage, ED provider initiates transfer to a regional comprehensive stroke center.
+Not thrombectomy capable. Teleneurologist communicates LVO concern to ED provider; ED provider calls synthetic Statewide Transfer Access.",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-005
+V02
+V06
+V08
+V09
+N1
+N2
+BT-05
+DEV-REPEAT
+DEV-RETRACT
+DEV-EARLY
+DEV-END
+DEV-OVERNIGHT
+PERF-01
+PERF-02
+HOLD-NEW
+HOLD-ISOLATION
+HOLD-SPEECH
+HOLD-SUNDAY
+HOLD-START
+HOLD-END
+HOLD-TZINVALID
+HOLD-REORDER
+HOLD-CONFLICTINGRULE",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-006,Wake Up Protocol,No approved alias supplied,Whether site lists a wake-up protocol; protocol details not supplied,Yes/No capability,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-03; RF-14,"Yes
+No",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-006
+N3
+BT-01
+BT-02",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-007,Order Entry,No approved alias supplied,Scope of orders permitted to teleneurologist at this site,Permission by actor/order category,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-07; RF-14,"Thrombolytic order set and post-treatment monitoring orders only
+Thrombolytic order entry only
+Full acute stroke order set permitted
+No medication orders entered by teleneurologist
+Thrombolytic and imaging orders permitted
+Thrombolytic order set only
+No orders entered by teleneurologist",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-007
+V07
+N4
+BT-06
+BT-07
+DEV-LATE
+HOLD-EHR",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-008,Order Set Name,No approved alias supplied,"Exact EHR search phrase, display title and identifier or NA",Literal strings / Not applicable,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-08; RF-14,"Search ""Acute Stroke Remote"" - ""CRMC Acute Ischemic Stroke - Alteplase [SYN-41021]""
+Search ""Neuro TNK"" - ""BWRH Stroke - Tenecteplase [SYN-88210]""
+Search ""RUMC Stroke Pathway"" - ""Acute Stroke / TNK / EVT Evaluation [SYN-73004]""
+Hospital provider uses local stroke order set
+Search ""Stroke TeleCare"" - ""Suncrest Acute Stroke - TNK [SYN-55190]""
+Search ""HVH Telestroke"" - ""Acute Ischemic Stroke - Tenecteplase [SYN-66018]""
+Not applicable",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-008
+V07
+V15
+N4
+BT-06
+BT-07
+HOLD-EHR",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-009,Charge Entry,No approved alias supplied,Whether encounter charge is required before completion,No / Yes / conditional prerequisite,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-10; RF-14,"No
+Yes
+Yes - tele-neurology encounter charge before sign-off",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-009
+V10
+N5
+BT-10
+DEV-READONLY
+DEV-ACK
+DEV-PARTIAL
+DEV-FIX
+DEV-UNKNOWNSTATE
+HOLD-GATE
+HOLD-CORRUPT",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-010,Required Note Title,note heading,Exact site-required note heading,Literal title string,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-01; RF-14,"Tele-Neurology Consult
+Neurology Consult - Remote
+Neuro Tele Consult
+MD Progress Note - Neuro
+Tele-Neurology Encounter",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-010
+V19
+V20
+BT-09
+DEV-SWITCH
+DEV-180
+DEV-181
+DEV-INJECTION
+HOLD-VERIFY
+HOLD-NULL
+HOLD-INJECTION
+HOLD-VERSION",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-011,Rounding Process,No approved alias supplied,Who initiates or populates rounding and by what channel,Actor/channel/initiation sequence,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-11; RF-14,"Hospitalist service sends daily census to the rounding queue by 0630 Central Time
+Charge nurse initiates rounding request in Synapse
+Scheduled inpatient list appears automatically in Synapse
+House supervisor calls Sevaro operations to initiate rounding
+Hospitalist coordinator schedules rounding in Synapse one day in advance
+Unit clerk sends request through hospital workflow queue
+Hospitalist sends secure message to initiate rounding",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-011
+",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-012,When Do We Round?,rounding days,Allowed days or appointment-dependent rounding cadence,Day set / Daily / As scheduled,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-04; RF-11; RF-14,"Monday-Friday
+Daily
+Tuesday, Thursday, Saturday
+As scheduled
+Monday-Saturday",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-012
+V17
+N9
+BT-11
+HOLD-APPOINTMENT",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-013,Rounding Timing,No approved alias supplied,"Local-time rounding interval, evaluated with rounding days",Local interval + zone,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-04; RF-11; RF-14,"0700-1100 Central Time
+0830-1200 Mountain Time
+0600-1400 Pacific Time
+0730-1030 Eastern Time
+0700-1700 Eastern Time
+0800-1500 Central Time
+0900-1300 Eastern Time",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-013
+V17
+N9
+BT-11
+DEV-PHOENIX
+HOLD-APPOINTMENT",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-014,Rounding Orders,No approved alias supplied,Rounding order permissions and co-sign conditions,Permission scope + prerequisites,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-07; RF-09; RF-14,"No routine orders
+No
+Yes - inpatient neurology orders permitted
+Medication changes require hospitalist co-sign",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-014
+V03
+V11
+BT-11
+HOLD-ORDER",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-015,General Neurology,No approved alias supplied,"General-neurology coverage by setting, actor or time",Coverage branches,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-13; RF-14,"Local group covers outpatient; Sevaro covers inpatient tele-neurology
+Sevaro inpatient; university faculty outpatient
+Sevaro is the only inpatient neurology service
+Local neurologist until 1700; Sevaro nights and overflow",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-015
+",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-016,Pediatric Neurology,No approved alias supplied,Pediatric service coverage or referral/transfer pathway,Service/call/transfer pathway,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-13; RF-14,"Regional children's center via transfer line
+In-house pediatric neurology 24/7
+Transfer to regional pediatric center
+Children's specialty network; phone consultation first",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-016
+V14",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-017,EEG,No approved alias supplied,"Routine and continuous EEG capabilities, schedules and on-call distinctions",Subservice + schedule + explicit negative,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-04; RF-12; RF-13; RF-14,"Mon-Sat 0700-1900
+Mon-Fri 0700-1700
+Routine and continuous EEG 24/7
+Tue/Thu 0800-1500
+Mon-Fri 0800-1800; weekend on-call
+Daily 0700-1900; continuous EEG unavailable
+Mon-Fri 0900-1600",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-017
+V04
+V13
+BT-08
+DEV-NEGATION
+DEV-ONCALL
+DEV-SEIZUREQUESTION
+HOLD-DST
+HOLD-GAP
+HOLD-FOLD
+HOLD-MULTIFLAG
+HOLD-NEWSUBSERVICE",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-018,CT Head,No approved alias supplied,Noncontrast head CT service availability as listed,Service schedule,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-04; RF-14,24/7,Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-018
+",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-019,CTA Head/Neck,No approved alias supplied,Head/neck CTA service availability as listed,Service schedule,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-04; RF-14,24/7,Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-019
+",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-020,CT Perfusion,CTP,CTP capability or exclusive service schedule,No / schedule,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-03; RF-04; RF-14,"24/7
+No
+Mon-Fri 0700-1900",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-020
+V05
+V16
+N6
+BT-04",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-021,MRI,No approved alias supplied,MRI routine availability and overnight/weekend fallback,Schedule + exception/on-call,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-04; RF-12; RF-14,"Daily 0600-2300; overnight on-call
+24/7
+Mon-Fri 0500-2300; weekend 0700-1900; overnight call
+Daily 0700-2200; no overnight coverage",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-021
+",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-022,AI,No approved alias supplied,"Named site imaging AI system, or explicit None",Literal system name / None,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-01; RF-03; RF-14,"RapidView Neuro - synthetic
+NeuroSignal AI - synthetic
+ClarityLVO - synthetic
+None",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-022
+N6
+BT-04",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-023,EHR,No approved alias supplied,Site electronic health record name; no implied API or permissions,Literal vendor/system label,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-01; RF-14,"MedAxis - synthetic
+CareSphere - synthetic
+Epic synthetic training tenant
+MedConnect One - synthetic
+ClinixPro - synthetic",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-023
+",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-024,PACS,No approved alias supplied,Site imaging archive/viewer name; no implied connectivity,Literal system label,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-01; RF-14,"NovaPACS - synthetic
+ImageHarbor - synthetic
+VisionGrid - synthetic
+ClearImage Enterprise - synthetic
+RadiantView - synthetic",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-024
+",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-025,VPN,No approved alias supplied,Site network-access system name; not credentials,Literal access label,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-01; RF-14,"SecureBridge - synthetic
+CloudGate Health - synthetic
+NorthPass - synthetic
+EdgeConnect Health - synthetic",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-025
+",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-026,Cardiovascular Services,No approved alias supplied,Service coverage and on-call/weekend variation,Schedule + exception,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-04; RF-12; RF-14,"Mon-Fri 0700-1800; weekend on-call
+Mon-Fri 0800-1700
+Daily 0700-1900",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-026
+",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-027,Carotid Ultrasound,No approved alias supplied,Ultrasound service availability,Service schedule,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-04; RF-14,"Daily 0800-1700
+Mon-Fri 0700-1600
+Mon-Sat 0700-1800",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-027
+",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-028,Cardiac Monitoring,No approved alias supplied,Inpatient telemetry versus outpatient monitoring arrangement,Setting-specific service branches,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-13; RF-14,"Inpatient telemetry 24/7; outpatient monitor via cardiology clinic
+Inpatient telemetry; outpatient monitoring arranged after discharge
+Telemetry 24/7; outpatient patch monitor",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-028
+",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-029,TEE,No approved alias supplied,Transesophageal echocardiography service availability,Service schedule,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-04; RF-14,"Mon-Fri 0800-1600
+Tue-Fri 0800-1500
+Mon-Fri 0700-1700",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-029
+",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-030,PT/OT/ST,No approved alias supplied,"Separate physical, occupational and speech therapy availability",Three component schedules,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-04; RF-13; RF-14,"PT daily; OT Mon-Sat; ST Mon-Fri
+PT daily; OT Mon-Fri; ST Mon/Wed/Fri
+PT/OT daily; ST Mon-Sat",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-030
+",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-031,Specialty Labs,No approved alias supplied,Listed reference-laboratory service name,Literal laboratory label,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-01; RF-14,"ReferenceLab North - synthetic
+Apex Reference Labs - synthetic
+Meridian Diagnostics - synthetic",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-031
+",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-032,EHR Department Login Location,No approved alias supplied,Department context to select for EHR login,Literal department string,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-01; RF-14,"RUMC TELE NEUROLOGY
+SCMP REMOTE NEURO
+SOHC NEUROLOGY REMOTE",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-032
+",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-033,Consult Completion Rule,No approved alias supplied,Local prerequisite for Synapse completion beyond charge,Actor + required confirmation fact,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-10; RF-14,Do not complete the consult in Synapse until the hospital provider confirms the patient plan,Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-033
+N7
+BT-10
+DEV-ACK
+DEV-PARTIAL
+DEV-FIX
+HOLD-GATE
+HOLD-VIDEOEND",Missing field != explicit No != unknown value != Not applicable. Source text always retained.
+GF-034,Stress Testing,No approved alias supplied,Stress-testing service availability,Service schedule,Present; explicit negative; not applicable; missing; unknown,Hospital guide maintainer / read-only supplied guide,Preload on encounter opening,Linked through Field–Rule Map; otherwise on-demand,RF-04; RF-14,"Mon-Fri 0700-1400
+Mon-Sat 0700-1500",Explicit challenge requirement,SRC-001,pp4–10,Dictionary supports concept; unseen semantics require validation,"DICT-GF-034
+",Missing field != explicit No != unknown value != Not applicable. Source text always retained.

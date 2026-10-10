@@ -1,0 +1,11 @@
+﻿metadata_id,name,meaning,classification,source_id,schema_status
+EM-01,encounter_id + hospital_id,Bind encounter and guide scope; no patient identity assumption,Proposed design or inference,SRC-001; SRC-010,Unofficial proposed schema
+EM-02,event_id + sequence + revision,"Idempotency, ordering and latest-state evaluation",Proposed design or inference,SRC-001; SRC-010,Unofficial proposed schema
+EM-03,event_kind,open; focus; display; value_change; saved; attempt; completed,Proposed design or inference,SRC-001; SRC-010,Unofficial proposed schema
+EM-04,occurred_at + documented_at + received_at,Clinical action time differs from documentation and observation,Proposed design or inference,SRC-001; SRC-010,Unofficial proposed schema
+EM-05,instant + hospital_timezone + provider_timezone + tzdb_version,Instant-to-local conversion; DST fold/gap validation,Proposed design or inference,SRC-001; SRC-010,Unofficial proposed schema
+EM-06,source_actor + source_system + capture_kind,Manual; import; auto; AI draft; unknown,Proposed design or inference,SRC-001; SRC-010,Unofficial proposed schema
+EM-07,guide_version + field_last_verified + source_locator,Immutable guide evidence and per-field verification,Proposed design or inference,SRC-001; SRC-010,Unofficial proposed schema
+EM-08,raw_value + normalized_value + value_state,Preserve source wording and missing/No/unknown/NA distinctions,Proposed design or inference,SRC-001; SRC-010,Unofficial proposed schema
+EM-09,extraction_method + review_state + approved_operator,No unreviewed new operator execution,Proposed design or inference,SRC-001; SRC-010,Unofficial proposed schema
+EM-10,decision_id + primary_status + quality_flags + tier + gate_permission,"Separate relevance, status, urgency and enforcement",Proposed design or inference,SRC-001; SRC-010,Unofficial proposed schema

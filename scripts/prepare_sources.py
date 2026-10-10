@@ -2,8 +2,8 @@
 from pathlib import Path
 import json, hashlib, zipfile, re
 import pdfplumber
-root = Path(__file__).resolve().parents[2]
-app = root / 'encounter-guide'
+app = Path(__file__).resolve().parents[1]
+root = app if (app / 'research/source_material').exists() else app.parent
 raw = app / 'data/raw'
 raw.mkdir(parents=True, exist_ok=True)
 sha = lambda b: hashlib.sha256(b).hexdigest()
