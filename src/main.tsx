@@ -538,7 +538,10 @@ function App() {
             </small>
           </span>
         </a>
-        <a href="/workflow.html">App workflow</a>
+        <nav className="review-links" aria-label="Review resources">
+          <a href="/workflow.html">App workflow</a>
+          <a href="/presentation.html">Mentor presentation</a>
+        </nav>
         <span className="demo-badge">
           SYNTHETIC DEMO <i /> No services required
         </span>
