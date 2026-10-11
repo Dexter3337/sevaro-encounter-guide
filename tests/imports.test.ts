@@ -250,6 +250,23 @@ describe("Storyboard import (sponsor format)", () => {
     expect(p.errors[0]).toMatch(/already has a version "Imported v1" active/);
   });
 
+  it("reads the sponsor storyboard as CSV too", () => {
+    const csv = [
+      "hospital_id,field,storyboard_value,storyboard_updated,note",
+      'SYN-002,Video Eval Location,Patient room,2025-09-14,"Disagrees with the guide"',
+    ].join("\n");
+    const p = previewImportBundle([
+      G,
+      { name: "storyboard.csv", text: csv, format: "csv" },
+    ]);
+    expect(p.errors).toEqual([]);
+    expect(p.files[1].kinds).toEqual(["storyboard"]);
+    const h = pick(p.hospitals, "SYN-002");
+    expect(
+      answerField(h, consult(h, "Stroke"), "Video Eval Location").primaryStatus,
+    ).toBe("conflict");
+  });
+
   it("a failed bundle leaves the active data byte-identical", () => {
     const active = activate([], previewImportBundle([G, S]).hospitals);
     const before = JSON.stringify(active);
@@ -263,5 +280,91 @@ describe("Storyboard import (sponsor format)", () => {
     expect(p.held).toEqual([]);
     expect(p.errors[0]).toContain("broken.json");
     expect(JSON.stringify(active)).toBe(before);
+  });
+});
+
+describe("Multi-file drop", () => {
+  const contacts: ImportFile = {
+    name: "directory.json",
+    format: "json",
+    text: JSON.stringify({
+      contacts: [
+        {
+          hospital_id: "SYN-002",
+          role: "technical_lead",
+          name: "Tess Example (synthetic)",
+          phone: "+1-555-0142",
+          availability: "24/7",
+          last_verified: "2026-02-02",
+        },
+      ],
+    }),
+  };
+
+  it("classifies each file by shape, whatever it is called", () => {
+    const p = previewImportBundle([
+      { ...S, name: "a.json" },
+      { ...contacts, name: "b.json" },
+      { ...G, name: "c.json" },
+    ]);
+    expect(p.errors).toEqual([]);
+    expect(p.files.map((f) => [f.name, f.kinds])).toEqual([
+      ["a.json", ["storyboard"]],
+      ["b.json", ["contacts"]],
+      ["c.json", ["guide"]],
+    ]);
+    expect(p.files.map((f) => [f.hospitals, f.storyboardRows, f.contacts])).toEqual([
+      [0, 2, 0],
+      [0, 0, 1],
+      [7, 0, 0],
+    ]);
+    const h = pick(p.hospitals, "SYN-002");
+    expect(h.contacts?.map((c) => c.name)).toEqual(["Tess Example (synthetic)"]);
+    expect(p.diagnostics).toContain(
+      "Bluewater Regional Hospital: 21 guide fields + 1 storyboard row + 1 contact; 1 conflict.",
+    );
+  });
+
+  it("keeps every file's original bytes", () => {
+    const p = previewImportBundle([G, S]);
+    expect(JSON.parse(p.raw)).toEqual([
+      { name: G.name, format: "json", text: guideText },
+      { name: S.name, format: "json", text: storyboardText },
+    ]);
+  });
+
+  it("reports each file's error against that file, and activates nothing", () => {
+    const bad: ImportFile = {
+      name: "judges_storyboard.json",
+      format: "json",
+      text: JSON.stringify([
+        { hospital_id: "SYN-002", field: "Thrombolytic", storyboard_value: "TNK" },
+        { hospital_id: "SYN-002", field: "EEG" },
+      ]),
+    };
+    const p = previewImportBundle([G, bad]);
+    expect(p.hospitals).toEqual([]);
+    expect(p.files[0].errors).toEqual([]);
+    expect(p.files[1].errors).toEqual([
+      'judges_storyboard.json, storyboard row 2: no storyboard_value for "EEG". Empty rows are not skipped silently — fill it in or remove the row.',
+    ]);
+  });
+
+  it("refuses the same hospital's guide in two files", () => {
+    const p = previewImportBundle([G, { ...G, name: "copy.json" }]);
+    expect(p.hospitals).toEqual([]);
+    expect(p.errors[0]).toBe(
+      "SYN-001 appears in both hospital_guides.json and copy.json. Import one guide per hospital.",
+    );
+  });
+
+  it("keeps the existing bounds", () => {
+    expect(previewImportBundle([]).errors).toEqual(["No files to import."]);
+    expect(
+      previewImportBundle(Array.from({ length: 11 }, () => S)).errors,
+    ).toEqual(["Import at most 10 files at once."]);
+    expect(
+      previewImportBundle([{ ...S, text: " ".repeat(1_000_001) }]).errors[0],
+    ).toContain("1 MB");
   });
 });

@@ -702,21 +702,27 @@ function fromList(
   const bad = kinds.findIndex((k) => k === undefined);
   if (bad >= 0)
     throw new Error(`${file}: row ${bad + 1} of ${what} is not an object.`);
-  const other = kinds.findIndex((k) => k !== kinds[0]);
-  if (other >= 0)
+  // A row that is missing its value no longer looks like anything in
+  // particular. It takes the kind of the rows around it, so the reader can say
+  // exactly what is missing rather than that the file is muddled.
+  const distinct = [...new Set(kinds.filter((k) => k !== "records"))];
+  if (distinct.length > 1) {
+    const other = kinds.findIndex((k) => k !== "records" && k !== distinct[0]);
     throw new Error(
-      `${file}: ${what} mixes kinds of row — row 1 reads as ${kinds[0]}, row ${other + 1} as ${kinds[other]}. Put each kind in its own file.`,
+      `${file}: ${what} mixes kinds of row — row ${kinds.indexOf(distinct[0]) + 1} reads as ${distinct[0]}, row ${other + 1} as ${kinds[other]}. Put each kind in its own file.`,
     );
-  if (kinds[0] === "storyboard")
+  }
+  const kind = distinct[0] ?? "records";
+  if (kind === "storyboard")
     return {
       guides: [],
       storyboard: storyboardRows(list, file, sourceName),
       contacts: [],
       notes: [],
     };
-  if (kinds[0] === "contacts")
+  if (kind === "contacts")
     return { guides: [], storyboard: [], ...contactRows(list, file, sourceName) };
-  if (kinds[0] === "hospitals") return hospitals(list, file, sourceName);
+  if (kind === "hospitals") return hospitals(list, file, sourceName);
   return fromRecords(list as Row[], file, sourceName, undefined, (i) => `record ${i + 1}`);
 }
 function hospitals(
