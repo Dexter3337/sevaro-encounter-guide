@@ -105,6 +105,50 @@ export const mappingSchema = z
   })
   .strict();
 export type Mapping = z.infer<typeof mappingSchema>;
+// Sponsor storyboard shape (storyboard_notes.json). A per-hospital, per-field
+// second source shown at the top of the caselog; it can disagree with the guide.
+// `note` is sponsor commentary about the row and is never read by engine or UI.
+export const storyboardRecordSchema = z
+  .object({
+    hospital_id: z.string().min(1),
+    field: z.string().min(1).max(200),
+    storyboard_value: z.string().max(12000),
+    storyboard_updated: z.string().optional(),
+    note: z.string().optional(),
+  })
+  .passthrough();
+export type StoryboardRecord = z.infer<typeof storyboardRecordSchema>;
+// Escalation step three: the person to call when the guide cannot answer.
+export const contactSchema = z
+  .object({
+    id: z.string().min(1),
+    hospitalId: z.string().min(1),
+    role: z.string().min(1),
+    name: z.string().min(1),
+    title: z.string().optional(),
+    phone: z.string().min(1),
+    altChannel: z.string().optional(),
+    availability: z.string().optional(),
+    lastVerified: z.string().optional(),
+    source: z.string().default("Synthetic directory"),
+  })
+  .passthrough();
+export type Contact = z.infer<typeof contactSchema>;
+// Current operational state reported by the hospital. Overlays a result; it
+// never rewrites a guide value, and absence never means "operational".
+export const liveStatusSchema = z
+  .object({
+    id: z.string().min(1),
+    hospitalId: z.string().min(1),
+    resource: z.string().min(1),
+    state: z.enum(["operational", "degraded", "down", "diverting", "unknown"]),
+    message: z.string().max(500).optional(),
+    reportedAt: z.string(),
+    expiresAt: z.string(),
+    source: z.string(),
+  })
+  .passthrough();
+export type LiveStatusReport = z.infer<typeof liveStatusSchema>;
 export const hospitalSchema = z
   .object({
     id: z.string().min(1).max(100),
@@ -113,6 +157,7 @@ export const hospitalSchema = z
     version: z.string().min(1).max(100),
     fields: z.array(sourceSchema).max(500),
     mappings: z.array(mappingSchema).max(50).optional(),
+    contacts: z.array(contactSchema).max(50).optional(),
   })
   .passthrough();
 export type Hospital = z.infer<typeof hospitalSchema>;
@@ -138,6 +183,17 @@ export type Result = {
   blocksCompletion: boolean;
   missingRequirements: string[];
   anchor?: string;
+  // The handbook's fourth question: "what should the doctor do?" Required on
+  // every result; an empty string is a defect, not an acceptable value.
+  action: string;
+  // Which trigger produced this, so the UI can answer "why am I seeing this?".
+  triggerId?: string;
+  // Set by ranking (B6). Info-tier results never auto-expand.
+  autoExpand?: boolean;
+  // Live operational reports overlaying this field; never replaces the guide.
+  liveStatus?: LiveStatusReport[];
+  // How a hard stop may be cleared. Absent on non-blocking results.
+  release?: "fix_only" | "acknowledge_with_reason";
 };
 export type Field = {
   id: string;

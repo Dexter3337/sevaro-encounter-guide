@@ -42,6 +42,9 @@ function base(h: Hospital, c: Context, field: string, ss: Source[]): Result {
     version: h.version,
     title: field,
     message: "",
+    // Kickoff 1 placeholder. B2 derives this from status, tier and the guide's
+    // own directive sentence; an empty action is a defect, not a valid result.
+    action: "",
     primaryStatus: flags.has("stale") ? "stale" : "answered",
     flags: [...flags],
     tier: "info",
