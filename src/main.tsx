@@ -1297,6 +1297,7 @@ function App() {
                       <button
                         className="eg-btn primary"
                         onClick={() => step(nextStep)}
+                        aria-label="Next step"
                       >
                         Next: {label(nextStep)} <Icon name="right" size={16} />
                       </button>

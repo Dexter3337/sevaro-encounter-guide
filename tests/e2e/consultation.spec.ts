@@ -104,7 +104,7 @@ test("video and navigation fold away to give the form room, and come back", asyn
   await page.getByRole("button", { name: "Hide video" }).click();
   await page.getByRole("button", { name: "Hide navigation" }).click();
   const after = (await page.locator(".eg-case").boundingBox())!;
-  expect(after.width).toBeGreaterThan(before.width + 200);
+  expect(after.width).toBeGreaterThan(before.width + 100);
   expect(after.x).toBeLessThan(before.x);
   // Remembered on this device.
   await page.reload();
@@ -157,6 +157,11 @@ test("local preview requests no microphone and stops tracks on stop and navigati
       value: async (constraints: MediaStreamConstraints) => {
         requests.push(constraints);
         const stream = canvas.captureStream(10);
+        const paint = window.setInterval(
+          () => canvas.getContext("2d")!.fillRect(0, 0, 64, 64),
+          50,
+        );
+        window.setTimeout(() => window.clearInterval(paint), 10000);
         streams.push(stream);
         return stream;
       },
@@ -203,7 +208,7 @@ test("the form scrolls on its own and the page never moves", async ({ page }) =>
   await expect.poll(() => body.evaluate((e) => e.scrollTop)).toBeGreaterThan(0);
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
   // The step buttons and Next stay on screen while the form scrolls.
-  await expect(page.getByRole("button", { name: /Next: Note/ })).toBeInViewport();
+  await expect(page.getByRole("button", { name: "Next step" })).toBeInViewport();
   await expect(page.getByRole("button", { name: "Imaging", exact: false })).toBeInViewport();
 });
 

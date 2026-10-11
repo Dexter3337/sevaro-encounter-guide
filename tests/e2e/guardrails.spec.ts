@@ -90,6 +90,8 @@ test("alien dry run: two unfamiliar hospitals load live and behave", async ({ pa
   expect(await page.evaluate(() => (window as any).pwned)).toBeUndefined();
   // The other hospital answers from its own guide only.
   await page.getByLabel("Hospital", { exact: true }).selectOption("ALN-001");
+  // A new hospital is a new encounter: the column returns to its guidance.
+  await openChatTab(page);
   await chat.getByPlaceholder("Ask about this hospital's guide…").fill("What should I title the note?");
   await chat.getByRole("button", { name: "Ask", exact: true }).click();
   await expect(chat).toContainText("Telestroke Consultation - Remote");
