@@ -13,7 +13,9 @@
     "evaluate": "tsx scripts/evaluate.ts",
     "preview": "vite preview --host 127.0.0.1",
     "verify:presentation": "node scripts/verify_presentation.mjs",
-    "verify:embedded-demo": "node scripts/verify_embedded_demo.mjs"
+    "verify:embedded-demo": "node scripts/verify_embedded_demo.mjs",
+    "ship": "node scripts/ship.mjs",
+    "sync": "node scripts/sync.mjs"
   },
   "dependencies": {
     "@js-temporal/polyfill": "^0.5.1",
