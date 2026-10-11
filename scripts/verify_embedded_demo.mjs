@@ -13,9 +13,14 @@ await demo.getByRole("button", { name: "Imaging", exact: false }).click();
 await demo
   .getByLabel("Large vessel occlusion present", { exact: true })
   .selectOption("yes");
-await expect(demo.locator(".guidance-panel .card > p")).toContainText(
-  "ED provider initiates transfer",
-);
+// The LVO advisory opens the guidance dock by itself.
+await expect(
+  demo
+    .getByTestId("nudge-dock")
+    .getByTestId("nudge-card")
+    .filter({ hasText: "LVO Protocol" })
+    .locator(".card-answer"),
+).toContainText("ED provider initiates transfer");
 await page.screenshot({ path: "reports/mentor-live-demo.png", fullPage: true });
 console.log(
   "Embedded demo automatically loads; actual LVO edit produces expected transfer guidance.",

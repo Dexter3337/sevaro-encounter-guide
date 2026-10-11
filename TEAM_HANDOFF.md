@@ -14,8 +14,7 @@ before. The longer-term design is [docs/PRODUCTION_PLAN.md](docs/PRODUCTION_PLAN
 Scope was revised on 10 October 2026: voice capture, transcript drafting and caselog auto-fill are
 out. The deliverable is proactive nudges inside the caselog, typed questions answered from the
 selected hospital's guide, and hospital contacts as the final escalation step. The voice and
-transcript code is still present in the tree and is removed as part of the sprint's Machine C
-work; the hosted links below predate this revision.
+transcript code has been removed; the hosted links below predate this revision.
 
 ## Links to share
 
@@ -60,9 +59,9 @@ Source files were preserved. `node_modules`, package caches, local Git internals
 1. Use Reset demo in Demo controls if you want a clean synthetic encounter.
 2. Open Imaging at Highland Valley / SYN-006, Tuesday 19:30 Central. Set LVO to Yes. Guidance cites that hospital's outside-coverage transfer pathway.
 3. Open Recommendation. Order permission guidance appears before focus and remains after unrelated edits.
-4. Choose Simulate transcript drafts. Approve individual synthetic facts; unapproved fields stay unchanged. No live meeting is accessed, and completion prerequisites cannot be filled from speech.
+4. Choose **Ask this hospital’s guide** and ask "Who covers pediatric neurology?" at Bluewater (SYN-002). The answer leads with "Not available in this hospital's guide." and offers **Call someone**, which opens that hospital's contacts with the reason.
 5. Launch N5 or N7 and show the incomplete charge or provider-confirmation gate, then record the required synthetic fact and retry.
-6. Import an unfamiliar hospital JSON/CSV, preview and activate it, then select it. Source-backed answers remain hospital-scoped.
+6. In Guide library, drop `data/fixtures/syn-108/hospital_guides.json` and `storyboard_notes.json` together, preview (one conflict found) and activate, then open Riverbend in an encounter. Source-backed answers remain hospital-scoped.
 7. Open Evaluation, run the 29 sponsor cases and inspect/export evidence.
 
 See `docs/DEMO_SCRIPT.md` and `docs/MENTOR_PRESENTATION.md` for the longer mentor walkthrough. The embedded presentation demo uses the same live app and its browser-local state.

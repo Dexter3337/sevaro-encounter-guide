@@ -132,6 +132,41 @@
   gap: 4px 12px;
   margin-top: 8px;
 }
+/* 44 px touch targets for every control on the new surfaces. */
+.card-actions button,
+.gate-actions button,
+.gate-acknowledge input,
+.storyboard-conflict button,
+.storyboard-head button,
+.chat-suggestions button,
+.chat-form button,
+.contact-phone a,
+.contact-phone button,
+.drop-files button,
+.reference-row summary,
+.evidence summary,
+.why-shown summary {
+  min-height: 44px;
+}
+.card-actions button,
+.storyboard-conflict button,
+.chat-suggestions button,
+.contact-phone a,
+.contact-phone button {
+  display: inline-flex;
+  align-items: center;
+}
+.evidence summary,
+.why-shown summary {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+:is(.nudge-dock, .chat-panel, .contacts-sheet, .storyboard-card, .gate-banner)
+  :is(button, a, summary, input, textarea, select):focus-visible {
+  outline: 3px solid #0c7774;
+  outline-offset: 2px;
+}
 
 /* ---- Field markers ----------------------------------------------------- */
 .field-marker {
