@@ -175,7 +175,13 @@ export const challengeFixtures: Fixture[] = [
     "SYN-002",
     "Where do I do the video eval for a stroke alert?",
     "conflict",
-    ["CT holding bay", "Storyboard: Patient room"],
+    // Both values, each attributed to its source. The exact punctuation
+    // between the label and the value is not what the sponsor asks for, so the
+    // oracle checks the label and the value rather than pinning the separator:
+    // the conflict message now carries each source's date, because one of these
+    // two values is 184 days old and the other six weeks, and the doctor
+    // choosing between them should be told that.
+    ["CT holding bay", "Storyboard", "Patient room"],
     ["Video Eval Location"],
     undefined,
     { flags: ["conflict"] },

@@ -18,6 +18,7 @@ import {
   resolveConcept,
   meansNo,
   meansYes,
+  semantics,
 } from "./knowledge";
 import {
   ageDays,
@@ -88,6 +89,97 @@ export function deriveAction(r: Result, h: Hospital): string {
   };
   return `${core()}${stale}`;
 }
+// The guide and the storyboard are kept separately, so they can disagree. The
+// handbook is firm about what to do: show both with their sources and never
+// pick one — and, just as firmly, do not raise a false alarm when they agree.
+//
+// Getting this wrong in either direction has a cost, but they are not equal.
+// A false "agree" hides a real conflict and the doctor acts on one of two
+// values without knowing the other exists. A false "disagree" costs them a
+// moment's confirmation. So anything we cannot settle is reported as a
+// possible difference rather than quietly treated as agreement.
+export type Verdict = "agree" | "disagree" | "uncertain";
+const STOPWORDS = new Set([
+  "the",
+  "and",
+  "for",
+  "with",
+  "from",
+  "via",
+  "per",
+  "all",
+  "any",
+  "are",
+  "use",
+  "used",
+  "uses",
+  "see",
+  "this",
+  "that",
+]);
+const normalise = (raw: string, consultType: string) =>
+  scoped(clean(raw), consultType)
+    .toLowerCase()
+    // Scope qualifiers describe which branch applies, not what the value is.
+    .replace(
+      /\bfor (?:other consults|inpatient consults|stroke alerts|stroke activation)\b/g,
+      "",
+    )
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+const significantWords = (text: string) =>
+  new Set(text.split(" ").filter((w) => w.length >= 3 && !STOPWORDS.has(w)));
+const sameSchedule = (a: string, b: string) => {
+  const wa = windows(a),
+    wb = windows(b);
+  if (!wa.length || !wb.length) return false;
+  const key = (ws: typeof wa) =>
+    ws
+      .map((w) => `${[...w.days].sort().join("")}:${w.start}-${w.end}`)
+      .sort()
+      .join("|");
+  return key(wa) === key(wb);
+};
+const DEFINITE = ["affirmative", "negative", "not_applicable"] as const;
+export function compare(
+  guide: Source,
+  others: Source[],
+  consultType: string,
+): { verdict: Verdict; reason: string } {
+  if (!others.length) return { verdict: "agree", reason: "Only one source." };
+  const g = normalise(guide.raw, consultType);
+  for (const other of others) {
+    const o = normalise(other.raw, consultType);
+    if (g === o) continue;
+    if (sameSchedule(guide.raw, other.raw)) continue;
+    const kg = semantics(guide.raw).kind,
+      ko = semantics(other.raw).kind;
+    const definite =
+      (DEFINITE as readonly string[]).includes(kg) &&
+      (DEFINITE as readonly string[]).includes(ko);
+    // "Yes" and "Yes - all stroke alerts" are the same answer with a qualifier.
+    if (definite && kg === ko) continue;
+    if (definite)
+      return {
+        verdict: "disagree",
+        reason: `The guide reads as ${kg}; the storyboard reads as ${ko}.`,
+      };
+    const wg = significantWords(g),
+      wo = significantWords(o);
+    const shared = [...wg].filter((w) => wo.has(w));
+    if (!shared.length)
+      return {
+        verdict: "disagree",
+        reason: "The two sources describe different things.",
+      };
+    // They overlap, so one may be a rewording of the other. We cannot tell.
+    return {
+      verdict: "uncertain",
+      reason: "The sources overlap but are not the same; this may be a rewording.",
+    };
+  }
+  return { verdict: "agree", reason: "Sources carry the same answer." };
+}
 function base(h: Hospital, c: Context, field: string, ss: Source[]): Result {
   const flags = new Set<string>();
   for (const s of ss) {
@@ -146,6 +238,15 @@ function resolveField(
     // An absent field means the guide has no record, not that the hospital
     // lacks the capability — and no other hospital is ever consulted.
     r.message = `Not available in this hospital's guide. This does not mean ${h.name} lacks it — the field is absent from the guide, and no other hospital was searched.`;
+    // The storyboard is a second source, not a substitute for the guide. When
+    // it is the only source carrying this field, the doctor still needs to see
+    // what it says — withholding it would be hiding information we hold — but
+    // it is labelled so they know it has not been confirmed against the guide.
+    const only = ss.filter((s) => s.sourceKind === "storyboard");
+    if (only.length) {
+      r.flags.push("storyboard_only");
+      r.message += ` Storyboard only (${only[0].updatedAt ? `updated ${only[0].updatedAt}` : "date unknown"}): ${only.map((s) => scoped(clean(s.raw), c.consultType)).join(" · ")}.`;
+    }
     r.missingEvidence = {
       hospitalId: h.id,
       version: h.version,
@@ -156,28 +257,26 @@ function resolveField(
   }
   let text = scoped(clean(guide[0].raw), c.consultType);
   r.message = text;
-  const meaningful = (s: Source) =>
-    scoped(clean(s.raw), c.consultType)
-      .toLowerCase()
-      .replace(
-        /\bfor (?:other consults|inpatient consults|stroke alerts|stroke activation)\b/g,
-        "",
-      )
-      .replace(/[^a-z0-9]/g, "");
-  const texts = new Set(ss.map(meaningful));
-  if (texts.size > 1) {
+  const second = ss.filter((s) => s.sourceKind !== "guide");
+  const { verdict, reason } = compare(guide[0], second, c.consultType);
+  if (verdict !== "agree") {
     r.primaryStatus = "conflict";
     r.flags.push("conflict");
+    // An unsettled comparison is marked as such. The doctor sees both values
+    // either way; this tells them whether we are sure the two differ.
+    if (verdict === "uncertain") r.flags.push("possible_conflict");
     r.message = ss
       .map(
         (s) =>
-          `${s.sourceKind === "guide" ? "On-call guide" : "Storyboard"}: ${scoped(clean(s.raw), c.consultType)}`,
+          `${s.sourceKind === "guide" ? "On-call guide" : "Storyboard"} (${s.lastVerified ? `verified ${s.lastVerified}` : s.updatedAt ? `updated ${s.updatedAt}` : "date unknown"}): ${scoped(clean(s.raw), c.consultType)}`,
       )
       .join(" · ");
-    r.rationale =
-      "Applicable source meanings disagree; no source precedence applied.";
+    r.rationale = `${reason} No source precedence applied.`;
     return r;
   }
+  // Agreement is worth recording. A second source that confirms the guide is
+  // reassurance; the handbook warns specifically against treating it as alarm.
+  if (second.length) r.flags.push("second_source_agrees");
   const timeDependent = (message: string, unknown = false) => {
     r.message = message;
     r.primaryStatus = "time_dependent";
