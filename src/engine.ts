@@ -19,6 +19,8 @@ import {
   meansNo,
   meansYes,
   semantics,
+  normalize,
+  conceptName,
 } from "./knowledge";
 import {
   ageDays,
@@ -425,6 +427,58 @@ function resolveField(
   r.rationale = `${field} evaluated at ${localTime(instant, h.timezone).toString()}; freshness reference ${localTime(c.instant, h.timezone).toPlainDate()}.`;
   return r;
 }
+// Every guide field this engine can raise a nudge for. A hospital's guide may
+// carry anything at all, so this list is how we tell the difference between a
+// field we will surface unprompted and one that is only reachable by asking.
+export const boundFields = [
+  "Video Eval Location",
+  "Wake Up Protocol",
+  "Thrombolytic",
+  "Thrombolytic Mix Model",
+  "CTA Head/Neck",
+  "CT Perfusion",
+  "AI",
+  "LVO Protocol",
+  "Order Entry",
+  "Order Set Name",
+  "EEG",
+  "Required Note Title",
+  "Charge Entry",
+  "Consult Completion Rule",
+  "Rounding Timing",
+  "Rounding Orders",
+  "When Do We Round?",
+] as const;
+// Fields this hospital documents that no trigger covers. They never produce an
+// unprompted nudge — we have no basis for choosing a step or a tier for them —
+// but the doctor can still ask, and an administrator can see what is going
+// unused. Adding a hospital or a field stays a data change: an unrecognised
+// field is carried, answered and reported, never dropped.
+export function unboundFields(h: Hospital): string[] {
+  const bound = new Set<string>(
+    boundFields.map((f) => normalize(conceptName(f))),
+  );
+  for (const m of h.mappings || []) bound.add(normalize(conceptName(m.sourceField)));
+  const seen = new Map<string, string>();
+  for (const s of h.fields) {
+    const key = normalize(conceptName(s.field));
+    if (!bound.has(key) && !seen.has(key)) seen.set(key, s.field);
+  }
+  return [...seen.values()].sort();
+}
+// A completion rule is a gate when it says the consult must not be finished
+// until someone else has done something. Hospitals word that differently —
+// "do not complete until the hospital provider confirms the plan", "consult may
+// not be closed before attending sign-off", "hold completion pending provider
+// confirmation" — so this looks for the shape rather than one phrasing: a
+// prohibition on completing, and a condition that releases it.
+const HOLD =
+  /\b(?:do not|don't|never|must not|may not|cannot|can't|should not)\s+(?:\w+\s+){0,3}(?:complete[ds]?|close[ds]?|finish(?:e[ds])?|finali[sz]e?[ds]?|submit(?:ted)?|sign(?:ed)?\s*off)\b|\bhold\s+(?:the\s+)?(?:consult\s+)?completion\b|\bcompletion\s+is\s+(?:blocked|held|withheld)\b/i;
+const RELEASE =
+  /\b(?:until|before|pending|unless|once|after)\b[\s\S]{0,80}?\b(?:confirm|confirms|confirmed|confirmation|sign[-\s]?off|signs?\s+off|approv|acknowledg|verif)/i;
+export function blocksUntilConfirmed(raw: string): boolean {
+  return HOLD.test(raw) && RELEASE.test(raw);
+}
 export function gates(h: Hospital, c: Context): Result[] {
   const out: Result[] = [];
   for (const [field, requirement] of [
@@ -439,21 +493,29 @@ export function gates(h: Hospital, c: Context): Result[] {
       // the same thing to the doctor. A value the lexicon cannot read stays
       // under review and raises no gate: uncertainty must not block anyone.
       required =
-        field === "Charge Entry"
-          ? meansYes(raw)
-          : /do not complete.*until.*hospital provider confirms.*plan/i.test(
-              raw,
-            );
+        field === "Charge Entry" ? meansYes(raw) : blocksUntilConfirmed(raw);
     const r = answerField(h, c, field);
+    // We cannot tell whether this hospital requires the step. Blocking on a
+    // requirement that may not exist would stop a doctor finishing a case for
+    // no reason; waving it through would let a real requirement past in
+    // silence. So neither: the doctor is told exactly what is unclear and
+    // completes by acknowledging it, which is recorded.
     if (
       r.primaryStatus === "conflict" ||
       r.flags.includes("stale") ||
       r.flags.includes("interpretation_review")
     ) {
-      r.message +=
-        " Prototype policy: uncertain requirement shown for review; no new completion gate introduced.";
+      const why =
+        r.primaryStatus === "conflict"
+          ? "the guide and the storyboard disagree about it"
+          : r.flags.includes("stale")
+            ? `it was last verified ${ss[0].lastVerified ?? "on an unknown date"} and may have changed`
+            : "the guide's wording cannot be read with confidence";
+      r.message += ` Whether ${h.name} requires this before completion is unclear, because ${why}. Completion is not blocked; confirm with the hospital if it matters for this case.`;
       r.tier = "advisory";
-      r.action = deriveAction(r, h);
+      r.release = "acknowledge_with_reason";
+      r.flags.push("uncertain_requirement");
+      r.action = `Confirm with ${h.name} whether this is required, then acknowledge to complete.`;
       out.push(r);
       continue;
     }
