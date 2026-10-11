@@ -70,8 +70,10 @@ export function dockReducer(model: DockModel, event: DockEvent): DockModel {
     }
 
     case "FIELD_FOCUS": {
+      // A field with no guidance of its own says nothing about the rest of the
+      // step: the pill stays, and only a peek for another field folds away.
       if (!event.results.length)
-        return { ...model, state: model.state === "panel" ? "panel" : "hidden" };
+        return { ...model, state: model.state === "peek" ? "pill" : model.state };
       // Focusing a field is the doctor looking, not the system interrupting.
       // Anything needing action opens; reference material only peeks.
       const actionable = event.results.some(isCard);

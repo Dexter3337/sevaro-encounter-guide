@@ -145,3 +145,18 @@ describe("What the pill says", () => {
     expect(s.count).toBe(info.length);
   });
 });
+
+describe("Focusing a field with no guidance of its own", () => {
+  it("keeps the pill for the rest of the step", () => {
+    const m = dockReducer({ ...initialDock, state: "pill" }, { type: "FIELD_FOCUS", results: [] });
+    expect(m.state).toBe("pill");
+  });
+  it("folds a peek for another field back to the pill", () => {
+    const m = dockReducer({ ...initialDock, state: "peek" }, { type: "FIELD_FOCUS", results: [] });
+    expect(m.state).toBe("pill");
+  });
+  it("leaves an open panel open", () => {
+    const m = dockReducer({ ...initialDock, state: "panel" }, { type: "FIELD_FOCUS", results: [] });
+    expect(m.state).toBe("panel");
+  });
+});

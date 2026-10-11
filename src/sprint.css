@@ -51,6 +51,30 @@
   font-weight: 600;
 }
 
+/* The page's global `header` rule is for the app bar. Headers inside these
+   surfaces are ordinary blocks. */
+.dock-header,
+.chat-head,
+.contacts-head,
+.storyboard-head {
+  height: auto;
+  background: none;
+  border-bottom: 0;
+  box-shadow: none;
+  position: static;
+  padding: 0;
+}
+.dock-header {
+  padding: 12px 14px 8px;
+  border-bottom: 1px solid var(--line);
+}
+.storyboard-head .link,
+.chat-head .link,
+.contacts-head .link {
+  min-height: 44px;
+  font-size: 13px;
+}
+
 /* ---- Layout: the caselog takes the full width ------------------------- */
 .workspace.single {
   grid-template-columns: minmax(0, 1fr);
@@ -230,8 +254,6 @@
   justify-content: space-between;
   align-items: start;
   gap: 8px;
-  padding: 12px 14px 8px;
-  border-bottom: 1px solid var(--line);
 }
 .dock-header h2 {
   margin: 2px 0 0;
