@@ -74,6 +74,7 @@ import "./sprint.css";
 import "./consultation.css";
 import { ConsultationPane } from "./encounter/ConsultationPane";
 import "./shell.css";
+import "./demo-polish.css";
 import type { GuideMode, ReportReason } from "./guidance/types";
 import {
   makeReport,
@@ -723,7 +724,7 @@ function App() {
         openChat();
       }
   };
-  const reportNudge = (r: Result, reason: ReportReason, comment: string) => {
+  const reportNudge = async (r: Result, reason: ReportReason, comment: string) => {
     setReported((x) => [...x, r.id]);
     setAudit((a) => [
       ...a,
@@ -735,9 +736,14 @@ function App() {
         action: `reported: ${reasonText[reason]}${comment ? ` — ${comment}` : ""}`,
       },
     ]);
-    void submitReport(makeReport(r, reason, comment)).then(() =>
-      setReportsTick((n) => n + 1),
-    );
+    const report = makeReport(r, reason, comment);
+    const delivered = await submitReport(report);
+    setReportsTick((n) => n + 1);
+    const receipt = delivered ? "Report received by the team inbox."
+      : localReports().some((item) => item.id === report.id)
+        ? "Saved on this device only. The report was not delivered to the team."
+        : "Report could not be delivered or saved. Please try again.";
+    return receipt;
   };
   const undoAcknowledge = (r: Result) =>
     setAcknowledged((a) => a.filter((x) => x !== resultSignature(r)));
@@ -1114,6 +1120,7 @@ function App() {
               >
                 {ui.video ? (
                   <ConsultationPane
+                    key={c.id}
                     hospital={h.name}
                     onHide={() => setUiPref({ video: false })}
                   />
@@ -1322,19 +1329,11 @@ function App() {
                     </button>
                     <button
                       role="tab"
-                      aria-selected={mode === "chat"}
-                      className="eg-tab"
-                      onClick={() => openChat()}
-                    >
-                      <Icon name="chat" size={17} /> Ask the guide
-                    </button>
-                    <button
-                      role="tab"
                       aria-selected={mode === "contacts"}
                       className="eg-tab call"
                       onClick={() => showContacts()}
                     >
-                      <Icon name="phone" size={17} /> Who to call
+                      <Icon name="phone" size={17} /> Care team contacts
                     </button>
                   </div>
                   <div className="eg-guide-body">
@@ -1396,6 +1395,12 @@ function App() {
                       </GuidanceBoundary>
                     </div>
                   </div>
+                  <button type="button" className="eg-guide-launcher" aria-label="Ask the Guide"
+                    aria-expanded={chatOpen} onClick={() => chatOpen ? setMode("guidance") : openChat()}>
+                    <span className="guide-orb"><Icon name="chat" size={22} /></span>
+                    <span><strong>Ask the Guide</strong><small>{chatOpen ? "Return to guidance" : "Hospital answers, with sources"}</small></span>
+                    <Icon name={chatOpen ? "close" : "right"} size={18} />
+                  </button>
                 </aside>
               </div>
             )}

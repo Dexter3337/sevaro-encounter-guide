@@ -215,6 +215,7 @@ export function NudgeCard({
   onClose,
 }: NudgeCardProps) {
   const [reporting, setReporting] = useState(false);
+  const [receipt, setReceipt] = useState("");
   const stale = isStale(r);
   const status =
     r.primaryStatus === "hard_stop" && r.flags.includes("uncertain_requirement")
@@ -262,14 +263,15 @@ export function NudgeCard({
       <SourceLine r={r} />
       {reported ? (
         <p className="gp-thanks" role="status">
-          <Icon name="check" size={15} /> Reported to the guide owner. Thank you.
+          <Icon name="check" size={15} /> {receipt || "Report recorded; delivery is not confirmed here."}
         </p>
       ) : reporting && onReport ? (
         <ReportForm
           r={r}
           onCancel={() => setReporting(false)}
           onSend={(reason, comment) => {
-            onReport(r, reason, comment);
+            setReceipt("Sending report…");
+            void onReport(r, reason, comment).then(setReceipt).catch(() => setReceipt("Report delivery could not be confirmed. Please try again."));
             setReporting(false);
           }}
         />
@@ -315,7 +317,7 @@ export function NudgeCard({
             className="gp-btn subtle"
             onClick={() => setReporting(true)}
           >
-            <Icon name="flag" size={15} /> Report a problem
+            <Icon name="flag" size={15} /> This looks wrong
           </button>
         )}
       </div>

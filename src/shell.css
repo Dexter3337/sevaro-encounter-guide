@@ -408,6 +408,9 @@ body {
   grid-template-columns: auto minmax(0, 1fr);
   min-height: 0;
 }
+.eg.rail-closed .eg-body {
+  grid-template-columns: minmax(0, 1fr);
+}
 
 /* ---- Navigation rail (collapsible) --------------------------------------- */
 .eg-rail {

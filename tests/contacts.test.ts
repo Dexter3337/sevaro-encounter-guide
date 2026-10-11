@@ -116,7 +116,7 @@ describe("Contacts sheet", () => {
       reason: "Guide doesn't cover Required Note Title",
       instant: "2026-03-17T15:00:00Z",
     });
-    expect(out).toContain("Who to call at SYN-006");
+    expect(out).toContain("Care team contacts at SYN-006");
     expect(out).toContain("Guide doesn't cover Required Note Title");
     for (const role of ["Technical lead", "Nursing in charge", "Administrator"])
       expect(out).toContain(role);

@@ -17,9 +17,9 @@ export async function launch(page: Page, id: string) {
 
 // The guide column's three views.
 export const openChatTab = (page: Page) =>
-  page.getByRole("tab", { name: /Ask the guide/ }).click();
+  page.getByRole("button", { name: "Ask the Guide", exact: true }).click();
 export const openContactsTab = (page: Page) =>
-  page.getByRole("tab", { name: /Who to call/ }).click();
+  page.getByRole("tab", { name: /Care team contacts/ }).click();
 export const openGuidanceTab = (page: Page) =>
   page.getByRole("tab", { name: /Guidance/ }).click();
 

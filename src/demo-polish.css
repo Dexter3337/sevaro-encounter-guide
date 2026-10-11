@@ -1,0 +1,54 @@
+/* Focused clinician workspace polish; existing form and guide scrolling stay intact. */
+@media (min-width: 1181px) {
+  .eg-work { grid-template-columns: minmax(240px, 270px) minmax(420px, 1fr) minmax(350px, 390px); gap: 10px; }
+}
+.eg-guide-tabs { grid-template-columns: minmax(0, .9fr) minmax(0, 1.2fr); }
+.eg .eg-tab { min-height: 44px; font-size: 14px; white-space: normal; }
+.eg .eg-guide-launcher {
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  margin: 10px; padding: 12px 14px; min-height: 64px; border-radius: 14px;
+  border: 1px solid #387f78; color: #f0fffc;
+  background: linear-gradient(115deg, #123c38, #095e58);
+  box-shadow: 0 4px 14px #153f3620, inset 0 1px 0 #b1f9e72b;
+  text-align: left; cursor: pointer;
+}
+.eg-guide-launcher > span:nth-child(2) { flex: 1; }
+.eg-guide-launcher strong { display: block; font-size: 17px; letter-spacing: .1px; }
+.eg-guide-launcher small { display: block; margin-top: 3px; font-size: 12px; color: #d1eee7; }
+.guide-orb { display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid #7edcc7; border-radius: 50%; background: #b0ffe914; }
+.eg .eg-guide-launcher:hover { background: #125a52; border-color: #73caba; }
+.eg .eg-guide-launcher:focus-visible, .eg .demo-playback button:focus-visible { outline: 3px solid #50bca9; outline-offset: 3px; }
+.eg-work .video-stage { flex: 0 0 auto; min-height: 0; aspect-ratio: 16 / 9; background: #071b19; }
+.eg-work .video-stage video { width: 100%; height: 100%; object-fit: contain; }
+.eg-work .video-stage .recorded-demo { display: block; position: absolute; inset: 0; opacity: 1; }
+.eg-work .demo-playback { display: flex; gap: 8px; }
+.eg .demo-playback button { flex: 1; min-height: 44px; padding: 7px 8px; border: 1px solid #638d83; border-radius: 8px; background: #204b43; color: #f2fffb; font-size: 14px; }
+.eg-work .demo-disclosure { margin: 0; font-size: 12px; line-height: 1.45; color: #c2d9d1; }
+.demo-transcript { min-height: 0; display: flex; flex-direction: column; gap: 9px; border-top: 1px solid #42645a; padding-top: 12px; }
+.demo-transcript header { display: flex; align-items: center; justify-content: space-between; gap: 4px; font-size: 15px; }
+.capture-indicator { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #bde9db; }
+.capture-indicator::before { content: ''; width: 6px; height: 6px; background: #8adbc0; border-radius: 50%; }
+.is-capturing .capture-indicator::before { animation: demo-capture 1.4s ease-in-out infinite; }
+.demo-transcript .transcript-disclaimer { margin: 0; color: #bcd4cb; font-size: 12px; line-height: 1.4; }
+.transcript-lines { display: grid; gap: 8px; }
+.demo-transcript .transcript-cue { margin: 0; padding: 8px 10px; border-left: 2px solid #6cbdab; background: #ffffff08; border-radius: 0 8px 8px 0; color: #f4faf7; font-size: 14px; line-height: 1.45; animation: demo-reveal .35s ease-out; }
+.transcript-cue > span { display: block; margin-bottom: 3px; font-size: 11px; color: #afd8ca; }
+.captured-keywords > strong { font-size: 12px; color: #c5e4d9; }
+.captured-keywords > div { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+.captured-keywords > div > span { padding: 4px 7px; border: 1px solid #578e7e; background: #254e42; color: #eafff5; border-radius: 6px; font-size: 11px; animation: demo-reveal .35s ease-out; }
+.captured-keywords > p { font-size: 12px; color: #bcd4cb; margin: 3px 0; }
+.eg-work .video-controls { margin-top: auto; padding-top: 6px; }
+.eg-work .camera-control { min-height: 44px; }
+.eg-work .video-hide { min-width: 36px; min-height: 36px; }
+.eg .gp-next > span { text-transform: uppercase; letter-spacing: .06em; }
+@keyframes demo-reveal { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes demo-capture { 50% { opacity: .45; box-shadow: 0 0 0 4px #8adbc018; } }
+@media (max-height: 800px) and (min-width: 1181px) {
+  .eg-work .consultation-pane { gap: 7px; padding: 10px; }
+  .demo-transcript { gap: 6px; padding-top: 8px; }
+  .demo-transcript .transcript-cue { padding: 5px 8px; font-size: 13px; }
+  .transcript-cue:not(:last-child) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .is-capturing .capture-indicator::before, .demo-transcript .transcript-cue, .captured-keywords > div > span { animation: none; }
+}

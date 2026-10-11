@@ -28,7 +28,7 @@ export interface GuidePanelProps {
   /** Opens the contacts view; the reason is shown as context. */
   onContacts: (reason: string) => void;
   /** The doctor says this nudge looks wrong, and why. */
-  onReport: (r: Result, reason: ReportReason, comment: string) => void;
+  onReport: (r: Result, reason: ReportReason, comment: string) => Promise<string>;
   /** Guidance could not be loaded; the caselog still works. */
   unavailable?: boolean;
   /** A field marker or the storyboard asked to show a result. New nonce, new request. */
@@ -44,7 +44,7 @@ export interface NudgeCardProps {
   onUndoAcknowledge?: (r: Result) => void;
   acknowledged?: boolean;
   onContacts?: (reason: string) => void;
-  onReport?: (r: Result, reason: ReportReason, comment: string) => void;
+  onReport?: (r: Result, reason: ReportReason, comment: string) => Promise<string>;
   reported?: boolean;
   /** Folds the card back into the list. */
   onClose?: () => void;

@@ -123,7 +123,7 @@ export function ContactsSheet({
       className="contacts-sheet"
       role="dialog"
       aria-modal="false"
-      aria-label={`Who to call at ${hospitalId}`}
+      aria-label={`Care team contacts at ${hospitalId}`}
       data-testid="contacts-sheet"
       onKeyDown={(e) => {
         if (e.key === "Escape") {
@@ -134,7 +134,7 @@ export function ContactsSheet({
     >
       <header className="contacts-head">
         <p>
-          <strong>Who to call at {hospitalId}</strong>
+          <strong>Care team contacts at {hospitalId}</strong>
           <small>
             {hospitalName ? `${hospitalName} · ` : ""}availability in the
             hospital's own time, now {nowLabel(instant, timezone)}

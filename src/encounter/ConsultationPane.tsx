@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "../Icon";
 
-/** Local camera preview only. A real Sevaro call requires its host integration. */
+const demoCues = [
+  { at: 0, speaker: "Doctor", text: "Tell me what brought you in today.", keywords: [] },
+  { at: 3, speaker: "Patient", text: "My left arm feels weak, and my speech is slurred.", keywords: ["Left arm weakness", "Slurred speech"] },
+  { at: 7, speaker: "Doctor", text: "When did you last feel like yourself? Any allergies?", keywords: ["Onset review", "Allergy review"] },
+  { at: 11, speaker: "Patient", text: "About an hour ago. I have a penicillin allergy.", keywords: ["About 1 hour ago", "Penicillin allergy"] },
+];
+
+/** Recorded synthetic demo and optional local camera; neither is a connected call. */
 export function ConsultationPane({
   hospital,
   onHide,
@@ -15,6 +22,10 @@ export function ConsultationPane({
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState(false);
   const video = useRef<HTMLVideoElement>(null);
+  const demoVideo = useRef<HTMLVideoElement>(null);
+  const [demoTime, setDemoTime] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const cues = demoCues.filter((cue) => cue.at <= demoTime);
   const stream = useRef<MediaStream | undefined>(undefined);
   const generation = useRef(0);
   const stop = () => {
@@ -33,6 +44,7 @@ export function ConsultationPane({
     [],
   );
   const start = async () => {
+    demoVideo.current?.pause();
     const request = ++generation.current;
     setPending(true);
     setError("");
@@ -107,27 +119,47 @@ export function ConsultationPane({
           aria-label="Local camera preview"
           className={preview ? "is-playing" : ""}
         />
-        {!preview && (
-          <div className="video-empty">
-            <div className="camera-emblem">
-              <Icon name="camera" size={32} />
-            </div>
-            <p className="video-empty-title">Video consultation</p>
-            <span className="video-disclosure">
-              No live Sevaro call is connected.
-            </span>
-          </div>
-        )}
+        {!preview && <video ref={demoVideo} className="recorded-demo is-playing"
+          src="/media/doctor-consultation-demo.mp4" controls muted playsInline preload="metadata"
+          aria-label="Recorded consultation demo"
+          onTimeUpdate={(e) => setDemoTime(e.currentTarget.currentTime)}
+          onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)}
+          onEnded={() => setPlaying(false)}
+          onError={() => setError("The recorded demo could not load. You can continue documenting.")}
+        />}
         {preview && (
           <span className="local-preview-tag">
             Only visible on this device · microphone off
           </span>
         )}
       </div>
+      {!preview && <div className="demo-playback">
+        <button type="button" onClick={() => {
+          if (playing) demoVideo.current?.pause();
+          else void demoVideo.current?.play().catch(() => setError("Use the video controls to start playback."));
+        }}>{playing ? "Pause demo" : "Play demo"}</button>
+        <button type="button" onClick={() => {
+          void demoVideo.current?.requestFullscreen?.().catch(() => setError("Fullscreen is unavailable in this browser. Use the video controls."));
+        }}>Fullscreen</button>
+      </div>}
+      <p className="demo-disclosure">Recorded preview · No live Sevaro call is connected.</p>
+      <section className={`demo-transcript${playing ? " is-capturing" : ""}`} aria-label="Scripted demo transcript">
+        <header><strong>Transcript preview</strong><span className="capture-indicator">{playing ? "Capturing" : "Demo"}</span></header>
+        <p className="transcript-disclaimer">Scripted example, not transcribed from this video. Play to reveal.</p>
+        <div className="transcript-lines" aria-live="polite" aria-atomic="false">
+          {cues.slice(-2).map((cue) => <p className="transcript-cue" key={cue.at}>
+            <span>{`00:${String(cue.at).padStart(2, "0")}`} · {cue.speaker}</span>{cue.text}
+          </p>)}
+        </div>
+        <div className="captured-keywords"><strong>Keywords captured · demo</strong>
+          <div>{cues.flatMap((cue) => cue.keywords).map((word) => <span key={word}>{word}</span>)}</div>
+          {cues.length === 1 && <p>Symptoms, timing and allergies appear here.</p>}
+        </div>
+      </section>
       <div className="video-controls">
         <div>
           <Icon name="shield" size={16} />
-          <span>{preview ? "Local camera only" : "Ready for a preview"}</span>
+          <span>{preview ? "Local camera only" : "Microphone off"}</span>
         </div>
         <button
           className={`camera-control${preview ? " is-on" : ""}`}
