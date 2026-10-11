@@ -84,19 +84,16 @@ if (failed)
 step(5, `Publishing ${branch}`);
 sh(`git push -u origin ${branch} --force-with-lease`);
 
-step(6, `Merging into ${TEAM}`);
-sh(`git checkout ${TEAM} --quiet`);
-sh("git pull --ff-only --quiet");
-const merge = spawnSync("git", ["merge", "--no-ff", branch, "-m", `Merge ${branch}: ${message}`], {
-  stdio: "inherit",
-});
-if (merge.status !== 0) {
-  sh("git merge --abort");
-  sh(`git checkout ${branch} --quiet`);
-  die(`${TEAM} moved while this ran. Run the command again.`);
-}
-sh(`git push origin ${TEAM}`);
-sh(`git checkout ${branch} --quiet`);
+// The rebase above put this branch directly on top of the team branch, so it
+// can be pushed straight there. No checkout, which keeps generated files and
+// anything else in the working tree out of the way.
+step(6, `Updating ${TEAM}`);
+const publish = spawnSync("git", ["push", "origin", `HEAD:${TEAM}`], { stdio: "inherit" });
+if (publish.status !== 0)
+  die(
+    `${TEAM} moved while this was running — another machine shipped first.`,
+    "Nothing is lost. Run the same command again to pick up their work and retry.",
+  );
 
 console.log(`\n✓ Shipped. ${TEAM} now has your work.`);
 console.log("  Tell the group chat, so the others pull it before their next task.\n");
