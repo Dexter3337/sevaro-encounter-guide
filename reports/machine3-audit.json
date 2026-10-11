@@ -1,7 +1,7 @@
 {
-  "reviewedAt": "2026-10-11T03:12:49.052Z",
+  "reviewedAt": "2026-10-11T03:16:26.693Z",
   "branch": "sprint/m3-ui",
-  "commit": "04b5a8fcc649403209155f3af922e352dcaaca50",
+  "commit": "167d77137fa94161cea46d747cb051544b482eb7",
   "environment": {
     "node": "v24.20.0",
     "browser": "154.0.8037.98",
@@ -226,8 +226,8 @@
     },
     {
       "path": "docs/IMPLEMENTATION_STATUS.md",
-      "bytes": 3014,
-      "sha256": "35cd6dd692f7fe2f1c518c44e03aab6628de21ac6a1dcebcab5745e57edb7de7",
+      "bytes": 3576,
+      "sha256": "866efe39fad18b9e7d5eba760c644397fd9ceafc9dac92025ee10142b05ae93e",
       "kind": "text"
     },
     {
@@ -280,8 +280,8 @@
     },
     {
       "path": "docs/sprint/MACHINE_3.md",
-      "bytes": 7692,
-      "sha256": "4ce90ed0c7b969468c7f09e4e36cd5dee44dd51fd57bf500590eaf3b2707a848",
+      "bytes": 8063,
+      "sha256": "635c9be0e2a06a4a4f2d71a8f496ffc798f602499647aae96ad468ed45e7842d",
       "kind": "text"
     },
     {
@@ -772,8 +772,8 @@
     },
     {
       "path": "package.json",
-      "bytes": 1247,
-      "sha256": "d09a3cbc0a4e5cf10106ab7de771b04d98ca919696956b1db90ccb7bae56fdda",
+      "bytes": 1293,
+      "sha256": "68acabf17a2b78d64a94f285bce60608455f39c4471975ec1fb3b641b82cbebb",
       "kind": "text"
     },
     {
@@ -867,10 +867,34 @@
       "kind": "text"
     },
     {
+      "path": "reports/MACHINE3_DEMO_READINESS.md",
+      "bytes": 12937,
+      "sha256": "0ce3e90f3cf8920685c9f08cc32ecd06300f407e39d45ce22045178e6ddd2eef",
+      "kind": "text"
+    },
+    {
       "path": "reports/TEST_RESULTS.md",
       "bytes": 6304,
       "sha256": "0283c8aba9642070f11b389c8658efd91b28fc284000eb09279414602b1b226f",
       "kind": "text"
+    },
+    {
+      "path": "reports/machine3-audit.json",
+      "bytes": 45194,
+      "sha256": "a37bd54295fadf79adc470f2880a557cc0a052932cbb247ae72598e4f0406ec0",
+      "kind": "text"
+    },
+    {
+      "path": "reports/machine3-desktop.png",
+      "bytes": 345072,
+      "sha256": "b5312a481b8a2aa3a97f491e56a5cc16a25a83ace41ec7d2dbb043cee700b8cb",
+      "kind": "binary-or-config"
+    },
+    {
+      "path": "reports/machine3-mobile.png",
+      "bytes": 161739,
+      "sha256": "9d08eb28189507e14ebc3a99ec2f3af9c546cf7bbdc8588a48c4520e4ac6fe4c",
+      "kind": "binary-or-config"
     },
     {
       "path": "reports/research-review-inventory.json",
@@ -954,6 +978,18 @@
       "path": "research/verify_package.py",
       "bytes": 4192,
       "sha256": "50ae6f11e8d63d798827e66fceeea0db63e4515e520fca59117aca9657a2238e",
+      "kind": "text"
+    },
+    {
+      "path": "scripts/audit_machine3.mjs",
+      "bytes": 5370,
+      "sha256": "66751e07bc117b5d1b4d646cc22cc27a3399be83353246a1e5ed260d2cf7edde",
+      "kind": "text"
+    },
+    {
+      "path": "scripts/build-seeds.mjs",
+      "bytes": 2098,
+      "sha256": "b7276c06afdf4716f4f582c5f6ec1b9f4d0e6f6e0c313c51a14f29d8dd6e764d",
       "kind": "text"
     },
     {
@@ -1054,8 +1090,8 @@
     },
     {
       "path": "src/data/seeds.json",
-      "bytes": 73291,
-      "sha256": "d3d745c3d89cff0ebaf115bc2141d373ad833f5284214368152ebcf452221e28",
+      "bytes": 73933,
+      "sha256": "d3c3bbc4d8f88bcb5fcf1a8df9b944d05721ab9514f57ed302e1793c2112761f",
       "kind": "text"
     },
     {
@@ -1132,8 +1168,8 @@
     },
     {
       "path": "src/imports.ts",
-      "bytes": 44712,
-      "sha256": "0c0725224156b54d66842f0317903ae9ec94bf1d3f198d3a1a1b80a9cc69a420",
+      "bytes": 45230,
+      "sha256": "071a9fd02f8d9b8b619902f4b7aec0b284547257b36f7c298d5f6c1282dd447a",
       "kind": "text"
     },
     {
@@ -1210,8 +1246,8 @@
     },
     {
       "path": "tests/e2e/workflow.spec.ts",
-      "bytes": 16515,
-      "sha256": "fc6fefc053edb1954b17c9c32b54c8a9d900436ca90bd10a52641e7c1215a201",
+      "bytes": 16642,
+      "sha256": "516be6f4d0b06f1ef11755d6b6eb72a1bb4109dc57256bbd80b9e3ad1e7ef1cb",
       "kind": "text"
     },
     {
@@ -1228,8 +1264,8 @@
     },
     {
       "path": "tests/imports.test.ts",
-      "bytes": 17820,
-      "sha256": "64a49f3683ca530851f72f1a0eaf8cf1d99e66dab3f1a91739fb9af8158d4bc5",
+      "bytes": 18842,
+      "sha256": "9ad48b9dbfb7c3a0c6d49049d819ec946b3d9e2dbb2f78f9044be6569550270d",
       "kind": "text"
     },
     {
@@ -1296,7 +1332,7 @@
     "beforeFocus": "Values saved locally · revision 1\nNext step →",
     "afterFocus": "Values saved locally · revision 1\nNext step →",
     "visibleGuidance": [
-      "AdvisoryTime DependentLVO ProtocolOutside coverage (Thrombectomy capable Mon-Fri 0700-1900): ED provider initiates transfer to a regional comprehensive stroke center.SYN-006 · Challenge v2Evaluated 2026-03-17 19:30 · America/ChicagoView source evidence · 1SYN-006 · LVO ProtocolThrombectomy capable Mon-Fri 0700-1900. During coverage, teleneurologist activates the synthetic EVT team. Outside coverage, ED provider initiates transfer to a regional comprehensive stroke center.guide · Challenge v2 · PDF p9 · LVO ProtocolVerified 2026-02-02LVO Protocol evaluated at 2026-03-17T19:30:00-05:00[America/Chicago]; freshness reference 2026-03-17.Evaluated instant 2026-03-18T00:30:00ZAcknowledge for this encounter"
+      "AdvisoryTime DependentLVO ProtocolOutside coverage (Thrombectomy capable Mon-Fri 0700-1900): ED provider initiates transfer to a regional comprehensive stroke center.SYN-006 · Challenge v2Evaluated 2026-03-17 19:30 · America/ChicagoView source evidence · 1SYN-006 · LVO ProtocolThrombectomy capable Mon-Fri 0700-1900. During coverage, teleneurologist activates the synthetic EVT team. Outside coverage, ED provider initiates transfer to a regional comprehensive stroke center.guide · Challenge v2 · hospital_guides.json · LVO ProtocolVerified 2026-02-02LVO Protocol evaluated at 2026-03-17T19:30:00-05:00[America/Chicago]; freshness reference 2026-03-17.Evaluated instant 2026-03-18T00:30:00ZAcknowledge for this encounter"
     ],
     "mounted": {
       "nudge-dock": 0,

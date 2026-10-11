@@ -35,7 +35,10 @@ test("N2 live edit, clock boundary, cited evidence; desktop inspection", async (
     .locator(".field-guidance")
     .getByText("View source evidence", { exact: false })
     .click();
-  await expect(page.locator(".evidence-body")).toContainText("PDF p9");
+  await expect(page.locator(".evidence-body")).toContainText(
+    "hospital_guides.json · LVO Protocol",
+  );
+  await expect(page.locator(".evidence-body")).toContainText("Verified 2026-02-02");
   mkdirSync("reports", { recursive: true });
   await page.screenshot({ path: "reports/desktop-n2.png", fullPage: true });
   await page.locator(".demo-controls > summary").click();

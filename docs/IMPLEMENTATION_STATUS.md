@@ -4,8 +4,8 @@
 
 The milestone completion below records the earlier prototype, not completion of the new
 three-machine sprint. See [Machine 3 and demo readiness review](../reports/MACHINE3_DEMO_READINESS.md)
-for the current task-level state and blockers. On Machine 3 combined with Machine 2 tasks 1-4,
-294 unit tests, all 29 sponsor cases, the production build and 11 browser workflows pass.
+for the current task-level state and blockers. On Machine 3 combined with Machine 2 tasks 1-5,
+295 unit tests, all 29 sponsor cases, the production build and 11 browser workflows pass.
 The dock, gate banner, multi-file import UI and Machine 2 component mounts remain unfinished.
 
 ## Earlier prototype milestones
