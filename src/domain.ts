@@ -317,6 +317,30 @@ export function freshContext(h: Hospital, local = "2026-03-17T14:00"): Context {
     values: {},
   };
 }
+// The doctor's own zone, read from their device. Rules are always evaluated on
+// the hospital's clock; this is only shown beside it.
+export function deviceZone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  } catch {
+    return "UTC";
+  }
+}
+// Now, to the minute. A live encounter is evaluated at the real time, so the
+// hospital clock, coverage windows and who is on duty are all current.
+export function nowInstant() {
+  return Temporal.Now.instant()
+    .round({ smallestUnit: "minute", roundingMode: "floor" })
+    .toString();
+}
+// A new encounter for this hospital at the current time, with nothing recorded.
+export function liveContext(h: Hospital): Context {
+  return {
+    ...freshContext(h),
+    instant: nowInstant(),
+    providerZone: deviceZone(),
+  };
+}
 export function localInstant(local: string, zone: string) {
   return Temporal.PlainDateTime.from(local)
     .toZonedDateTime(zone, { disambiguation: "reject" })

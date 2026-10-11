@@ -16,6 +16,7 @@ import { freshContext, type Hospital } from "../src/domain";
 import { seedHospitals } from "../src/data";
 import { challengeFixtures } from "../src/fixtures";
 import { fixtureContext } from "../src/evaluation";
+import { withoutStaleNote } from "../src/guidance/NudgeCard";
 
 const byId = (id: string) => seedHospitals.find((h) => h.id === id)!;
 const noop = () => {};
@@ -55,7 +56,7 @@ describe("Chat panel", () => {
     expect(out).toContain("About LVO Protocol · SYN-006");
     expect(out).toContain("Time Dependent");
     expect(out).toContain(seed.message);
-    expect(out).toContain(`Do ${seed.action}`);
+    expect(out).toContain(`Next step ${seed.action}`);
     expect(out).toContain("Try asking:");
     expect(out).toContain("What are the thrombectomy coverage hours?");
     expect(out).toContain("Don't include patient names or identifiers.");
@@ -91,7 +92,7 @@ describe("Answers for the sponsor's validation questions", () => {
     ["V14", "not_in_guide", "Pediatric Neurology"],
   ];
   for (const [id, status, field] of cases)
-    it(`${id} renders as ${status}, citing ${field}, with a Do line`, () => {
+    it(`${id} renders as ${status}, citing ${field}, with a Next step line`, () => {
       const f = challengeFixtures.find((x) => x.id === id)!;
       const h = byId(f.hospital);
       const turn = askGuide(h, fixtureContext(h, f), f.question!, 1);
@@ -103,7 +104,10 @@ describe("Answers for the sponsor's validation questions", () => {
       expect(out).toContain(f.question!);
       expect(out).toContain(field);
       expect(r.action.length).toBeGreaterThan(0);
-      expect(out).toContain(`Do ${r.action}`);
+      // A stale rule says how old it is once, in the Verify line, rather than
+      // repeating it inside the action.
+      expect(out).toContain(`Next step ${withoutStaleNote(r.action)}`);
+      if (status === "stale") expect(out).toContain("Verify before relying on it.");
       expect(r.citations.every((s) => s.hospitalId === h.id)).toBe(true);
     });
 

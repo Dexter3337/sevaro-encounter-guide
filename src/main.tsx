@@ -1,4 +1,10 @@
-import React, { useState, useRef, useLayoutEffect, useEffect } from "react";
+import React, {
+  useState,
+  useRef,
+  useLayoutEffect,
+  useEffect,
+  useMemo,
+} from "react";
 import { createRoot } from "react-dom/client";
 import {
   type Context,
@@ -17,6 +23,8 @@ import {
   value,
   localTime,
   localInstant,
+  liveContext,
+  nowInstant,
 } from "./domain";
 import {
   seedHospitals,
@@ -26,7 +34,15 @@ import {
   latest,
   download,
 } from "./data";
-import { evaluate, ask, answerField, gates, engineVersion } from "./engine";
+import {
+  evaluate,
+  ask,
+  answerField,
+  gates,
+  engineVersion,
+  completionChecklist,
+  resultSignature,
+} from "./engine";
 import { NudgeDock } from "./guidance/NudgeDock";
 import { NudgeCard } from "./guidance/NudgeCard";
 import { FieldMarker } from "./guidance/FieldMarker";
@@ -57,7 +73,16 @@ import "./workspace.css";
 import "./sprint.css";
 import "./consultation.css";
 import { ConsultationPane } from "./encounter/ConsultationPane";
-import { AssistantOrb } from "./guidance/AssistantOrb";
+import "./shell.css";
+import type { GuideMode, ReportReason } from "./guidance/types";
+import {
+  makeReport,
+  submitReport,
+  localReports,
+  fetchReports,
+  reasonText,
+  type GuideReport,
+} from "./feedback";
 
 const label = (s: string) =>
   s.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -79,7 +104,6 @@ type Measure = {
   cards: number;
   committed: boolean;
 };
-const signature = (r: Result) => `${r.id}:${r.message}:${r.primaryStatus}`;
 // `?guidance-fail` makes every evaluation throw, to prove the caselog survives
 // a guidance failure (guardrail 14). Never set in normal use.
 const forcedGuidanceFailure =
@@ -92,6 +116,7 @@ function InputField({
   onFocus,
   onBlur,
   marker,
+  hint,
 }: {
   f: Field;
   c: Context;
@@ -99,6 +124,7 @@ function InputField({
   onFocus: (id: string) => void;
   onBlur: () => void;
   marker?: React.ReactNode;
+  hint?: React.ReactNode;
 }) {
   const v = value(c, f.id);
   const id = `field-${f.id}`;
@@ -161,7 +187,9 @@ function InputField({
           placeholder={
             f.id === "assessment_plan"
               ? "Synthetic documentation only. Mention EEG or seizure to see availability."
-              : "Enter synthetic encounter information…"
+              : f.id === "reason_for_consult"
+                ? "e.g. Synthetic stroke alert, left-sided weakness"
+                : "Synthetic encounter information…"
           }
           onChange={(e) => onChange(f.id, known(e.target.value))}
         />
@@ -176,17 +204,7 @@ function InputField({
           onChange={(e) => onChange(f.id, known(e.target.value))}
         />
       )}
-      {f.id === "charge_entered" && (
-        <small>
-          This records your statement; it does not post a hospital charge.
-        </small>
-      )}
-      {f.id === "plan_confirmed" && (
-        <small>
-          Prototype extension: record confirmation received from the hospital
-          provider.
-        </small>
-      )}
+      {hint}
     </div>
   );
 }
@@ -196,21 +214,14 @@ function App() {
     ...seedHospitals,
     ...(initial.current?.hospitals || []),
   ]);
-  const [c, setC] = useState<Context>(() => {
-    const s = initial.current?.context;
-    if (
-      s &&
-      [...seedHospitals, ...(initial.current?.hospitals || [])].some(
-        (h) => h.id === s.hospitalId && h.version === s.guideVersion,
-      )
-    ) {
-      try {
-        localTime(s.instant, "UTC");
-        return s;
-      } catch {}
-    }
-    return freshContext(seedHospitals[5], "2026-03-17T19:30");
-  });
+  // Every visit opens a new encounter at the current time. The caselog belongs
+  // to one patient: nothing recorded in a previous session is carried into
+  // this one, whichever hospital it was for. Hospitals, imports and held rows
+  // are what persist on this device.
+  const [c, setC] = useState<Context>(() => liveContext(seedHospitals[5]));
+  // Live: the encounter follows the real clock. A scenario or a set instant
+  // pins it, and the header says so.
+  const [live, setLive] = useState(true);
   const h = hs.find(
     (h) => h.id === c.hospitalId && h.version === c.guideVersion,
   )!;
@@ -224,16 +235,44 @@ function App() {
     }
   });
   const resultsRef = useRef<Result[]>(results);
-  const [dismissed, setDismissed] = useState<string[]>([]);
+  // Acknowledged nudges stay on screen, marked, and never reopen by themselves.
+  const [acknowledged, setAcknowledged] = useState<string[]>([]);
+  const [reported, setReported] = useState<string[]>([]);
   const [audit, setAudit] = useState<Audit[]>([]);
   const [measures, setMeasures] = useState<Measure[]>([]);
   const [completed, setCompleted] = useState(false);
   const [completionText, setCompletionText] = useState("");
   const [error, setError] = useState("");
-  // The doctor's escalation ladder: the dock, then the guide chat, then a person.
-  const [chatOpen, setChatOpen] = useState(false);
+  // The doctor's escalation ladder, in one column beside the form: the
+  // guidance, then the guide chat, then a person.
+  const [mode, setMode] = useState<GuideMode>("guidance");
+  const [attention, setAttention] = useState(false);
+  const chatOpen = mode === "chat";
   const [chatSeed, setChatSeed] = useState<Result>();
   const [contactsFor, setContactsFor] = useState<{ reason?: string }>();
+  const showContacts = (reason?: string) => {
+    setContactsFor({ reason });
+    setMode("contacts");
+  };
+  const setChatOpen = (open: boolean) => setMode(open ? "chat" : "guidance");
+  // Layout preferences for this device only.
+  const [ui, setUi] = useState(() => {
+    const narrow = typeof window !== "undefined" && window.innerWidth < 1200;
+    try {
+      const saved = JSON.parse(localStorage.getItem("encounter-guide:ui") || "{}");
+      return { rail: saved.rail ?? !narrow, video: saved.video ?? !narrow };
+    } catch {
+      return { rail: !narrow, video: !narrow };
+    }
+  });
+  const setUiPref = (next: Partial<typeof ui>) =>
+    setUi((prev) => {
+      const v = { ...prev, ...next };
+      try {
+        localStorage.setItem("encounter-guide:ui", JSON.stringify(v));
+      } catch {}
+      return v;
+    });
   const [dockRequest, setDockRequest] = useState<{
     resultId?: string;
     nonce: number;
@@ -292,14 +331,15 @@ function App() {
     if (r) setShareable([]);
   }
   const lastCompletion = useRef("");
+  // Bumped when a report is filed, so the library's list re-reads this device.
+  const [reportsTick, setReportsTick] = useState(0);
   const [search, setSearch] = useState("");
   const [report, setReport] = useState<ReturnType<typeof runEvaluation>>();
   const pending = useRef<{ start: number; event: Event; cards: number }[]>([]);
   const latestC = useRef(c);
   latestC.current = c;
-  const visible = outage
-    ? []
-    : results.filter((r) => !dismissed.includes(signature(r)));
+  const visible = outage ? [] : results;
+  // Only hospital data persists on this device — never the encounter.
   useEffect(() => {
     if (
       !saveData({
@@ -309,7 +349,6 @@ function App() {
               (s) => s.id === h.id && s.version === h.version,
             ),
         ),
-        context: c,
         imports: importHistory,
         held,
       })
@@ -317,7 +356,7 @@ function App() {
       setError(
         "Local persistence unavailable or full; export data before reloading.",
       );
-  }, [hs, c, importHistory, held]);
+  }, [hs, importHistory, held]);
   useLayoutEffect(() => {
     const batch = pending.current.splice(0);
     if (!batch.length) return;
@@ -389,6 +428,29 @@ function App() {
     );
     return rs;
   }
+  // The live clock: the encounter moves to the real time as minutes pass, so
+  // coverage windows and who is on duty stay correct while the doctor works.
+  const commitRef = useRef(commit);
+  commitRef.current = commit;
+  useEffect(() => {
+    if (!live || completed) return;
+    const tick = () => {
+      const now = nowInstant(),
+        cur = latestC.current;
+      if (now !== cur.instant)
+        commitRef.current(
+          { ...cur, instant: now },
+          makeEvent(cur, "clock_changed"),
+        );
+    };
+    tick();
+    const id = setInterval(tick, 15_000);
+    return () => clearInterval(id);
+  }, [live, completed, h.id, h.version]);
+  function goLive() {
+    setLive(true);
+    commit({ ...c, instant: nowInstant() }, makeEvent(c, "clock_changed"));
+  }
   function change(id: string, val: Known) {
     commit(c, makeEvent(c, "field_changed", id, val));
   }
@@ -407,8 +469,14 @@ function App() {
     commit({ ...c, step }, makeEvent(c, "step_changed"));
   }
   function newHospital(hospital: Hospital) {
-    const next = freshContext(hospital);
-    setDismissed([]);
+    // A new patient: nothing recorded carries over. A pinned scenario time is
+    // kept; otherwise the encounter starts now.
+    const next = live
+      ? liveContext(hospital)
+      : { ...liveContext(hospital), instant: c.instant };
+    setAcknowledged([]);
+    setReported([]);
+    setMode("guidance");
     setChatSeed(undefined);
     setContactsFor(undefined);
     commit(next, makeEvent(next, "encounter_opened"), hospital);
@@ -417,8 +485,10 @@ function App() {
     const f = challengeFixtures.find((f) => f.id === id)!;
     const guide = hs.find((h) => h.id === f.hospital)!;
     const next = fixtureContext(guide, f);
+    setLive(false);
     setOutage(false);
-    setDismissed([]);
+    setAcknowledged([]);
+    setReported([]);
     lastCompletion.current = "";
     const rs = commit(
       next,
@@ -437,7 +507,7 @@ function App() {
     }
     if (f.block && f.kind === "nudge" && rs.some((r) => r.blocksCompletion)) {
       setGateShown(true);
-      setCompletionText("Completion blocked. Record the requirement below.");
+      setCompletionText("Completion blocked — record what is marked Required.");
     }
     setTab("encounter");
   }
@@ -465,7 +535,7 @@ function App() {
     );
     if (blocking.length) {
       setGateShown(true);
-      setCompletionText("Completion blocked. Record the required state below.");
+      setCompletionText("Completion blocked — record what is marked Required.");
       requestAnimationFrame(() =>
         document
           .getElementById("field-" + blocking[0].missingRequirements[0])
@@ -483,7 +553,7 @@ function App() {
         .join("");
       setCompletionText(
         (outage
-          ? "Mock encounter completed. Guide requirements could not be verified during outage."
+          ? "Encounter completed. Guide requirements could not be verified during the outage."
           : rs.some(
                 (r) =>
                   r.primaryStatus === "conflict" ||
@@ -491,8 +561,8 @@ function App() {
                     ["stale", "interpretation_review"].includes(f),
                   ),
               )
-            ? "Mock encounter completed with uncertain guide requirements. Review the source warnings."
-            : "Mock encounter completed. Known supported guide requirements are satisfied.") +
+            ? "Encounter completed with uncertain guide requirements. Review the source warnings."
+            : "Encounter completed. Known supported guide requirements are satisfied.") +
           acknowledged,
       );
     }
@@ -520,6 +590,7 @@ function App() {
       if (!/[Zz]|[+-]\d\d:\d\d$/.test(clock))
         throw new Error("Use an ISO instant with Z or an offset.");
       localTime(clock, h.timezone);
+      setLive(false);
       commit({ ...c, instant: clock }, makeEvent(c, "clock_changed"));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -618,8 +689,11 @@ function App() {
   // skip both copies.
   const forField = (id: string) => visible.filter((r) => r.anchor === id);
   const fieldLabels = Object.fromEntries(fields.map((f) => [f.id, f.label]));
-  const openDockOn = (resultId?: string) =>
+  const openDockOn = (resultId?: string) => {
+    setMode("guidance");
+    setAttention(false);
     setDockRequest({ resultId, nonce: Date.now() });
+  };
   // The gate is re-read from the engine on every render once the doctor has
   // tried to complete, so recording the value clears it as they type.
   const gateResults = (() => {
@@ -649,7 +723,8 @@ function App() {
         openChat();
       }
   };
-  const reportNudge = (r: Result) => {
+  const reportNudge = (r: Result, reason: ReportReason, comment: string) => {
+    setReported((x) => [...x, r.id]);
     setAudit((a) => [
       ...a,
       {
@@ -657,15 +732,17 @@ function App() {
         hospitalId: h.id,
         version: h.version,
         results: [r],
-        action: "reported as looking wrong",
+        action: `reported: ${reasonText[reason]}${comment ? ` — ${comment}` : ""}`,
       },
     ]);
-    setNotice(
-      `Flagged “${r.title}” for the guide owner. It is recorded in the local event log.`,
+    void submitReport(makeReport(r, reason, comment)).then(() =>
+      setReportsTick((n) => n + 1),
     );
   };
+  const undoAcknowledge = (r: Result) =>
+    setAcknowledged((a) => a.filter((x) => x !== resultSignature(r)));
   const acknowledge = (r: Result) => {
-    setDismissed((a) => [...a, signature(r)]);
+    setAcknowledged((a) => [...a, resultSignature(r)]);
     setAudit((a) => [
       ...a,
       {
@@ -685,242 +762,200 @@ function App() {
       .filter((m) => m.type === "field_changed" && m.committed)
       .map((m) => m.ms),
   );
+  const checklist =
+    c.step === "sign_off" && !outage
+      ? (() => {
+          try {
+            return completionChecklist(h, c);
+          } catch {
+            return [];
+          }
+        })()
+      : [];
+  // Each requirement field says, under itself, where this hospital stands:
+  // the doctor never has to press Complete to find out.
+  const requirementHint = (id: string) => {
+    const i = checklist.find((x) => x.requirement === id);
+    if (!i) return undefined;
+    const said = {
+      missing: `Required by ${h.name} before completion.`,
+      satisfied: `Required by ${h.name} — recorded.`,
+      unclear: `${h.name}'s rule may be out of date — check before completing.`,
+      not_required: `Not required by ${h.name}.`,
+      not_in_guide: `${h.name}'s guide doesn't say whether this is required.`,
+    }[i.state];
+    return (
+      <small className={`eg-req ${i.state}`} data-state={i.state}>
+        {said}
+        {id === "charge_entered" && " Records your statement; no charge is posted."}
+      </small>
+    );
+  };
+  const stepList = steps.filter(
+    (s) => s !== "rounding" || c.encounterType === "Rounding",
+  );
+  const stepIndex = stepList.indexOf(c.step);
+  const nextStep = stepList[stepIndex + 1];
+  const prevStep = stepList[stepIndex - 1];
+  const recorded = Object.values(c.values).filter(
+    (v) => v.state !== "unknown",
+  ).length;
+  const clockOf = (zone: string) => {
+    const t = localTime(c.instant, zone);
+    let date = t.toPlainDate().toString();
+    try {
+      date = new Intl.DateTimeFormat("en-US", {
+        timeZone: zone,
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }).format(new Date(c.instant));
+    } catch {}
+    let abbr = zone;
+    try {
+      abbr =
+        new Intl.DateTimeFormat("en-US", { timeZone: zone, timeZoneName: "short" })
+          .formatToParts(new Date(c.instant))
+          .find((p) => p.type === "timeZoneName")?.value ?? zone;
+    } catch {}
+    return {
+      time: t.toPlainTime().toString({ smallestUnit: "minute" }),
+      date,
+      abbr,
+    };
+  };
+  const hospitalClock = clockOf(h.timezone);
+  const yourClock = clockOf(c.providerZone);
+  const guidanceCount = visible.length;
+  const loudest = visible.some((r) => r.blocksCompletion)
+    ? "hard_stop"
+    : visible.some((r) => r.tier === "advisory")
+      ? "advisory"
+      : "info";
   return (
     <>
-      <header>
-        <a className="brand" href="#" onClick={(e) => e.preventDefault()}>
-          <span className="brand-mark">
-            <Icon name="wave" size={26} />
-          </span>
-          <span>
-            Encounter<span className="brand-accent">Guide</span>
-            <small>PROACTIVE CARE COMPANION</small>
-          </span>
-        </a>
-        <nav className="review-links" aria-label="Review resources">
-          <a href="/workflow.html">App workflow</a>
-          <a href="/integration-review.html">Sevaro integration review</a>
-          <a href="/presentation.html">Mentor presentation</a>
-        </nav>
-        <span className="demo-badge">
-          SYNTHETIC WORKSPACE <i /> Rutgers Health Hack
-        </span>
-      </header>
-      <div className="app-shell">
-        <nav className="rail" aria-label="Main navigation">
-          <div>
-            <span className="rail-label">WORKSPACE</span>
-            {[
-              ["encounter", "01", "Encounter"],
-              ["guides", "02", "Guide library"],
-              ["evaluation", "03", "Evaluation"],
-            ].map(([id, num, name]) => (
-              <button
-                key={id}
-                aria-label={name}
-                aria-current={tab === id ? "page" : undefined}
-                onClick={() => setTab(id)}
-              >
-                <Icon
-                  name={
-                    id === "encounter"
-                      ? "wave"
-                      : id === "guides"
-                        ? "book"
-                        : "chart"
-                  }
-                />
-                {name}
-              </button>
-            ))}
-          </div>
-          <div className="rail-footer">
-            <Icon name="shield" size={20} /> Built around your workflow
-            <p>
-              The right guidance, at the right moment. Synthetic hospital data.
-            </p>
-            <small>Engine {engineVersion}</small>
-          </div>
-        </nav>
-        <main className={`page-${tab}`}>
-          <div className="page-heading">
-            <div>
-              <p className="eyebrow">
-                {tab === "encounter"
-                  ? "YOUR CLINICAL WORKSPACE"
-                  : tab === "guides"
-                    ? "SOURCE KNOWLEDGE"
-                    : "ENGINE VERIFICATION"}
-              </p>
-              <h1>
-                {tab === "encounter"
-                  ? "Consultation workspace"
-                  : tab === "guides"
-                    ? "Source records, made inspectable."
-                    : "Evidence before claims."}
-              </h1>
-            </div>
-            {tab === "encounter" && (
-              <span className={`case-status ${completed ? "done" : ""}`}>
-                {completed ? "✓ Completed" : "● In progress"}
+      <div className={`eg${ui.rail ? "" : " rail-closed"}`}>
+        <header className="eg-top">
+          <button
+            className="eg-icon"
+            onClick={() => setUiPref({ rail: !ui.rail })}
+            aria-label={ui.rail ? "Hide navigation" : "Show navigation"}
+            aria-expanded={ui.rail}
+            title={ui.rail ? "Hide navigation" : "Show navigation"}
+          >
+            <Icon name="menu" />
+          </button>
+          <a
+            className="eg-brand"
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              setTab("encounter");
+            }}
+          >
+            <span className="eg-brand-mark">
+              <Icon name="wave" size={18} />
+            </span>
+            <span>
+              Encounter<b>Guide</b>
+            </span>
+          </a>
+          <label className="eg-hospital">
+            <span>Hospital</span>
+            <select
+              aria-label="Hospital"
+              value={h.id}
+              onChange={(e) =>
+                newHospital(latest(hs).find((h) => h.id === e.target.value)!)
+              }
+            >
+              {latest(hs).map((h) => (
+                <option key={h.id} value={h.id}>
+                  {h.name} · {h.id}
+                </option>
+              ))}
+            </select>
+          </label>
+          {/* Every rule is read on the hospital's clock; the doctor's own is
+              shown beside it so the difference is never a surprise. */}
+          <div className="eg-clocks">
+            <div className="eg-clock hospital" data-testid="hospital-clock">
+              <span className="eg-clock-label">
+                Hospital time
+                {live ? (
+                  <i className="eg-live">Live</i>
+                ) : (
+                  <i className="eg-pinned">Scenario</i>
+                )}
               </span>
+              <strong>{hospitalClock.time}</strong>
+              <small title={h.timezone}>
+                {hospitalClock.date} · {hospitalClock.abbr}
+              </small>
+            </div>
+            <div className="eg-clock" data-testid="provider-clock">
+              <span className="eg-clock-label">Your time</span>
+              <strong>{yourClock.time}</strong>
+              <small title={c.providerZone}>
+                {yourClock.date} · {yourClock.abbr}
+              </small>
+            </div>
+            {!live && (
+              <button className="eg-btn small" onClick={goLive}>
+                <Icon name="clock" size={15} /> Use live time
+              </button>
             )}
           </div>
-          <section className="context-strip" aria-label="Encounter context">
-            <label>
-              Hospital
-              <select
-                aria-label="Hospital"
-                value={h.id}
-                onChange={(e) =>
-                  newHospital(latest(hs).find((h) => h.id === e.target.value)!)
-                }
-              >
-                {latest(hs).map((h) => (
-                  <option key={h.id} value={h.id}>
-                    {h.name} · {h.id}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <div>
-              <small>Hospital-local clock</small>
-              <strong>
-                {localTime(c.instant, h.timezone)
-                  .toPlainTime()
-                  .toString({ smallestUnit: "minute" })}
-              </strong>
-              <small>
-                {localTime(c.instant, h.timezone).toPlainDate().toString()} ·{" "}
-                {h.timezone}
-              </small>
-            </div>
-            {/* Every rule is read on the hospital's clock; the doctor's own
-                is shown beside it so the difference is never a surprise. */}
-            <div data-testid="provider-clock">
-              <small>Your clock</small>
-              <strong>
-                {localTime(c.instant, c.providerZone)
-                  .toPlainTime()
-                  .toString({ smallestUnit: "minute" })}
-              </strong>
-              <small>
-                {localTime(c.instant, c.providerZone).toPlainDate().toString()}{" "}
-                · {c.providerZone}
-              </small>
-            </div>
-            <div>
-              <small>Guide version</small>
-              <strong>{h.version}</strong>
-              <small>
-                {outage || guidanceFailed
-                  ? "Unavailable"
-                  : "Loaded · read-only"}
-              </small>
-            </div>
-          </section>
-          {tab === "encounter" && (
-            <>
-              <div className="companion-actions">
-                <button className="secondary" onClick={() => openChat()}>
-                  Ask this hospital’s guide
-                </button>
-                <button
-                  className="secondary"
-                  onClick={() => setContactsFor({})}
-                >
-                  Who to call
-                </button>
-              </div>
-              <GuidanceBoundary key={`sb:${h.id}:${h.version}`} quiet>
-                <StoryboardCard
-                  hospital={h}
-                  context={c}
-                  onOpenConflict={openConflict}
-                />
-              </GuidanceBoundary>
-            </>
-          )}
-          {notice && (
-            <div role="status" className="banner">
-              {notice}{" "}
-              <button className="link" onClick={() => setNotice("")}>
-                Dismiss
-              </button>
-            </div>
-          )}
-          {newer && (
-            <div className="banner">
-              A newer guide version is available. This encounter is pinned to{" "}
-              {h.version}.{" "}
-              <button
-                onClick={() => {
-                  commit(
-                    { ...c, guideVersion: newer.version },
-                    makeEvent(c, "guide_changed"),
-                    newer,
-                  );
-                  setDismissed([]);
-                }}
-              >
-                Refresh to {newer.version}
-              </button>
-            </div>
-          )}
-          {error && (
-            <div role="alert" className="banner error">
-              {error}
-            </div>
-          )}
-          {outage && (
-            <div role="status" className="banner">
-              Hospital guidance unavailable. The caselog remains usable; guide
-              completion requirements cannot be verified.
-            </div>
-          )}
-          {tab === "encounter" && (
-            <>
-              <details className="demo-controls">
-                <summary>Demo controls & scenario launcher</summary>
-                <div className="control-grid">
-                  <label>
-                    Reproducible scenario
-                    <select
-                      aria-label="Scenario"
-                      value={fixture}
-                      onChange={(e) => setFixture(e.target.value)}
-                    >
-                      {challengeFixtures.map((f) => (
-                        <option key={f.id} value={f.id}>
-                          {f.id} · {f.question || label(f.step!)}
-                        </option>
-                      ))}
-                    </select>
-                    <button onClick={() => launch(fixture)}>
-                      Launch scenario
-                    </button>
-                  </label>
-                  <label>
-                    Encounter instant (ISO with offset)
-                    <input
-                      aria-label="Encounter instant"
-                      value={clock}
-                      onChange={(e) => setClock(e.target.value)}
-                    />
-                    <button onClick={applyClock}>Apply clock</button>
-                  </label>
-                  <label>
-                    Provider display zone
-                    <select
-                      value={c.providerZone}
-                      onChange={(e) =>
-                        commit(
-                          { ...c, providerZone: e.target.value },
-                          makeEvent(c, "clock_changed"),
-                        )
-                      }
-                    >
-                      {[
+          <div className="eg-top-actions">
+            <button
+              className="eg-btn"
+              onClick={() => newHospital(h)}
+              title="Start a new, empty encounter for this hospital"
+            >
+              <Icon name="plus" size={16} /> New encounter
+            </button>
+            <details className="demo-controls eg-demo">
+              <summary>Demo</summary>
+              <div className="eg-demo-panel control-grid">
+                <label>
+                  Reproducible scenario
+                  <select
+                    aria-label="Scenario"
+                    value={fixture}
+                    onChange={(e) => setFixture(e.target.value)}
+                  >
+                    {challengeFixtures.map((f) => (
+                      <option key={f.id} value={f.id}>
+                        {f.id} · {f.question || label(f.step!)}
+                      </option>
+                    ))}
+                  </select>
+                  <button onClick={() => launch(fixture)}>Launch scenario</button>
+                </label>
+                <label>
+                  Encounter instant (ISO with offset)
+                  <input
+                    aria-label="Encounter instant"
+                    value={clock}
+                    onChange={(e) => setClock(e.target.value)}
+                  />
+                  <button onClick={applyClock}>Apply clock</button>
+                </label>
+                <label>
+                  Your display zone
+                  <select
+                    value={c.providerZone}
+                    onChange={(e) =>
+                      commit(
+                        { ...c, providerZone: e.target.value },
+                        makeEvent(c, "clock_changed"),
+                      )
+                    }
+                  >
+                    {[
+                      ...new Set([
+                        c.providerZone,
                         "America/New_York",
                         "America/Chicago",
                         "America/Denver",
@@ -928,89 +963,188 @@ function App() {
                         "UTC",
                         "Asia/Kolkata",
                         "Asia/Tokyo",
-                      ].map((z) => (
-                        <option key={z}>{z}</option>
-                      ))}
-                    </select>
-                    <small>
-                      {localTime(c.instant, c.providerZone).toString()}
-                    </small>
-                  </label>
-                  <div>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={outage}
-                        onChange={(e) => {
-                          setOutage(e.target.checked);
-                          const rs = e.target.checked
-                            ? []
-                            : evaluate(h, c, makeEvent(c, "guide_changed"));
-                          resultsRef.current = rs;
-                          setResults(rs);
-                        }}
-                      />{" "}
-                      Simulate guide outage
-                    </label>
-                    <button
-                      className="secondary"
-                      onClick={() => {
-                        localStorage.removeItem(storageKey);
-                        setHs(seedHospitals);
-                        setOutage(false);
-                        setDismissed([]);
-                        setAudit([]);
-                        setMeasures([]);
-                        setImportHistory([]);
-                        setImportFiles([]);
-                        setHeld([]);
-                        setShareable([]);
-                        setSharedStatus("");
-                        setReport(undefined);
-                        setImportText("");
-                        setPreview(undefined);
-                        setChatOpen(false);
-                        setChatSeed(undefined);
-                        setContactsFor(undefined);
-                        setNotice("");
-                        setImportNotice("");
-                        setSearch("");
-                        setFixture("N2");
-                        setFormat("json");
-                        setMapping({});
-                        const next = freshContext(
-                          seedHospitals[5],
-                          "2026-03-17T19:30",
-                        );
-                        commit(
-                          next,
-                          makeEvent(next, "encounter_opened"),
-                          seedHospitals[5],
-                          true,
-                        );
+                      ]),
+                    ].map((z) => (
+                      <option key={z}>{z}</option>
+                    ))}
+                  </select>
+                </label>
+                <div>
+                  <label className="eg-check">
+                    <input
+                      type="checkbox"
+                      checked={outage}
+                      onChange={(e) => {
+                        setOutage(e.target.checked);
+                        const rs = e.target.checked
+                          ? []
+                          : evaluate(h, c, makeEvent(c, "guide_changed"));
+                        resultsRef.current = rs;
+                        setResults(rs);
                       }}
-                    >
-                      Reset demo data
+                    />{" "}
+                    Simulate guide outage
+                  </label>
+                  <button
+                    className="secondary"
+                    onClick={() => {
+                      localStorage.removeItem(storageKey);
+                      setHs(seedHospitals);
+                      setOutage(false);
+                      setAcknowledged([]);
+                      setReported([]);
+                      setAudit([]);
+                      setMeasures([]);
+                      setImportHistory([]);
+                      setImportFiles([]);
+                      setHeld([]);
+                      setShareable([]);
+                      setSharedStatus("");
+                      setReport(undefined);
+                      setImportText("");
+                      setPreview(undefined);
+                      setMode("guidance");
+                      setChatSeed(undefined);
+                      setContactsFor(undefined);
+                      setNotice("");
+                      setImportNotice("");
+                      setSearch("");
+                      setFixture("N2");
+                      setFormat("json");
+                      setMapping({});
+                      setLive(true);
+                      const next = liveContext(seedHospitals[5]);
+                      commit(
+                        next,
+                        makeEvent(next, "encounter_opened"),
+                        seedHospitals[5],
+                        true,
+                      );
+                    }}
+                  >
+                    Reset demo data
+                  </button>
+                </div>
+              </div>
+            </details>
+            <span className="eg-badge" title="All hospitals, people and patients here are synthetic.">
+              Synthetic data
+            </span>
+          </div>
+        </header>
+        <div className="eg-body">
+          <nav className="eg-rail" aria-label="Main navigation" hidden={!ui.rail}>
+            {[
+              ["encounter", "Encounter", "wave"],
+              ["guides", "Guide library", "book"],
+              ["evaluation", "Evaluation", "chart"],
+            ].map(([id, name, icon]) => (
+              <button
+                key={id}
+                aria-label={name}
+                aria-current={tab === id ? "page" : undefined}
+                onClick={() => setTab(id)}
+              >
+                <Icon name={icon} />
+                <span>{name}</span>
+              </button>
+            ))}
+            <small className="eg-rail-foot">Engine {engineVersion}</small>
+          </nav>
+          <main className={`eg-main page-${tab}`}>
+            {(notice || newer || error || outage) && (
+              <div className="eg-banners">
+                {notice && (
+                  <div role="status" className="banner">
+                    {notice}{" "}
+                    <button className="link" onClick={() => setNotice("")}>
+                      Dismiss
                     </button>
                   </div>
+                )}
+                {newer && (
+                  <div className="banner">
+                    A newer guide version is available. This encounter is
+                    pinned to {h.version}.{" "}
+                    <button
+                      onClick={() => {
+                        commit(
+                          { ...c, guideVersion: newer.version },
+                          makeEvent(c, "guide_changed"),
+                          newer,
+                        );
+                        setAcknowledged([]);
+                      }}
+                    >
+                      Refresh to {newer.version}
+                    </button>
+                  </div>
+                )}
+                {error && (
+                  <div role="alert" className="banner error">
+                    {error}
+                  </div>
+                )}
+                {outage && (
+                  <div role="status" className="banner">
+                    Hospital guidance unavailable. The caselog remains usable;
+                    guide completion requirements cannot be verified.
+                  </div>
+                )}
+              </div>
+            )}
+            {tab !== "encounter" && (
+              <div className="page-heading">
+                <div>
+                  <p className="eyebrow">
+                    {tab === "guides" ? "SOURCE KNOWLEDGE" : "ENGINE VERIFICATION"}
+                  </p>
+                  <h1>
+                    {tab === "guides"
+                      ? "Source records, made inspectable."
+                      : "Evidence before claims."}
+                  </h1>
                 </div>
-              </details>
-              <div className="workspace single" id="encounter-workspace">
-                <ConsultationPane hospital={h.name} />
-                <section className="caselog">
-                  <div className="section-head">
-                    <div>
-                      <h2>Your encounter</h2>
-                      <small>Synthetic encounter · {c.id.slice(0, 8)}</small>
+              </div>
+            )}
+            {tab === "encounter" && (
+              <div
+                className={`eg-work${ui.video ? "" : " video-closed"}`}
+                id="encounter-workspace"
+              >
+                {ui.video ? (
+                  <ConsultationPane
+                    hospital={h.name}
+                    onHide={() => setUiPref({ video: false })}
+                  />
+                ) : (
+                  <button
+                    className="eg-video-tab"
+                    onClick={() => setUiPref({ video: true })}
+                    aria-label="Show video"
+                    title="Show video"
+                  >
+                    <Icon name="camera" />
+                    <span>Video</span>
+                  </button>
+                )}
+                <section className="eg-case caselog" aria-label="Caselog">
+                  <header className="eg-case-head">
+                    <div className="eg-case-id">
+                      <h2>Encounter</h2>
+                      <span className={`case-status ${completed ? "done" : ""}`}>
+                        {completed ? "✓ Completed" : "In progress"}
+                      </span>
+                      <small>#{c.id.slice(0, 6)} · synthetic patient</small>
                     </div>
-                    <div className="type-controls">
+                    <div className="eg-types">
                       <label>
-                        Consult type
+                        Consult
                         <select
                           aria-label="Consult type"
                           value={c.consultType}
                           onChange={(e) => {
-                            setDismissed([]);
+                            setAcknowledged([]);
                             commit(
                               { ...c, consultType: e.target.value },
                               makeEvent(c, "step_changed"),
@@ -1022,12 +1156,12 @@ function App() {
                         </select>
                       </label>
                       <label>
-                        Encounter type
+                        Encounter
                         <select
                           aria-label="Encounter type"
                           value={c.encounterType}
                           onChange={(e) => {
-                            setDismissed([]);
+                            setAcknowledged([]);
                             commit(
                               {
                                 ...c,
@@ -1046,43 +1180,39 @@ function App() {
                         </select>
                       </label>
                     </div>
-                  </div>
-                  <nav className="stepper" aria-label="Caselog steps">
-                    {steps
-                      .filter(
-                        (s) =>
-                          s !== "rounding" || c.encounterType === "Rounding",
-                      )
-                      .map((s, i) => (
-                        <button
-                          aria-current={c.step === s ? "step" : undefined}
-                          key={s}
-                          onClick={() => step(s)}
-                        >
-                          <span>{i + 1}</span>
-                          {label(s)}
-                        </button>
-                      ))}
+                  </header>
+                  <nav className="eg-steps stepper" aria-label="Caselog steps">
+                    {stepList.map((s, i) => (
+                      <button
+                        aria-current={c.step === s ? "step" : undefined}
+                        className={i < stepIndex ? "done" : ""}
+                        key={s}
+                        onClick={() => step(s)}
+                      >
+                        <span>{i < stepIndex ? "✓" : i + 1}</span>
+                        {label(s)}
+                      </button>
+                    ))}
                   </nav>
-                  <div className="form-body">
-                    <div className="form-title">
-                      <span className="eyebrow">
-                        {label(c.step)} · {c.encounterType}
-                      </span>
-                      <h2>
-                        {c.step === "imaging"
-                          ? "Document imaging findings"
-                          : c.step === "sign_off"
-                            ? "Review & complete"
-                            : c.step === "rounding"
-                              ? "Rounding workflow"
-                              : `${label(c.step)} details`}
-                      </h2>
-                      <p className="muted">
-                        Guidance follows recorded context and the selected
-                        hospital’s source records.
-                      </p>
-                    </div>
+                  <div className="eg-case-body form-body">
+                    <p className="eg-step-title">
+                      {c.step === "imaging"
+                        ? "Imaging findings"
+                        : c.step === "sign_off"
+                          ? "Review and complete"
+                          : c.step === "rounding"
+                            ? "Rounding"
+                            : `${label(c.step)}`}
+                    </p>
+                    {c.step === "sign_off" && (
+                      <GateBanner
+                        gates={gateResults}
+                        onGoToField={(id) =>
+                          document.getElementById(`field-${id}`)?.focus()
+                        }
+                        onAcknowledge={acknowledgeGate}
+                      />
+                    )}
                     {fields.map((f) => (
                       <div key={f.id} className="manual-field">
                         <InputField
@@ -1091,25 +1221,29 @@ function App() {
                           onChange={change}
                           onFocus={focus}
                           onBlur={blur}
+                          hint={requirementHint(f.id)}
                           marker={
                             <FieldMarker
                               results={forField(f.id)}
                               fieldLabel={f.label}
                               onOpen={openDockOn}
+                              acknowledged={(r) =>
+                                acknowledged.includes(resultSignature(r))
+                              }
                             />
                           }
                         />
                         {f.id === "cta_done" && (
                           <small className="field-context">
-                            Record whether the scan was performed, including at
-                            another facility. Missing guide information does not
-                            mean CTA is unavailable.
+                            Include a scan done at another facility. A guide
+                            that doesn't mention CTA doesn't mean it's
+                            unavailable.
                           </small>
                         )}
                       </div>
                     ))}
                     {c.step === "note" && (
-                      <details>
+                      <details className="eg-note-preview">
                         <summary>Draft note preview</summary>
                         <pre>
                           {String(value(c, "note_title") || "Untitled")}
@@ -1120,106 +1254,150 @@ function App() {
                         </pre>
                       </details>
                     )}
-                    {c.step === "sign_off" && (
-                      <>
-                        <p className="muted">
-                          These fields record synthetic workflow statements.
-                          Completion does not sign a note or submit a charge to
-                          a hospital.
-                        </p>
-                        <GateBanner
-                          gates={gateResults}
-                          onGoToField={(id) =>
-                            document.getElementById(`field-${id}`)?.focus()
-                          }
-                          onAcknowledge={acknowledgeGate}
-                        />
-                        <button
-                          className="primary"
-                          onClick={() => complete()}
-                          disabled={completed}
-                        >
-                          Complete mock encounter →
-                        </button>
-                        <p
-                          role="status"
-                          className={completed ? "success" : "completion-error"}
-                        >
-                          {completionText}
-                        </p>
-                      </>
-                    )}
                   </div>
-                  <footer className="form-footer">
-                    <span>Values saved locally · revision {c.revision}</span>
+                  <footer className="eg-case-foot">
                     <button
-                      className="secondary"
-                      onClick={() =>
-                        step(
-                          steps[
-                            Math.min(
-                              steps.indexOf(c.step) + 1,
-                              c.encounterType === "Rounding" ? 6 : 5,
-                            )
-                          ],
-                        )
-                      }
+                      className="eg-btn"
+                      disabled={!prevStep}
+                      onClick={() => prevStep && step(prevStep)}
                     >
-                      Next step →
+                      <Icon name="left" size={16} /> Back
                     </button>
+                    {completionText ? (
+                      <p
+                        role="status"
+                        className={`eg-foot-note ${completed ? "success" : "completion-error"}`}
+                        title={completionText}
+                      >
+                        {completionText}
+                      </p>
+                    ) : (
+                      <span className="eg-foot-note">
+                        {recorded} value{recorded === 1 ? "" : "s"} recorded ·
+                        cleared when you start a new encounter
+                      </span>
+                    )}
+                    {c.step === "sign_off" || !nextStep ? (
+                      <button
+                        className="eg-btn primary"
+                        onClick={() =>
+                          c.step === "sign_off" ? complete() : step("sign_off")
+                        }
+                        disabled={completed}
+                      >
+                        {c.step === "sign_off" ? (
+                          <>
+                            <Icon name="check" size={16} /> Complete encounter
+                          </>
+                        ) : (
+                          "Go to sign off"
+                        )}
+                      </button>
+                    ) : (
+                      <button
+                        className="eg-btn primary"
+                        onClick={() => step(nextStep)}
+                      >
+                        Next: {label(nextStep)} <Icon name="right" size={16} />
+                      </button>
+                    )}
                   </footer>
                 </section>
-                <div className={`companion${chatOpen ? " chat-open" : ""}`}>
-                  <button
-                    className="assistant-idle"
-                    onClick={() => openChat()}
-                    aria-label="Open guide companion"
-                  >
-                    <AssistantOrb />
-                    <span>
-                      <strong>Guide companion</strong>
-                      <small>Here when you need me</small>
-                    </span>
-                  </button>
-                  <GuidanceBoundary key={`dock:${h.id}:${h.version}`}>
-                    <NudgeDock
-                      onOpenChat={() => openChat()}
-                      results={visible}
-                      focusedFieldId={focusedField}
-                      fieldLabels={fieldLabels}
-                      onAsk={openChat}
-                      onAcknowledge={acknowledge}
-                      onContacts={(reason) => setContactsFor({ reason })}
-                      onReport={reportNudge}
-                      unavailable={outage || guidanceFailed}
-                      openRequest={dockRequest}
-                    />
-                  </GuidanceBoundary>
-                  <GuidanceBoundary key={`chat:${h.id}:${h.version}`} quiet>
-                    <ChatPanel
-                      open={chatOpen && !outage}
-                      hospital={h}
-                      context={c}
-                      seed={chatSeed}
-                      onClose={() => setChatOpen(false)}
-                      onContacts={(reason) => setContactsFor({ reason })}
-                    />
-                  </GuidanceBoundary>
-                </div>
-                <GuidanceBoundary key={`contacts:${h.id}`} quiet>
-                  <ContactsSheet
-                    open={!!contactsFor}
-                    hospitalId={h.id}
-                    contacts={h.contacts ?? []}
-                    instant={c.instant}
-                    timezone={h.timezone}
-                    reason={contactsFor?.reason}
-                    onClose={() => setContactsFor(undefined)}
-                  />
-                </GuidanceBoundary>
+                <aside className="eg-guide" aria-label="Guide companion">
+                  <div className="eg-guide-tabs" role="tablist" aria-label="Guide companion">
+                    <button
+                      role="tab"
+                      aria-selected={mode === "guidance"}
+                      className={`eg-tab${attention ? " attention" : ""}`}
+                      onClick={() => {
+                        setMode("guidance");
+                        setAttention(false);
+                      }}
+                    >
+                      <Icon name="book" size={17} /> Guidance
+                      {guidanceCount > 0 && (
+                        <span className={`eg-count ${loudest}`}>{guidanceCount}</span>
+                      )}
+                    </button>
+                    <button
+                      role="tab"
+                      aria-selected={mode === "chat"}
+                      className="eg-tab"
+                      onClick={() => openChat()}
+                    >
+                      <Icon name="chat" size={17} /> Ask the guide
+                    </button>
+                    <button
+                      role="tab"
+                      aria-selected={mode === "contacts"}
+                      className="eg-tab call"
+                      onClick={() => showContacts()}
+                    >
+                      <Icon name="phone" size={17} /> Who to call
+                    </button>
+                  </div>
+                  <div className="eg-guide-body">
+                    <div className="eg-pane" hidden={mode !== "guidance"}>
+                      <GuidanceBoundary key={`dock:${h.id}:${h.version}`}>
+                        <NudgeDock
+                          results={visible}
+                          acknowledged={acknowledged}
+                          reported={reported}
+                          focusedFieldId={focusedField}
+                          fieldLabels={fieldLabels}
+                          hospitalName={h.name}
+                          onAsk={openChat}
+                          onAcknowledge={acknowledge}
+                          onUndoAcknowledge={undoAcknowledge}
+                          onContacts={showContacts}
+                          onReport={reportNudge}
+                          unavailable={outage || guidanceFailed}
+                          openRequest={dockRequest}
+                          onNewNudge={() => {
+                            if (mode !== "guidance") setAttention(true);
+                          }}
+                          storyboard={
+                            <GuidanceBoundary key={`sb:${h.id}:${h.version}`} quiet>
+                              <StoryboardCard
+                                hospital={h}
+                                context={c}
+                                onOpenConflict={openConflict}
+                              />
+                            </GuidanceBoundary>
+                          }
+                        />
+                      </GuidanceBoundary>
+                    </div>
+                    <div className="eg-pane chat-pane" hidden={mode !== "chat"}>
+                      <GuidanceBoundary key={`chat:${h.id}:${h.version}`} quiet>
+                        <ChatPanel
+                          open={chatOpen && !outage}
+                          hospital={h}
+                          context={c}
+                          seed={chatSeed}
+                          onClose={() => setMode("guidance")}
+                          onContacts={showContacts}
+                        />
+                      </GuidanceBoundary>
+                    </div>
+                    <div className="eg-pane" hidden={mode !== "contacts"}>
+                      <GuidanceBoundary key={`contacts:${h.id}`} quiet>
+                        <ContactsSheet
+                          open={mode === "contacts"}
+                          hospitalId={h.id}
+                          hospitalName={h.name}
+                          contacts={h.contacts ?? []}
+                          instant={c.instant}
+                          timezone={h.timezone}
+                          reason={contactsFor?.reason}
+                          onClose={() => setMode("guidance")}
+                        />
+                      </GuidanceBoundary>
+                    </div>
+                  </div>
+                </aside>
               </div>
-            </>
-          )}
+            )}
           {tab === "guides" && (
             <div className="guide-layout">
               <section className="panel">
@@ -1270,6 +1448,7 @@ function App() {
                 >
                   Export selected guide
                 </button>
+                <ReportedProblems hospitalId={h.id} tick={reportsTick} />
               </section>
               <section className="panel importer">
                 <p className="eyebrow">DYNAMIC DATA · NO RESTART</p>
@@ -1792,13 +1971,74 @@ function App() {
               </section>
             </>
           )}
-          <footer className="page-footer">
-            Synthetic rules for hackathon prototyping only. No real patient
-            data, treatment decisions, or hospital connections.
-          </footer>
-        </main>
+            {tab !== "encounter" && (
+              <footer className="page-footer">
+                Synthetic rules for hackathon prototyping only. No real patient
+                data, treatment decisions, or hospital connections.
+              </footer>
+            )}
+          </main>
+        </div>
       </div>
     </>
+  );
+}
+// What doctors reported as looking wrong in this hospital's guide. Reports
+// filed on this device are always listed; the team inbox is read on request.
+function ReportedProblems({ hospitalId, tick }: { hospitalId: string; tick: number }) {
+  const [team, setTeam] = useState<GuideReport[]>();
+  const [status, setStatus] = useState("");
+  const mine = useMemo(() => localReports(), [tick]);
+  const all = [...(team ?? []), ...mine.filter((m) => !team?.some((t) => t.id === m.id))]
+    .filter((r) => r.hospitalId === hospitalId)
+    .sort((a, b) => b.reportedAt.localeCompare(a.reportedAt));
+  return (
+    <section className="reported-problems" data-testid="reported-problems">
+      <div className="section-head">
+        <div>
+          <h3>Reported problems</h3>
+          <small>
+            Rules doctors flagged with “Report a problem” · {hospitalId}
+          </small>
+        </div>
+        <button
+          className="secondary"
+          onClick={async () => {
+            setStatus("Contacting the team inbox…");
+            const got = await fetchReports();
+            setTeam(got);
+            setStatus(
+              got
+                ? `Team inbox: ${got.length} report(s).`
+                : "The team inbox is not reachable — showing this device only.",
+            );
+          }}
+        >
+          Load team reports
+        </button>
+      </div>
+      {status && (
+        <p className="muted" role="status">
+          {status}
+        </p>
+      )}
+      {all.length ? (
+        <ul className="report-list">
+          {all.map((r) => (
+            <li key={r.id}>
+              <strong>{r.field}</strong> · {reasonText[r.reason]}
+              {r.comment && <> — “{r.comment}”</>}
+              <br />
+              <small>
+                {r.version} · {r.reportedAt.slice(0, 16).replace("T", " ")} UTC
+              </small>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="muted">No problems reported for this hospital.</p>
+      )}
+    </section>
   );
 }
 // Guidance is an addition to the caselog, never a dependency of it. If any
@@ -1816,11 +2056,11 @@ class GuidanceBoundary extends React.Component<
     if (!this.state.error) return this.props.children;
     if (this.props.quiet) return null;
     return (
-      <aside className="nudge-dock" data-state="pill" data-testid="nudge-dock">
-        <div className="dock-pill unavailable" role="status">
+      <section className="gp-guidance" data-state="pill" data-testid="nudge-dock">
+        <p className="gp-unavailable" role="status">
           Guidance unavailable — the caselog still works
-        </div>
-      </aside>
+        </p>
+      </section>
     );
   }
 }

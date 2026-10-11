@@ -16,6 +16,11 @@
   to = "/.netlify/functions/hospitals"
   status = 200
 
+[[redirects]]
+  from = "/api/feedback"
+  to = "/.netlify/functions/feedback"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]

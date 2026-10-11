@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { test, expect } from "@playwright/test";
+import { pinClock, hospitalZone } from "./helpers";
 
 // The judges hand over two files for a hospital we have never seen and we load
 // them live. This is that gesture, through the real screen.
@@ -7,6 +8,7 @@ const guide = "data/fixtures/syn-108/hospital_guides.json";
 const storyboard = "data/fixtures/syn-108/storyboard_notes.json";
 
 test.beforeEach(async ({ page }) => {
+  await pinClock(page);
   await page.goto("/");
   await page.evaluate(() => localStorage.clear());
   await page.reload();
@@ -34,7 +36,7 @@ test("two files for an unseen hospital, in one drop, become one hospital with it
   await page
     .getByRole("button", { name: "Open Riverbend Community Hospital in an encounter" })
     .click();
-  await expect(page.locator(".context-strip")).toContainText("America/Phoenix");
+  await expect(hospitalZone(page)).toHaveAttribute("title", "America/Phoenix");
   await expect(page.getByLabel("Hospital", { exact: true })).toHaveValue("SYN-108");
 });
 

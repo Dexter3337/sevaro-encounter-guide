@@ -52,8 +52,8 @@ export function SeedContext({ seed }: { seed: Result }) {
         </small>
       </p>
       <p className="card-answer">{seed.message}</p>
-      <p className="card-action">
-        <span>Do</span>
+      <p className="card-action gp-next">
+        <span>Next step</span>
         {seed.action}
       </p>
       <Evidence r={seed} />
@@ -218,40 +218,39 @@ export function ChatPanel({
       }}
     >
       <header className="chat-head">
-        <div>
-          <p className="eyebrow">Ask the guide · {hospital.id}</p>
-          <h2>{hospital.name}</h2>
-          <small className="muted">
-            Guide {hospital.version} · answers come only from this hospital's
-            guide
+        <p>
+          <strong>Ask {hospital.name}'s guide</strong>
+          <small>
+            Answers come only from this hospital's guide · {hospital.version}
           </small>
-        </div>
+        </p>
         <button
           type="button"
-          className="link chat-close"
+          className="gp-btn chat-close"
           onClick={onClose}
           aria-label="Close the guide chat"
+          title="Back to guidance"
         >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
           Close
         </button>
       </header>
       {shownSeed && <SeedContext seed={shownSeed} />}
       {!thread.turns.length && (
-        <div className="try-phrases chat-suggestions">
+        <div className="chat-suggestions">
           <p>Try asking:</p>
-          <ul>
+          <div className="chat-chips">
             {suggestionsFor(shownSeed?.title).map((s) => (
-              <li key={s}>
-                <button
-                  type="button"
-                  className="link"
-                  onClick={() => submit(s)}
-                >
-                  {s}
-                </button>
-              </li>
+              <button
+                key={s}
+                type="button"
+                className="fact-chip"
+                onClick={() => submit(s)}
+              >
+                {s}
+              </button>
             ))}
-          </ul>
+          </div>
         </div>
       )}
       <div className="chat-thread" aria-live="polite">
@@ -297,16 +296,18 @@ export function ChatPanel({
             }
           }}
         />
-        <small className="muted">
-          Don't include patient names or identifiers.
-        </small>
-        <button
-          className="secondary"
-          type="submit"
-          disabled={!text.trim() || pending}
-        >
-          Ask
-        </button>
+        <div className="chat-form-foot">
+          <small className="muted">
+            Don't include patient names or identifiers.
+          </small>
+          <button
+            className="gp-btn primary"
+            type="submit"
+            disabled={!text.trim() || pending}
+          >
+            Ask
+          </button>
+        </div>
       </form>
     </section>
   );

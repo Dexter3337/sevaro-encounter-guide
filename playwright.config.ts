@@ -7,6 +7,8 @@ export default defineConfig({
     baseURL: process.env.DEMO_URL || "http://127.0.0.1:5173",
     channel: process.env.PW_CHANNEL || "chrome",
     headless: true,
+    // The doctor's own clock in these tests; the hospital's comes from its guide.
+    timezoneId: "America/New_York",
     viewport: { width: 1440, height: 1000 },
     screenshot: "only-on-failure",
     trace: "retain-on-failure",

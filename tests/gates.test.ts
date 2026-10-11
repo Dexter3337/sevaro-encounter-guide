@@ -5,6 +5,7 @@ import {
   blocksUntilConfirmed,
   unboundFields,
   boundFields,
+  completionChecklist,
 } from "../src/engine";
 import { freshContext, known, hospitalSchema, type Context } from "../src/domain";
 
@@ -126,23 +127,46 @@ describe("When we cannot tell whether the step is required", () => {
       ],
     });
 
-  it("a stale requirement neither blocks nor passes silently", () => {
+  // A requirement that may be out of date is still the guide's latest word.
+  // Letting it stop blocking would let the rule it describes slip through;
+  // the doctor, who may know it has changed, can release it with a reason.
+  it("a stale requirement still blocks, and can be released with a reason", () => {
     const hosp = uncertain("Yes", { lastVerified: "2025-01-01" });
     const g = gates(hosp, freshContext(hosp))[0];
-    expect(g.blocksCompletion).toBe(false);
+    expect(g.blocksCompletion).toBe(true);
     expect(g.flags).toContain("uncertain_requirement");
     expect(g.release).toBe("acknowledge_with_reason");
   });
 
-  it("it says what is unclear, in words a doctor can act on", () => {
+  it("recording it clears a stale requirement like any other", () => {
+    const hosp = uncertain("Yes", { lastVerified: "2025-01-01" });
+    const c = { ...freshContext(hosp), values: { charge_entered: known(true) } };
+    expect(gates(hosp, c).some((r) => r.blocksCompletion)).toBe(false);
+  });
+
+  it("it says what may have changed, in words a doctor can act on", () => {
     const hosp = uncertain("Yes", { lastVerified: "2025-01-01" });
     const g = gates(hosp, freshContext(hosp))[0];
-    expect(g.message).toContain("unclear");
+    expect(g.message).toContain("may not be current");
     expect(g.message).toContain("2025-01-01");
-    expect(g.message).toContain("Completion is not blocked");
-    expect(g.action).toContain("Confirm with Unsure Regional");
+    expect(g.action).toContain("Unsure Regional");
+    expect(g.action).toContain("acknowledge with a reason");
     // Not the internal vocabulary we used to show.
     expect(g.message).not.toMatch(/prototype policy|no new completion gate/i);
+  });
+
+  // Old, and requiring nothing, is still the guide saying nothing is
+  // required. Raising it at every sign-off would only be noise.
+  it("a stale rule that requires nothing raises no gate", () => {
+    const hosp = uncertain("No", { lastVerified: "2025-01-01" });
+    expect(gates(hosp, freshContext(hosp))).toEqual([]);
+  });
+
+  it("but the checklist says it was last checked long ago", () => {
+    const hosp = uncertain("No", { lastVerified: "2025-01-01" });
+    const i = completionChecklist(hosp, freshContext(hosp))[0];
+    expect(i.state).toBe("not_required");
+    expect(i.text).toContain("Last checked 2025-01-01");
   });
 
   it("a requirement we cannot read raises no gate", () => {
@@ -206,5 +230,35 @@ describe("Fields no trigger covers", () => {
       ],
     });
     expect(unboundFields(hosp)).toEqual([]);
+  });
+});
+
+// A doctor who records "No" and is allowed to complete should see why. The
+// sign-off checklist says where this hospital stands on every completion rule,
+// including the ones it does not have.
+describe("The sign-off checklist", () => {
+  const item = (id: string, field: string, over: Partial<Context> = {}) =>
+    completionChecklist(h(id), ctx(id, over)).find((i) => i.field === field)!;
+
+  it("says a charge is not required where the guide says No", () => {
+    const i = item("SYN-006", "Charge Entry", { values: { charge_entered: known(false) } });
+    expect(i.state).toBe("not_required");
+    expect(i.text).toContain("Not required by Highland Valley Hospital");
+  });
+
+  it("says a charge is missing where the guide requires one", () => {
+    const i = item("SYN-007", "Charge Entry", { values: { charge_entered: known(false) } });
+    expect(i.state).toBe("missing");
+    expect(i.result?.blocksCompletion).toBe(true);
+  });
+
+  it("says it is satisfied once recorded", () => {
+    expect(
+      item("SYN-007", "Charge Entry", { values: { charge_entered: known(true) } }).state,
+    ).toBe("satisfied");
+  });
+
+  it("says when the guide is silent rather than implying no requirement", () => {
+    expect(item("SYN-001", "Consult Completion Rule").state).toBe("not_in_guide");
   });
 });

@@ -1,67 +1,70 @@
 import { test, expect } from "@playwright/test";
+import { pinClock, openChatTab } from "./helpers";
 
 test.beforeEach(async ({ page }) => {
+  await pinClock(page);
   await page.goto("/");
 });
 
-test("consultation split, anticipatory CTA preview and expanded guidance never cover the form", async ({
+type Box = { x: number; y: number; width: number; height: number };
+const overlaps = (a: Box, b: Box) =>
+  a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+
+test("one screen: video, caselog and guide side by side, nothing covering the form", async ({
   page,
 }) => {
   const video = page.getByTestId("consultation-pane");
-  const form = page.locator(".caselog");
-  const left = await video.boundingBox(),
-    right = await form.boundingBox();
-  expect(left!.x + left!.width).toBeLessThan(right!.x);
-  expect(Math.abs(left!.width - right!.width)).toBeLessThan(2);
+  const form = page.locator(".eg-case");
+  const guide = page.locator(".eg-guide");
+  const [v, f, g] = [
+    (await video.boundingBox())!,
+    (await form.boundingBox())!,
+    (await guide.boundingBox())!,
+  ];
+  expect(v.x + v.width).toBeLessThan(f.x);
+  expect(f.x + f.width).toBeLessThan(g.x);
   await expect(video).toContainText("No live Sevaro call is connected");
-  await page.screenshot({
-    path: "reports/consultation-desktop.png",
-    fullPage: true,
-  });
+  // The page itself does not scroll on a laptop screen.
+  expect(
+    await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight + 1),
+  ).toBe(true);
+  await page.screenshot({ path: "reports/consultation-desktop.png" });
+
   await page.getByRole("button", { name: "Imaging", exact: false }).click();
   await page.getByLabel("CTA done", { exact: true }).focus();
-  await expect(page.getByTestId("nudge-dock")).toHaveAttribute(
-    "data-state",
-    "peek",
-  );
-  await expect(page.getByLabel("CTA done", { exact: true })).toHaveValue("");
+  // Looking at a field shows its guidance, and only its guidance, opened.
+  await expect(page.getByTestId("nudge-dock")).toHaveAttribute("data-state", "peek");
   await expect(page.getByTestId("dock-peek")).toContainText("CTA Head/Neck");
-  await page
-    .getByLabel("Large vessel occlusion present", { exact: true })
-    .focus();
-  await page
-    .getByLabel("Large vessel occlusion present", { exact: true })
-    .selectOption("yes");
-  await expect(page.getByTestId("nudge-dock")).toHaveAttribute(
-    "data-state",
-    "panel",
-  );
-  const panel = await page.getByTestId("dock-panel").boundingBox(),
-    body = await form.boundingBox();
-  expect(body!.y + body!.height).toBeLessThanOrEqual(panel!.y);
-  const active = await page
-    .getByLabel("Large vessel occlusion present", { exact: true })
-    .boundingBox();
-  expect(active!.y + active!.height).toBeLessThanOrEqual(panel!.y);
-  await page.screenshot({
-    path: "reports/consultation-guidance.png",
-    fullPage: true,
-  });
-  await page.getByRole("button", { name: "Collapse guidance" }).click();
-  await expect(page.getByTestId("dock-pill")).toBeFocused();
+  await expect(page.getByTestId("dock-peek")).toContainText("For CTA done");
+  await expect(page.getByTestId("dock-peek").getByTestId("nudge-card")).toHaveCount(1);
+  await expect(page.getByLabel("CTA done", { exact: true })).toHaveValue("");
+
+  const lvo = page.getByLabel("Large vessel occlusion present", { exact: true });
+  await lvo.focus();
+  await lvo.selectOption("yes");
+  await expect(page.getByTestId("nudge-dock")).toHaveAttribute("data-state", "panel");
+  const panel = (await page.getByTestId("dock-panel").boundingBox())!;
+  expect(overlaps(panel, (await form.boundingBox())!)).toBe(false);
+  expect(overlaps(panel, (await lvo.boundingBox())!)).toBe(false);
+  // Exactly one rule is open at a time.
+  await expect(page.getByTestId("nudge-dock").getByTestId("nudge-card")).toHaveCount(1);
+  await page.screenshot({ path: "reports/consultation-guidance.png" });
+  await page.getByRole("button", { name: "Close LVO Protocol" }).click();
+  await expect(page.getByTestId("nudge-dock")).toHaveAttribute("data-state", "pill");
+  await expect(page.getByTestId("nudge-card")).toHaveCount(0);
 });
 
 test("connected chat answers multiple questions and exposes typo correction", async ({
   page,
 }) => {
-  await page.getByRole("button", { name: "Ask this hospital’s guide" }).click();
+  await openChatTab(page);
   const chat = page.getByTestId("chat-panel");
   await chat.getByRole("textbox").fill("lvo protcol? EEG and MRI?");
   await chat.getByRole("button", { name: "Ask", exact: true }).click();
   await expect(chat.getByTestId("chat-turn")).toHaveCount(3);
   await expect(chat).toContainText("Interpreted as:");
   await expect(chat).toContainText("Local guide answers");
-  // Off-screen accessible labels must stay within the scrolling thread.
+  // The answers scroll inside the column; the page does not grow.
   expect(
     await page.evaluate(
       () =>
@@ -69,22 +72,19 @@ test("connected chat answers multiple questions and exposes typo correction", as
         document.getElementById("root")!.getBoundingClientRect().height,
     ),
   ).toBeLessThan(2);
-  await page.screenshot({
-    path: "reports/consultation-chat.png",
-    fullPage: true,
-  });
+  await expect(chat.getByRole("button", { name: "Ask", exact: true })).toBeInViewport();
+  await page.screenshot({ path: "reports/consultation-chat.png" });
   await chat.getByRole("textbox").press("Escape");
   await expect(chat).toHaveCount(0);
 });
 
-test("390px layout keeps video compact and all surfaces within the viewport", async ({
+test("390px layout keeps video folded and all surfaces within the viewport", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect(
-    page.getByRole("button", { name: "Show video workspace" }),
-  ).toBeVisible();
-  await expect(page.locator(".video-stage")).not.toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Show video" })).toBeVisible();
+  await expect(page.locator(".video-stage")).toHaveCount(0);
   await page.getByRole("button", { name: "Imaging", exact: false }).click();
   await page.getByLabel("CTA done", { exact: true }).focus();
   await expect(page.getByTestId("dock-peek")).toBeVisible();
@@ -95,6 +95,24 @@ test("390px layout keeps video compact and all surfaces within the viewport", as
     path: "reports/consultation-mobile.png",
     fullPage: true,
   });
+});
+
+test("video and navigation fold away to give the form room, and come back", async ({
+  page,
+}) => {
+  const before = (await page.locator(".eg-case").boundingBox())!;
+  await page.getByRole("button", { name: "Hide video" }).click();
+  await page.getByRole("button", { name: "Hide navigation" }).click();
+  const after = (await page.locator(".eg-case").boundingBox())!;
+  expect(after.width).toBeGreaterThan(before.width + 200);
+  expect(after.x).toBeLessThan(before.x);
+  // Remembered on this device.
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Show video" })).toBeVisible();
+  await page.getByRole("button", { name: "Show video" }).click();
+  await page.getByRole("button", { name: "Show navigation" }).click();
+  await expect(page.getByTestId("consultation-pane")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Guide library" })).toBeVisible();
 });
 
 test("camera permission failure is recoverable without blocking documentation", async ({
@@ -139,11 +157,6 @@ test("local preview requests no microphone and stops tracks on stop and navigati
       value: async (constraints: MediaStreamConstraints) => {
         requests.push(constraints);
         const stream = canvas.captureStream(10);
-        const paint = window.setInterval(
-          () => canvas.getContext("2d")!.fillRect(0, 0, 64, 64),
-          50,
-        );
-        window.setTimeout(() => window.clearInterval(paint), 10000);
         streams.push(stream);
         return stream;
       },
@@ -177,43 +190,24 @@ test("local preview requests no microphone and stops tracks on stop and navigati
   ).toBe("ended");
 });
 
-test("wheel scrolls the form first, then hands off to the page at both edges", async ({
-  page,
-}) => {
-  await page.getByRole("button", { name: "Imaging", exact: false }).click();
-  const form = page.locator(".caselog");
-  await form.evaluate((e) => {
-    e.scrollTop = 0;
-  });
-  await page.evaluate(() => window.scrollTo(0, 0));
-  const box = (await form.boundingBox())!;
-  await page.mouse.move(box.x + box.width - 35, box.y + 120);
-  await page.mouse.wheel(0, 100);
-  await expect.poll(() => form.evaluate((e) => e.scrollTop)).toBeGreaterThan(0);
+test("the form scrolls on its own and the page never moves", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 640 });
+  await page.getByRole("button", { name: "Recommendation", exact: false }).click();
+  const body = page.locator(".eg-case-body");
+  await expect
+    .poll(() => body.evaluate((e) => e.scrollHeight > e.clientHeight))
+    .toBe(true);
+  const box = (await body.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.wheel(0, 200);
+  await expect.poll(() => body.evaluate((e) => e.scrollTop)).toBeGreaterThan(0);
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
-  await form.evaluate((e) => {
-    e.scrollTop = e.scrollHeight;
-  });
-  await page.mouse.wheel(0, 180);
-  await expect
-    .poll(() => page.evaluate(() => window.scrollY))
-    .toBeGreaterThan(0);
-  await form.evaluate((e) => {
-    e.scrollTop = 0;
-  });
-  const pageY = await page.evaluate(() => window.scrollY);
-  const moved = (await form.boundingBox())!;
-  await page.mouse.move(
-    moved.x + moved.width - 35,
-    Math.max(80, moved.y + 120),
-  );
-  await page.mouse.wheel(0, -100);
-  await expect
-    .poll(() => page.evaluate(() => window.scrollY))
-    .toBeLessThan(pageY);
+  // The step buttons and Next stay on screen while the form scrolls.
+  await expect(page.getByRole("button", { name: /Next: Note/ })).toBeInViewport();
+  await expect(page.getByRole("button", { name: "Imaging", exact: false })).toBeInViewport();
 });
 
-test("companion opens usable chat on every step, with or without guidance", async ({
+test("the guide chat works on every step, with or without guidance", async ({
   page,
 }) => {
   for (const step of [
@@ -228,9 +222,7 @@ test("companion opens usable chat on every step, with or without guidance", asyn
       .getByRole("button", { name: new RegExp(step, "i") })
       .first()
       .click();
-    await page
-      .getByRole("button", { name: "Open guide companion", exact: true })
-      .click();
+    await openChatTab(page);
     const chat = page.getByTestId("chat-panel");
     await expect(chat.getByRole("textbox")).toBeFocused();
     await expect(chat.getByRole("textbox")).toBeInViewport();
@@ -240,11 +232,12 @@ test("companion opens usable chat on every step, with or without guidance", asyn
     await chat.getByRole("button", { name: "Close the guide chat" }).click();
   }
   await page.getByRole("button", { name: "Imaging", exact: false }).click();
-  await page.getByRole("button", { name: "Review hospital guidance" }).click();
-  await expect(page.getByTestId("dock-panel")).toBeVisible();
   await page
-    .getByRole("button", { name: "Open guide companion", exact: true })
+    .locator('[data-field="cta_done"]')
+    .getByTestId("field-marker")
     .click();
+  await expect(page.getByTestId("dock-panel")).toBeVisible();
+  await openChatTab(page);
   await expect(
     page.getByTestId("chat-panel").getByRole("textbox"),
   ).toBeFocused();

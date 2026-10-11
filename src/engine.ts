@@ -496,22 +496,52 @@ export function gates(h: Hospital, c: Context): Result[] {
       required =
         field === "Charge Entry" ? meansYes(raw) : blocksUntilConfirmed(raw);
     const r = answerField(h, c, field);
-    // We cannot tell whether this hospital requires the step. Blocking on a
+    const unclear =
+      r.primaryStatus === "conflict" ||
+      r.flags.includes("stale") ||
+      r.flags.includes("interpretation_review");
+    const why =
+      r.primaryStatus === "conflict"
+        ? "the guide and the storyboard disagree about it"
+        : r.flags.includes("stale")
+          ? `it was last verified ${ss[0].lastVerified ?? "on an unknown date"} and may have changed`
+          : "the guide's wording cannot be read with confidence";
+    // The guide says the step is required, but the rule may be out of date or
+    // contradicted. Its latest word is still the rule: completion stops, and
+    // because the doctor may know it no longer applies, they can release it
+    // with a reason that is recorded. A stale rule that silently stopped
+    // blocking would let the requirement it describes slip through unnoticed.
+    if (
+      unclear &&
+      required &&
+      !r.flags.includes("interpretation_review") &&
+      value(c, requirement) !== true
+    ) {
+      r.primaryStatus = "hard_stop";
+      r.tier = "hard_stop";
+      r.blocksCompletion = true;
+      r.missingRequirements = [requirement];
+      r.anchor = requirement;
+      r.release = "acknowledge_with_reason";
+      r.flags.push("uncertain_requirement");
+      r.message = `${field === "Charge Entry" ? "Record the required encounter charge before sign-off" : "Record confirmation of the patient plan from the hospital provider before completion"}. Guide: ${raw}. This rule may not be current, because ${why}.`;
+      r.action = `${field === "Charge Entry" ? "Record the charge" : "Record the confirmation"}, or confirm with ${h.name} that it no longer applies and acknowledge with a reason.`;
+      out.push(r);
+      continue;
+    }
+    // We cannot tell whether this hospital requires the step at all: the
+    // sources disagree, or the wording cannot be read. Blocking on a
     // requirement that may not exist would stop a doctor finishing a case for
     // no reason; waving it through would let a real requirement past in
     // silence. So neither: the doctor is told exactly what is unclear and
-    // completes by acknowledging it, which is recorded.
+    // completes by acknowledging it, which is recorded. A rule that is merely
+    // old and says nothing is required is not unclear — it is the guide's
+    // latest word, and raising it at every sign-off would be noise.
     if (
-      r.primaryStatus === "conflict" ||
-      r.flags.includes("stale") ||
-      r.flags.includes("interpretation_review")
+      (r.primaryStatus === "conflict" ||
+        r.flags.includes("interpretation_review")) &&
+      value(c, requirement) !== true
     ) {
-      const why =
-        r.primaryStatus === "conflict"
-          ? "the guide and the storyboard disagree about it"
-          : r.flags.includes("stale")
-            ? `it was last verified ${ss[0].lastVerified ?? "on an unknown date"} and may have changed`
-            : "the guide's wording cannot be read with confidence";
       r.message += ` Whether ${h.name} requires this before completion is unclear, because ${why}. Completion is not blocked; confirm with the hospital if it matters for this case.`;
       r.tier = "advisory";
       r.release = "acknowledge_with_reason";
@@ -542,6 +572,68 @@ export function gates(h: Hospital, c: Context): Result[] {
     out.push(r);
   }
   return out;
+}
+// What the sign-off screen tells the doctor before they press Complete: each
+// completion rule this engine knows, and where this hospital stands on it. A
+// rule the hospital does not have is said out loud too — "not required here" —
+// because a doctor who records "No" and is allowed to complete should see why,
+// not wonder whether the check is broken.
+export type ChecklistItem = {
+  field: "Charge Entry" | "Consult Completion Rule";
+  requirement: string;
+  state: "missing" | "satisfied" | "unclear" | "not_required" | "not_in_guide";
+  text: string;
+  /** The gate result, when there is one. */
+  result?: Result;
+};
+export function completionChecklist(h: Hospital, c: Context): ChecklistItem[] {
+  const rs = gates(h, c);
+  return (
+    [
+      ["Charge Entry", "charge_entered", "An encounter charge"],
+      ["Consult Completion Rule", "plan_confirmed", "Hospital provider confirmation of the plan"],
+    ] as const
+  ).map(([field, requirement, what]) => {
+    const guide = getSources(h, field).find((s) => s.sourceKind === "guide");
+    const r = rs.find((x) => x.title === field);
+    if (!guide)
+      return {
+        field,
+        requirement,
+        state: "not_in_guide",
+        text: `${h.name}'s guide does not say whether this is required.`,
+      };
+    const raw = clean(guide.raw);
+    if (r?.blocksCompletion)
+      return {
+        field,
+        requirement,
+        state: "missing",
+        text: `${what} is required before completion. Guide: “${raw}”.`,
+        result: r,
+      };
+    if (r?.flags.includes("uncertain_requirement"))
+      return { field, requirement, state: "unclear", text: r.message, result: r };
+    if (r?.flags.includes("resolved"))
+      return {
+        field,
+        requirement,
+        state: "satisfied",
+        text: `Required, and recorded. Guide: “${raw}”.`,
+        result: r,
+      };
+    const old =
+      guide.lastVerified &&
+      ageDays(guide.lastVerified, c.instant, h.timezone) > 180
+        ? ` Last checked ${guide.lastVerified}, so it may have changed.`
+        : "";
+    return {
+      field,
+      requirement,
+      state: "not_required",
+      text: `Not required by ${h.name}. Guide: “${raw}”.${old}`,
+    };
+  });
 }
 export function ask(
   h: Hospital,

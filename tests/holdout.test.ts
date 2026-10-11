@@ -240,15 +240,17 @@ describe("Independent unfamiliar hospitals and edge behavior", () => {
     c.values.plan_confirmed = known(true);
     expect(gates(copper, c).some((r) => r.blocksCompletion)).toBe(false);
   });
-  it("stale supported mandatory source is uncertain without introducing gate", () => {
+  // A stale requirement is still the guide's latest word. It stops completion,
+  // and because it may have changed the doctor can release it with a reason.
+  it("stale supported mandatory source still blocks, releasable with a reason", () => {
     const h = {
       ...harbor,
       fields: harbor.fields.map((s) => ({ ...s, lastVerified: "2020-01-01" })),
     };
-    expect(gates(h, freshContext(h)).some((r) => r.blocksCompletion)).toBe(
-      false,
-    );
-    expect(gates(h, freshContext(h))[0].flags).toContain("stale");
+    const g = gates(h, freshContext(h)).find((r) => r.blocksCompletion)!;
+    expect(g.flags).toContain("stale");
+    expect(g.flags).toContain("uncertain_requirement");
+    expect(g.release).toBe("acknowledge_with_reason");
   });
   it("new static field resolves from free text without source changes", () => {
     const a = ask(

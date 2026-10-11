@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { Contact } from "../domain";
+import { localTime, type Contact } from "../domain";
 import {
   ROLES,
   availabilityAt,
@@ -21,6 +21,8 @@ export interface ContactsSheetProps {
   timezone: string;
   /** Why the doctor was sent here, e.g. "Guide doesn't cover note title". */
   reason?: string;
+  /** Shown in the heading when known; the id is always shown. */
+  hospitalName?: string;
   onClose: () => void;
 }
 
@@ -29,7 +31,7 @@ function CopyButton({ value }: { value: string }) {
   return (
     <button
       type="button"
-      className="link"
+      className="gp-btn"
       onClick={() => {
         // Demo laptops have no dialler; copying is the fallback.
         navigator.clipboard?.writeText(value).then(
@@ -38,10 +40,18 @@ function CopyButton({ value }: { value: string }) {
         );
       }}
     >
-      {copied ? "Copied" : "Copy"}
+      {copied ? "Copied" : "Copy number"}
     </button>
   );
 }
+
+const nowLabel = (instant: string, zone: string) => {
+  try {
+    return `${localTime(instant, zone).toPlainTime().toString({ smallestUnit: "minute" })} ${zoneName(instant, zone)}`;
+  } catch {
+    return zone;
+  }
+};
 
 export function ContactCard({
   contact: c,
@@ -64,10 +74,12 @@ export function ContactCard({
       <h3>{c.name}</h3>
       {c.title && <p className="muted">{c.title}</p>}
       <p className="contact-phone">
-        <a href={`tel:${c.phone.replace(/[^\d+]/g, "")}`}>{c.phone}</a>{" "}
-        <a className="link" href={`tel:${c.phone.replace(/[^\d+]/g, "")}`}>
+        <a className="contact-number" href={`tel:${c.phone.replace(/[^\d+]/g, "")}`}>
+          {c.phone}
+        </a>
+        <a className="gp-btn primary" href={`tel:${c.phone.replace(/[^\d+]/g, "")}`}>
           Call
-        </a>{" "}
+        </a>
         <CopyButton value={c.phone} />
       </p>
       {c.altChannel && <p className="contact-alt">{c.altChannel}</p>}
@@ -94,6 +106,7 @@ export function ContactsSheet({
   instant,
   timezone,
   reason,
+  hospitalName,
   onClose,
 }: ContactsSheetProps) {
   const close = useRef<HTMLButtonElement>(null);
@@ -120,21 +133,26 @@ export function ContactsSheet({
       }}
     >
       <header className="contacts-head">
-        <div>
-          <p className="eyebrow">Escalate · {hospitalId}</p>
-          <h2>Who to call at {hospitalId}</h2>
-          {reason && <p className="contacts-reason">{reason}</p>}
-        </div>
+        <p>
+          <strong>Who to call at {hospitalId}</strong>
+          <small>
+            {hospitalName ? `${hospitalName} · ` : ""}availability in the
+            hospital's own time, now {nowLabel(instant, timezone)}
+          </small>
+        </p>
         <button
           ref={close}
           type="button"
-          className="link"
+          className="gp-btn"
           onClick={onClose}
           aria-label="Close contacts"
+          title="Back to guidance"
         >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
           Close
         </button>
       </header>
+      {reason && <p className="contacts-reason">About: {reason}</p>}
       {[...ROLES.map(([role]) => role), ...extra].map((role) => {
         const people = mine.filter((c) => c.role === role);
         return people.length ? (

@@ -1,14 +1,10 @@
 import { test, expect } from "@playwright/test";
+import { pinClock, launch, openChatTab, hospitalZone } from "./helpers";
 
 // The guardrails a judge sees on screen. Each test is named for the guardrail
 // it protects (numbering follows MACHINE_E_GUARDRAILS.md, E1).
-async function launch(page: any, id: string) {
-  await page.locator(".demo-controls > summary").click();
-  await page.getByLabel("Scenario", { exact: true }).selectOption(id);
-  await page.getByRole("button", { name: "Launch scenario", exact: true }).click();
-  await page.locator(".demo-controls > summary").click();
-}
 test.beforeEach(async ({ page }) => {
+  await pinClock(page);
   await page.goto("/");
   await page.evaluate(() => localStorage.clear());
   await page.reload();
@@ -80,12 +76,12 @@ test("alien dry run: two unfamiliar hospitals load live and behave", async ({ pa
   await page
     .getByRole("button", { name: "Open Nordhaven Medical (synthetic) in an encounter" })
     .click();
-  await expect(page.locator(".context-strip")).toContainText("Europe/London");
+  await expect(hospitalZone(page)).toHaveAttribute("title", "Europe/London");
   // Three storyboard rows for one field, two disagreeing: one conflict, all rows shown.
   await expect(page.getByTestId("storyboard-row")).toHaveCount(3);
   await expect(page.getByTestId("storyboard-card")).toContainText("Ward side room");
   // Hostile text is shown as text.
-  await page.getByRole("button", { name: "Ask this hospital’s guide" }).click();
+  await openChatTab(page);
   const chat = page.getByTestId("chat-panel");
   await chat.getByPlaceholder("Ask about this hospital's guide…").fill("Connection instructions");
   await chat.getByRole("button", { name: "Ask", exact: true }).click();

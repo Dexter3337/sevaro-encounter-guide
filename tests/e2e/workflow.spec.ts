@@ -1,25 +1,15 @@
 import { test, expect } from "@playwright/test";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
-async function launch(page: any, id: string) {
-  await page.locator(".demo-controls > summary").click();
-  await page.getByLabel("Scenario", { exact: true }).selectOption(id);
-  await page
-    .getByRole("button", { name: "Launch scenario", exact: true })
-    .click();
-  await page.locator(".demo-controls > summary").click();
-}
-// A dock card by its guide field.
+import { pinClock, launch, openChatTab, hospitalZone } from "./helpers";
+// A rule in the guide column by its guide field: the open card, or its row.
 const card = (page: any, title: string) =>
   page
     .getByTestId("nudge-dock")
-    .getByTestId("nudge-card")
-    .filter({ has: page.locator("h3", { hasText: title }) });
+    .locator('[data-testid="nudge-card"], [data-testid="reference-row"]')
+    .filter({ has: page.locator("h3, .gp-row-title", { hasText: title }) });
 const chat = (page: any) => page.getByTestId("chat-panel");
 async function ask(page: any, question: string) {
-  if (!(await chat(page).isVisible()))
-    await page
-      .getByRole("button", { name: "Ask this hospital’s guide" })
-      .click();
+  if (!(await chat(page).isVisible())) await openChatTab(page);
   await chat(page)
     .getByPlaceholder("Ask about this hospital's guide…")
     .fill(question);
@@ -29,6 +19,7 @@ async function ask(page: any, question: string) {
 const answer = (page: any) =>
   chat(page).getByTestId("chat-turn").last().getByTestId("nudge-card");
 test.beforeEach(async ({ page }) => {
+  await pinClock(page);
   await page.goto("/");
   await page.evaluate(() => localStorage.clear());
   await page.reload();
@@ -83,7 +74,7 @@ test("N5 gate blocks, acknowledgement cannot replace charge; recorded state reso
   page,
 }) => {
   await launch(page, "N5");
-  await page.getByRole("button", { name: "Complete mock encounter" }).click();
+  await page.getByRole("button", { name: "Complete encounter" }).click();
   const gate = page.getByTestId("gate-banner");
   await expect(gate).toHaveAttribute("role", "alert");
   await expect(gate).toContainText("Charge Entry");
@@ -93,7 +84,7 @@ test("N5 gate blocks, acknowledgement cannot replace charge; recorded state reso
     .getByLabel("Encounter charge recorded", { exact: true })
     .selectOption("yes");
   await expect(gate).toHaveCount(0);
-  await page.getByRole("button", { name: "Complete mock encounter" }).click();
+  await page.getByRole("button", { name: "Complete encounter" }).click();
   await expect(page.locator(".success")).toContainText(
     "Known supported guide requirements are satisfied",
   );
@@ -102,21 +93,21 @@ test("N7 plan confirmation blocks until explicitly recorded", async ({
   page,
 }) => {
   await launch(page, "N7");
-  await page.getByRole("button", { name: "Complete mock encounter" }).click();
+  await page.getByRole("button", { name: "Complete encounter" }).click();
   await expect(page.getByTestId("gate-banner")).toContainText(
     "Consult Completion Rule",
   );
   await page
     .getByLabel("Hospital provider confirmed patient plan", { exact: true })
     .selectOption("yes");
-  await page.getByRole("button", { name: "Complete mock encounter" }).click();
+  await page.getByRole("button", { name: "Complete encounter" }).click();
   await expect(page.locator(".case-status")).toContainText("Completed");
 });
 test("N7 can be released only with a written reason, which is shown", async ({
   page,
 }) => {
   await launch(page, "N7");
-  await page.getByRole("button", { name: "Complete mock encounter" }).click();
+  await page.getByRole("button", { name: "Complete encounter" }).click();
   const gate = page.getByTestId("gate-banner");
   const release = gate.getByRole("button", { name: "Acknowledge and complete" });
   await expect(release).toBeDisabled();
@@ -140,7 +131,7 @@ test("V12 conflicting source evidence and V14 missing field", async ({
   await seed.locator(".evidence summary").click();
   await expect(seed).toContainText("Updated 2025-09-14 (not verification)");
   await ask(page, "Who covers pediatric neurology?");
-  await expect(answer(page)).toContainText("Not In Guide");
+  await expect(answer(page)).toContainText("Not in the guide");
   await expect(answer(page).locator(".card-answer")).toContainText(
     "Not available in this hospital's guide.",
   );
@@ -195,13 +186,16 @@ test("unfamiliar import, new static field, dynamic mapping, persistence, inert m
     .getByTestId("field-marker")
     .click();
   await expect(page.getByTestId("nudge-dock")).toContainText("SYN-778");
+  // The imported hospital stays on this device. The encounter does not: a
+  // reload is a new patient, and nothing recorded is carried into it.
   await page.reload();
-  await expect(page.getByLabel("Hospital", { exact: true })).toHaveValue(
-    "ORBIT-91",
-  );
+  const hospital = page.getByLabel("Hospital", { exact: true });
+  await expect(hospital.locator('option[value="ORBIT-91"]')).toHaveCount(1);
+  await expect(hospital).toHaveValue("SYN-006");
+  await hospital.selectOption("ORBIT-91");
   await expect(
     page.getByLabel("Interpreter needed (enter Yes)", { exact: true }),
-  ).toHaveValue("Yes");
+  ).toHaveValue("");
   await page.getByRole("button", { name: "Guide library" }).click();
   await page.getByLabel("Import data").fill('{"id":');
   await page.getByRole("button", { name: "Preview & validate" }).click();
@@ -233,7 +227,7 @@ test("unfamiliar import, new static field, dynamic mapping, persistence, inert m
   await expect(
     page.getByLabel("Hospital", { exact: true }).locator("option"),
   ).toHaveCount(7);
-  await expect(page.locator(".context-strip")).toContainText("19:30");
+  await expect(page.getByTestId("hospital-clock")).toContainText("19:30");
   await expect(chat(page)).toHaveCount(0);
 });
 test("workbench computes 29 passes; keyboard evidence and narrow layout inspection", async ({
@@ -292,7 +286,7 @@ test("actual browser latency across all required triggers", async ({
         await page.getByLabel("Allergies", { exact: true }).fill("none");
       } else if (id === "N5" || id === "N7")
         await page
-          .getByRole("button", { name: "Complete mock encounter" })
+          .getByRole("button", { name: "Complete encounter" })
           .click();
       await page.waitForTimeout(80);
     }
@@ -379,7 +373,7 @@ test("CSV mapping and explicit guide-version refresh preserve pinned encounter",
   );
   await page.getByRole("button", { name: "Preview & validate" }).click();
   await page.getByRole("button", { name: "Activate validated bundle" }).click();
-  await expect(page.locator(".context-strip")).toContainText("csv-v1");
+  await expect(page.getByText("This encounter is pinned to csv-v1")).toBeVisible();
   await page.getByRole("button", { name: "Encounter", exact: true }).click();
   await ask(page, "CT perfusion");
   await expect(answer(page).locator(".card-answer")).toHaveText("No");

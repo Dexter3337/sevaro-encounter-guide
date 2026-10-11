@@ -1,48 +1,45 @@
-import { useEffect, useReducer, useRef } from "react";
-import { AssistantOrb } from "./AssistantOrb";
-import { nudgePriority } from "../engine";
-import { NudgeCard, ReferenceRow } from "./NudgeCard";
-import {
-  dockReducer,
-  initialDock,
-  pillSummary,
-  orderForField,
-} from "./dockMachine";
-import type { NudgeDockProps } from "./types";
+import { useEffect, useReducer, useRef, useState } from "react";
+import type { Result } from "../domain";
+import { nudgePriority, resultSignature } from "../engine";
+import { NudgeCard, NudgeRow } from "./NudgeCard";
+import { dockReducer, initialDock, pillSummary } from "./dockMachine";
+import type { GuidePanelProps } from "./types";
 
-// The companion's whole surface. It sits in the corner of the caselog and is
-// deliberately hard to provoke: a corner panel that opened on every keystroke
-// would be trained away inside a day.
-
+// The guide column's guidance view. It lives in a fixed column beside the form,
+// so it never covers what the doctor is typing, and it opens exactly one rule
+// at a time: the one for the field they are in, the one they clicked, or the
+// one that has just become important. Everything else is a single line below.
+//
+// It stays hard to provoke. Reference material never opens by itself; a rule
+// already seen does not reopen; a doctor who closed a card is not overruled
+// until something genuinely new arrives.
 export function NudgeDock({
-  onOpenChat,
   results,
+  acknowledged,
+  reported,
   focusedFieldId,
   fieldLabels,
+  hospitalName,
   onAsk,
   onAcknowledge,
+  onUndoAcknowledge,
   onContacts,
   onReport,
   unavailable,
   openRequest,
-}: NudgeDockProps) {
+  storyboard,
+  onNewNudge,
+}: GuidePanelProps & { onNewNudge?: () => void }) {
   const [dock, dispatch] = useReducer(dockReducer, initialDock);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const pillRef = useRef<HTMLButtonElement>(null);
+  // What the doctor chose explicitly: a rule, or "nothing open".
+  const [picked, setPicked] = useState<{ id?: string; closed?: boolean }>({});
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (openRequest) dispatch({ type: "OPEN", resultId: openRequest.resultId });
+    if (!openRequest) return;
+    dispatch({ type: "OPEN", resultId: openRequest.resultId });
+    setPicked({ id: openRequest.resultId });
   }, [openRequest]);
-
-  // Esc collapses the panel back to the pill, wherever focus is.
-  useEffect(() => {
-    if (dock.state !== "panel") return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") dispatch({ type: "COLLAPSE" });
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [dock.state]);
 
   useEffect(() => {
     dispatch({ type: "RESULTS", results });
@@ -57,151 +54,147 @@ export function NudgeDock({
     else dispatch({ type: "FIELD_BLUR" });
   }, [focusedFieldId, results]);
 
-  // Scroll a newly opened nudge into view, but never steal the keyboard: the
-  // doctor is usually mid-sentence in a field when this fires.
+  // Moving to another field with guidance of its own hands the card to it.
   useEffect(() => {
-    if (dock.state !== "panel" || !dock.focusResultId) return;
-    panelRef.current
-      ?.querySelector(`[data-result="${CSS.escape(dock.focusResultId)}"]`)
-      ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  }, [dock.state, dock.focusResultId]);
+    if (focusedFieldId && results.some((r) => r.anchor === focusedFieldId))
+      setPicked({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusedFieldId]);
 
-  // Reserve space in layout and keep the focused field inside its scroll area.
+  // Something new and important arrived: it takes the card, once.
   useEffect(() => {
-    const frame = requestAnimationFrame(() => {
-      const active = document.activeElement;
-      const form = active?.closest(".caselog");
-      if (!(active instanceof HTMLElement) || !(form instanceof HTMLElement))
-        return;
-      const a = active.getBoundingClientRect(),
-        box = form.getBoundingClientRect();
-      if (a.bottom > box.bottom - 16)
-        form.scrollTop += a.bottom - box.bottom + 20;
-      else if (a.top < box.top + 16) form.scrollTop -= box.top - a.top + 20;
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [dock.state, focusedFieldId]);
+    if (dock.state === "panel" && dock.focusResultId) {
+      setPicked({ id: dock.focusResultId });
+      onNewNudge?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dock.focusResultId]);
+
+  const mine = focusedFieldId
+    ? results.filter((r) => r.anchor === focusedFieldId)
+    : [];
+  let selected: Result | undefined;
+  if (!picked.closed) {
+    if (picked.id) selected = results.find((r) => r.id === picked.id);
+    if (!selected && (dock.state === "peek" || dock.state === "panel") && mine.length)
+      selected = mine[0];
+    if (!selected && dock.state === "panel")
+      selected =
+        results.find((r) => r.id === dock.focusResultId) ??
+        results.find((r) => nudgePriority(r) >= 50) ??
+        results[0];
+  }
+
+  // Bring the open card into view without taking the keyboard: the doctor is
+  // usually mid-entry in a field when this happens.
+  useEffect(() => {
+    cardRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [selected?.id]);
+
+  // Esc folds the open card back into the list, wherever focus is.
+  const hasCard = !!selected;
+  useEffect(() => {
+    if (!hasCard) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      setPicked({ closed: true });
+      dispatch({ type: "COLLAPSE" });
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [hasCard]);
 
   if (unavailable)
     return (
-      <aside className="nudge-dock" data-state="pill" data-testid="nudge-dock">
-        <div className="dock-pill unavailable" role="status">
+      <section className="gp-guidance" data-state="pill" data-testid="nudge-dock">
+        <p className="gp-unavailable" role="status">
           Guidance unavailable — the caselog still works
-        </div>
-      </aside>
+        </p>
+      </section>
     );
 
-  if (dock.state === "hidden") return null;
+  if (!results.length)
+    return (
+      <section className="gp-guidance is-empty">
+        {storyboard}
+        <div className="gp-empty">
+          <p>
+            <strong>Nothing from {hospitalName}'s guide at this step.</strong>
+          </p>
+          <p className="muted">
+            Ask the guide if you need something specific.
+          </p>
+        </div>
+      </section>
+    );
 
-  const ordered = orderForField(results, focusedFieldId);
+  const isAck = (r: Result) => acknowledged.includes(resultSignature(r));
   const summary = pillSummary(results);
+  const forField = mine.filter((r) => r !== selected);
+  const rest = results.filter((r) => r !== selected && !mine.includes(r));
+  const open = (r: Result) => {
+    setPicked({ id: r.id });
+    dispatch({ type: "OPEN", resultId: r.id });
+  };
   const focusedLabel = focusedFieldId ? fieldLabels[focusedFieldId] : undefined;
-  const peeked = focusedFieldId
-    ? ordered.filter((r) => r.anchor === focusedFieldId)
-    : [];
 
   return (
-    <aside
-      className="nudge-dock"
+    <section
+      className="gp-guidance"
       data-state={dock.state}
       data-testid="nudge-dock"
       role="region"
       aria-label="Hospital guidance"
     >
-      {dock.state === "peek" && peeked.length > 0 && (
-        <div className="dock-peek" data-testid="dock-peek">
-          <span className="dock-peek-for">For {focusedLabel}</span>
-          <span className="dock-peek-line">
-            {peeked.map((r) => `${r.title}: ${r.message}`).join(" · ")}
-          </span>
+      {storyboard}
+      <p className={`gp-summary ${summary.tier}`} data-testid="dock-pill">
+        <span className="gp-dot" aria-hidden="true" />
+        {summary.label}
+      </p>
+      {selected && (
+        <div
+          ref={cardRef}
+          className="gp-open"
+          data-testid={dock.state === "peek" ? "dock-peek" : "dock-panel"}
+          aria-live="polite"
+        >
+          {selected.anchor && fieldLabels[selected.anchor] && (
+            <p className="gp-for">For {fieldLabels[selected.anchor]}</p>
+          )}
+          <NudgeCard
+            r={selected}
+            onAsk={onAsk}
+            onAcknowledge={onAcknowledge}
+            onUndoAcknowledge={onUndoAcknowledge}
+            acknowledged={isAck(selected)}
+            onContacts={onContacts}
+            onReport={onReport}
+            reported={reported.includes(selected.id)}
+            onClose={() => {
+              setPicked({ closed: true });
+              dispatch({ type: "COLLAPSE" });
+            }}
+          />
         </div>
       )}
-
-      {dock.state === "panel" ? (
-        <section className="dock-panel" data-testid="dock-panel">
-          <header className="dock-header">
-            <div className="dock-title-group">
-              <button
-                className="dock-chat-launcher"
-                onClick={onOpenChat}
-                aria-label="Open guide companion"
-              >
-                <AssistantOrb small />
-                <span>Ask a question</span>
-              </button>
-              <div>
-                <p className="eyebrow">
-                  <span className="live-dot" /> HOSPITAL GUIDANCE ·{" "}
-                  {summary.count}
-                </p>
-                <h2>
-                  {focusedLabel ? `For ${focusedLabel}` : "Hospital guidance"}
-                </h2>
-                <span className="dock-subtitle">
-                  Guide companion: {summary.label}
-                </span>
-              </div>
-            </div>
-            <button
-              className="dock-collapse"
-              onClick={() => {
-                dispatch({ type: "COLLAPSE" });
-                requestAnimationFrame(() => pillRef.current?.focus());
-              }}
-              aria-label="Collapse guidance"
-            >
-              Hide
-            </button>
-          </header>
-          <div
-            className="dock-list"
-            ref={panelRef}
-            aria-live="polite"
-            aria-atomic="false"
-          >
-            {ordered.map((r) => (
-              <div key={r.id} data-result={r.id}>
-                {nudgePriority(r) >= 50 ? (
-                  <NudgeCard
-                    r={r}
-                    onAsk={onAsk}
-                    onAcknowledge={onAcknowledge}
-                    onContacts={onContacts}
-                    onReport={onReport}
-                  />
-                ) : (
-                  <ReferenceRow r={r} onAsk={onAsk} />
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-      ) : (
-        <div className="dock-launchers">
-          <button
-            className="secondary dock-review"
-            onClick={() => dispatch({ type: "TOGGLE" })}
-            aria-label="Review hospital guidance"
-          >
-            Review guidance
-          </button>
-          <button
-            ref={pillRef}
-            className={`dock-pill ${summary.tier}`}
-            onClick={onOpenChat}
-            data-testid="dock-pill"
-            aria-label="Open guide companion"
-          >
-            <AssistantOrb />
-            <span className="dock-pill-count">{summary.count}</span>
-            {/* Tier is said in words as well as shown in colour. */}
-            <span className="dock-pill-copy">
-              <strong>Guide companion</strong>
-              <span className="dock-pill-label">{summary.label}</span>
-            </span>
-          </button>
+      {forField.length > 0 && (
+        <div className="gp-list">
+          <p className="gp-list-head">Also for {focusedLabel}</p>
+          {forField.map((r) => (
+            <NudgeRow key={r.id} r={r} acknowledged={isAck(r)} onOpen={open} />
+          ))}
         </div>
       )}
-    </aside>
+      {rest.length > 0 && (
+        <div className="gp-list">
+          <p className="gp-list-head">
+            {selected || forField.length ? "Also at this step" : "At this step"}
+          </p>
+          {rest.map((r) => (
+            <NudgeRow key={r.id} r={r} acknowledged={isAck(r)} onOpen={open} />
+          ))}
+        </div>
+      )}
+    </section>
   );
 }

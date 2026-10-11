@@ -43,6 +43,42 @@ const paths: Record<string, React.ReactNode> = {
       <path d="M9 5 4 10l5 5M4 10h10a6 6 0 0 1 0 12" />
     </>
   ),
+  phone: (
+    <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" />
+  ),
+  chat: (
+    <path d="M4 5h16v11H9l-5 4Z" />
+  ),
+  menu: <path d="M4 6h16M4 12h16M4 18h16" />,
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </>
+  ),
+  flag: <path d="M5 21V4m0 0h11l-2 4 2 4H5" />,
+  left: <path d="m15 5-7 7 7 7" />,
+  right: <path d="m9 5 7 7-7 7" />,
+  plus: <path d="M12 5v14M5 12h14" />,
+  close: <path d="M6 6l12 12M18 6 6 18" />,
+  alert: (
+    <>
+      <path d="M12 3 2 20h20Z" />
+      <path d="M12 10v4m0 3v.01" />
+    </>
+  ),
+  info: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v6m0-9v.01" />
+    </>
+  ),
+  lock: (
+    <>
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    </>
+  ),
 };
 export function Icon({ name, size = 20 }: { name: string; size?: number }) {
   return (

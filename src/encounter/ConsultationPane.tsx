@@ -2,7 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "../Icon";
 
 /** Local camera preview only. A real Sevaro call requires its host integration. */
-export function ConsultationPane({ hospital }: { hospital: string }) {
+export function ConsultationPane({
+  hospital,
+  onHide,
+}: {
+  hospital: string;
+  /** Folds the video away so the form can use the space. */
+  onHide?: () => void;
+}) {
   const [preview, setPreview] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
@@ -70,6 +77,19 @@ export function ConsultationPane({ hospital }: { hospital: string }) {
           <p>{hospital}</p>
         </div>
         <span className="video-mode">{preview ? "Local preview" : "Demo"}</span>
+        {onHide && (
+          <button
+            className="video-hide"
+            onClick={() => {
+              stop();
+              onHide();
+            }}
+            aria-label="Hide video"
+            title="Hide video — gives the form more room"
+          >
+            <Icon name="left" size={18} />
+          </button>
+        )}
       </header>
       <button
         className="video-mobile-toggle"
@@ -92,12 +112,7 @@ export function ConsultationPane({ hospital }: { hospital: string }) {
             <div className="camera-emblem">
               <Icon name="camera" size={32} />
             </div>
-            <h2>Space for the conversation.</h2>
-            <p>
-              Your consultation on the left.
-              <br />
-              Everything you need to document, on the right.
-            </p>
+            <p className="video-empty-title">Video consultation</p>
             <span className="video-disclosure">
               No live Sevaro call is connected.
             </span>
@@ -132,16 +147,6 @@ export function ConsultationPane({ hospital }: { hospital: string }) {
           {error}
         </p>
       )}
-      <footer className="consultation-footer">
-        <Icon name="book" size={18} />
-        <div>
-          <strong>Stay with the patient.</strong>
-          <p>
-            Hospital guidance follows the field you’re in. Review it when you
-            need it.
-          </p>
-        </div>
-      </footer>
     </section>
   );
 }

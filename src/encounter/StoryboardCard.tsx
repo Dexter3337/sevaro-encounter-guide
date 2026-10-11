@@ -132,9 +132,12 @@ export function StoryboardCard({
   context,
   onOpenConflict,
 }: StoryboardCardProps) {
-  // Collapsed or not is remembered for this encounter only.
-  const [fold, setFold] = useState({ key: context.id, collapsed: false });
-  const collapsed = fold.key === context.id && fold.collapsed;
+  // Folded to one line unless a field disagrees with the guide: the doctor
+  // needs to see a disagreement, not a list of notes that agree. Their choice
+  // is remembered for this encounter only.
+  const [fold, setFold] = useState<{ key: string; collapsed?: boolean }>({
+    key: context.id,
+  });
   const rows = storyboardRows(hospital, context);
   if (!rows.length) return null;
   const newest = rows
@@ -143,6 +146,10 @@ export function StoryboardCard({
   const differing = rows.filter(
     (r) => r.verdict === "conflict" || r.verdict === "possible_conflict",
   ).length;
+  const collapsed =
+    fold.key === context.id && fold.collapsed !== undefined
+      ? fold.collapsed
+      : differing === 0;
   return (
     <section
       className="storyboard-card"
@@ -151,7 +158,7 @@ export function StoryboardCard({
     >
       <header className="storyboard-head">
         <div>
-          <p className="eyebrow">Hospital storyboard · {hospital.name}</p>
+          <p className="eyebrow">Storyboard notes · {rows.length}</p>
           <small className={newest?.stale ? "storyboard-stale" : "muted"}>
             {newest ? updated(newest) : "Update date unknown"}
             {differing
@@ -165,16 +172,14 @@ export function StoryboardCard({
           aria-expanded={!collapsed}
           onClick={() => setFold({ key: context.id, collapsed: !collapsed })}
         >
-          {collapsed ? "Expand" : "Collapse"}
+          {collapsed ? "Show" : "Hide"}
         </button>
       </header>
-      {!collapsed && (
-        <ul className="storyboard-rows">
-          {rows.map((row) => (
-            <Row key={row.source.id} row={row} onOpenConflict={onOpenConflict} />
-          ))}
-        </ul>
-      )}
+      <ul className="storyboard-rows" hidden={collapsed}>
+        {rows.map((row) => (
+          <Row key={row.source.id} row={row} onOpenConflict={onOpenConflict} />
+        ))}
+      </ul>
     </section>
   );
 }

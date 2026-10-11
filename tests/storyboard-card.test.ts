@@ -35,7 +35,7 @@ describe("Storyboard card", () => {
     const html = render(byId("SYN-002"));
     expect(html).toContain('data-verdict="conflict"');
     const out = text(html);
-    expect(out).toContain("Hospital storyboard · Bluewater Regional Hospital");
+    expect(out).toContain("Storyboard notes · 1");
     expect(out).toContain("Video Eval Location Patient room");
     expect(out).toContain("Differs from the guide");
     expect(out).toContain("Guide says: CT holding bay for stroke alerts");
