@@ -447,7 +447,16 @@ export function currentEEGConcern(text: string): boolean {
     );
   });
 }
-export function evaluate(h: Hospital, c: Context, e: Event): Result[] {
+// `previous` is the result set from the last evaluation of this encounter. It
+// is passed in rather than remembered so the engine stays a pure function of
+// its inputs: the same pack, context, event and previous set always produce the
+// same output, which is what makes the behaviour testable and replayable.
+export function evaluate(
+  h: Hospital,
+  c: Context,
+  e: Event,
+  previous: Result[] = [],
+): Result[] {
   if (c.hospitalId !== h.id || c.guideVersion !== h.version)
     throw new Error("Hospital/version mismatch");
   const out: Result[] = [];
@@ -592,18 +601,65 @@ export function evaluate(h: Hospital, c: Context, e: Event): Result[] {
     if (c.step === m.step && predicate(m.condition, c) === true)
       add(m.sourceField, m.tier, m.fieldId);
   }
-  return [...new Map(out.map((r) => [r.id, r])).values()]
-    .filter(r => !r.flags.includes("resolved"))
+  const ranked = [...new Map(out.map((r) => [r.id, r])).values()]
+    .filter((r) => !r.flags.includes("resolved"))
     .sort((a, b) => nudgePriority(b) - nudgePriority(a));
+  // Which result, if any, may open the panel on its own. Three conditions, and
+  // all of them have to hold.
+  //
+  // Info never interrupts, whatever its score: the handbook is explicit that
+  // info is "available if the doctor looks for it".
+  //
+  // It has to be new. A rule that was already on screen before this keystroke
+  // has had its chance to be read; re-opening the panel for it would punish
+  // the doctor for carrying on typing.
+  //
+  // Only one per event, so the panel settles on the most important thing
+  // instead of jumping between several.
+  const seen = new Set(previous.map(resultSignature));
+  const candidate = ranked.find(
+    (r) =>
+      r.tier !== "info" &&
+      nudgePriority(r) >= TIER_BASE.advisory &&
+      !seen.has(resultSignature(r)),
+  );
+  for (const r of ranked) r.autoExpand = r === candidate;
+  return ranked;
 }
 
+// How loudly a result should be shown. The tier sets the floor and the
+// circumstances raise it, so a rule that is ordinarily reference material can
+// still rise above one that is ordinarily advisory when the encounter calls
+// for it. 50 and above is a card; below that is a one-line row.
+const TIER_BASE: Record<Tier, number> = {
+  hard_stop: 100,
+  advisory: 50,
+  info: 10,
+};
 export function nudgePriority(r: Result): number {
-  if (r.blocksCompletion) return 100;
-  if (r.flags.includes("recorded_capability_conflict")) return 90;
+  let p = TIER_BASE[r.tier];
+  // A recorded observation that the guide contradicts is the sharpest case:
+  // one of the two is wrong and only the doctor can say which.
+  if (r.flags.includes("recorded_capability_conflict")) p += 30;
+  // Something the hospital says is down right now, on a field in play.
+  if (r.liveStatus?.length) p += 25;
+  if (r.primaryStatus === "conflict") p += 20;
   // Loud once an LVO is recorded; until then it is capability context.
-  if (r.title === "LVO Protocol" && r.tier !== "info") return 80;
-  if (r.primaryStatus === "conflict") return 70;
-  return r.tier === "advisory" ? 50 : 10;
+  if (r.title === "LVO Protocol" && r.tier !== "info") p += 20;
+  // Sources that disagree always reach card level, whatever the tier. A
+  // doctor acting on the wrong one of two values is the harm the handbook
+  // asks us to prevent, and a collapsed row is too easy to pass over.
+  if (r.primaryStatus === "conflict") p = Math.max(p, TIER_BASE.advisory);
+  return p;
+}
+// Identifies a result across evaluations, so the dock can tell a genuinely new
+// nudge from the same one still applying. Message and status are included
+// because a time-dependent rule keeps its id while its answer changes, and tier
+// because the same rule changes meaning when a recorded value promotes it: the
+// LVO protocol shown as context before an LVO is recorded, and as an advisory
+// once one is, is the same field saying two different things to the doctor.
+export function resultSignature(r: Result): string {
+  return `${r.id}:${r.tier}:${r.primaryStatus}:${r.message}`;
 }
 
 // Capability and encounter facts are separate. A scan may have been performed
