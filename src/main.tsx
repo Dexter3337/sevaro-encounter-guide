@@ -48,16 +48,8 @@ import {
 import { challengeFixtures } from "./fixtures";
 import { runEvaluation, fixtureContext, percentiles } from "./evaluation";
 import "./style.css";
-import { TranscriptReview } from "./TranscriptReview";
-import { VoiceCopilot, type VoiceOutcome } from "./VoiceCopilot";
-import { type VoiceIntent } from "./voice";
 import { Icon } from "./Icon";
 import "./workspace.css";
-import {
-  syntheticTranscriptBatch,
-  approvedTranscriptValues,
-  type TranscriptBatch,
-} from "./transcript";
 
 const label = (s: string) =>
   s.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -324,7 +316,6 @@ function App() {
   )!;
   const [tab, setTab] = useState("encounter");
   const [outage, setOutage] = useState(false);
-  const [transcriptBatch, setTranscriptBatch] = useState<TranscriptBatch>();
   const [results, setResults] = useState<Result[]>(() =>
     evaluate(h, c, makeEvent(c, "encounter_opened")),
   );
@@ -332,12 +323,6 @@ function App() {
   const [audit, setAudit] = useState<Audit[]>([]);
   const [measures, setMeasures] = useState<Measure[]>([]);
   const [completed, setCompleted] = useState(false);
-  const [voiceFields, setVoiceFields] = useState<string[]>([]);
-  const voiceUndo = useRef<{
-    revision: number;
-    before: Context;
-    fields: string[];
-  } | null>(null);
   const [completionText, setCompletionText] = useState("");
   const [error, setError] = useState("");
   const [question, setQuestion] = useState("");
@@ -360,10 +345,6 @@ function App() {
   const pending = useRef<{ start: number; event: Event; cards: number }[]>([]);
   const latestC = useRef(c);
   latestC.current = c;
-  useEffect(() => {
-    setVoiceFields([]);
-    voiceUndo.current = null;
-  }, [c.id, c.guideVersion]);
   const visible = outage
     ? []
     : results.filter((r) => !dismissed.includes(signature(r)));
@@ -440,168 +421,7 @@ function App() {
     return rs;
   }
   function change(id: string, val: Known) {
-    setVoiceFields((prev) => prev.filter((field) => field !== id));
     commit(c, makeEvent(c, "field_changed", id, val));
-  }
-  function voiceAction(intent: VoiceIntent, revision: number): VoiceOutcome {
-    const current = latestC.current;
-    if (revision !== current.revision)
-      return {
-        message:
-          "Encounter changed before this phrase was applied. Please repeat it.",
-      };
-    if (intent.kind === "question") {
-      setQuestion(intent.question);
-      if (outage) {
-        setAnswer(undefined);
-        setClarification(
-          "Hospital guidance is unavailable. No answer can be verified.",
-        );
-        return {
-          message:
-            "Hospital guidance is unavailable. No answer can be verified.",
-        };
-      }
-      const response = ask(h, current, intent.question);
-      setAnswer(response.result);
-      setClarification(response.clarification || "");
-      setCandidates(response.candidates || []);
-      return {
-        message: response.result
-          ? `${response.result.message} Source: ${h.name}, ${response.result.citations.map((s) => s.field).join(", ") || "field not in guide"}.`
-          : response.clarification || "Please name a hospital guide field.",
-      };
-    }
-    if (intent.kind === "navigate") {
-      if (intent.step === "rounding" && current.encounterType !== "Rounding")
-        return {
-          message: "Select a Rounding encounter before opening that step.",
-        };
-      commit(
-        { ...current, step: intent.step },
-        makeEvent(current, "step_changed"),
-      );
-      return { message: `Opened ${label(intent.step)}.` };
-    }
-    if (intent.kind === "undo") {
-      const undo = voiceUndo.current;
-      if (
-        !undo ||
-        undo.revision !== current.revision ||
-        undo.before.id !== current.id
-      )
-        return {
-          message:
-            "Nothing to undo. Later edits are preserved; use the form to correct them.",
-        };
-      commit(
-        { ...current, values: undo.before.values, step: undo.before.step },
-        makeEvent(current, "step_changed"),
-      );
-      setVoiceFields((prev) => prev.filter((id) => !undo.fields.includes(id)));
-      voiceUndo.current = null;
-      return {
-        message: "Last voice update undone. Guidance has been refreshed.",
-      };
-    }
-    if (intent.kind === "changes") {
-      const allowed = new Set([
-        "last_known_well_status",
-        "cta_done",
-        "lvo_present",
-        "allergies",
-        "reason_for_consult",
-        "assessment_plan",
-        "note_title",
-        "note_body",
-        "rounding_order_intent",
-      ]);
-      if (intent.changes.some((x) => !allowed.has(x.fieldId)))
-        return {
-          message: "This field needs manual confirmation. No values changed.",
-        };
-      const changes = intent.changes.filter(
-        (x) => value(current, x.fieldId) !== x.value,
-      );
-      if (!changes.length)
-        return {
-          message:
-            "Those findings are already recorded. No duplicate changes made.",
-        };
-      let next = current;
-      for (const x of changes) {
-        const field = registry.find((f) => f.id === x.fieldId)!;
-        next = { ...next, step: field.step };
-        const event = makeEvent(
-          next,
-          "field_changed",
-          x.fieldId,
-          known(x.value),
-        );
-        commit(next, event);
-        next = latestC.current;
-        setAudit((prev) =>
-          prev.map((row) =>
-            row.event.id === event.id
-              ? {
-                  ...row,
-                  action: intent.explicit
-                    ? "explicit voice command"
-                    : "voice current-fact extraction",
-                }
-              : row,
-          ),
-        );
-      }
-      voiceUndo.current = {
-        revision: next.revision,
-        before: current,
-        fields: changes.map((x) => x.fieldId),
-      };
-      setVoiceFields((prev) => [
-        ...new Set([...prev, ...changes.map((x) => x.fieldId)]),
-      ]);
-      return {
-        message: `Filled ${changes.map((x) => `${registry.find((f) => f.id === x.fieldId)?.label}: ${typeof x.value === "boolean" ? (x.value ? "Yes" : "No") : x.value}`).join(" · ")}. ${outage ? "Guidance is unavailable." : "Hospital guidance updated."}`,
-        changed: changes.length,
-      };
-    }
-    return {
-      message: "Say Bot, then ask a hospital question or name a field to fill.",
-    };
-  }
-  function applyTranscript(selected: string[]) {
-    if (!transcriptBatch) return;
-    try {
-      const approved = approvedTranscriptValues(
-        transcriptBatch,
-        latestC.current,
-        selected,
-      );
-      let next = latestC.current;
-      for (const [fieldId, val] of Object.entries(approved)) {
-        const target = registry.find((f) => f.id === fieldId)!;
-        next = { ...next, step: target.step };
-        const event = makeEvent(next, "field_changed", fieldId, val);
-        commit(next, event);
-        next = reduceEvent(next, event);
-        setAudit((a) =>
-          a.map((row) =>
-            row.event.id === event.id
-              ? {
-                  ...row,
-                  action:
-                    "clinician-approved synthetic transcript draft · " +
-                    transcriptBatch.sourceId,
-                }
-              : row,
-          ),
-        );
-      }
-      setTranscriptBatch(undefined);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    }
   }
   function focus(id: string) {
     if (id === "thrombolytic_order_placed")
@@ -743,16 +563,21 @@ function App() {
         type: "text" as const,
       })),
   ].filter((f) => f.step === c.step);
-  // Guidance belongs at the field it concerns, where the clinician is already
-  // looking. Only what has no field on this step stays in the side rail, so
-  // nothing is shown twice.
-  const onStep = new Set(fields.map((f) => f.id));
+  // Everything applicable goes to one place — the dock — rather than being
+  // split between a rail and the form. Showing a rule twice taught the eye to
+  // skip both copies.
   const forField = (id: string) => visible.filter((r) => r.anchor === id);
-  const railGuidance = visible.filter(
-    (r) => !r.anchor || !onStep.has(r.anchor),
-  );
-  const railCards = railGuidance.filter((r) => nudgePriority(r) >= 50);
-  const railRows = railGuidance.filter((r) => nudgePriority(r) < 50);
+  const fieldLabels = Object.fromEntries(fields.map((f) => [f.id, f.label]));
+  const blocking = visible.filter((r) => r.blocksCompletion);
+  // Which field the doctor is in. The dock leads with that field's guidance.
+  const [focusedField, setFocusedField] = useState<string>();
+  const [chatSeed, setChatSeed] = useState<Result>();
+  const [contactsReason, setContactsReason] = useState<string>();
+  const openDockOn = (resultId: string) => {
+    document
+      .querySelector(`[data-result="${CSS.escape(resultId)}"]`)
+      ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  };
   const acknowledge = (r: Result) => {
     setDismissed((a) => [...a, signature(r)]);
     setAudit((a) => [
@@ -831,14 +656,6 @@ function App() {
             <small>Engine {engineVersion}</small>
           </div>
         </nav>
-        {transcriptBatch && (
-          <TranscriptReview
-            batch={transcriptBatch}
-            context={c}
-            close={() => setTranscriptBatch(undefined)}
-            approve={applyTranscript}
-          />
-        )}
         <main>
           <div className="page-heading">
             <div>
@@ -929,39 +746,6 @@ function App() {
           )}
           {tab === "encounter" && (
             <>
-              <VoiceCopilot
-                key={`${c.id}:${c.guideVersion}`}
-                context={c}
-                onAction={voiceAction}
-                filled={voiceFields.length}
-                canUndo={voiceUndo.current?.revision === c.revision}
-                reviewReason={(intent) => intent.kind === "changes" &&
-                  intent.changes.some(x => x.fieldId === "cta_done" && x.value === true)
-                  ? ctaConcern(h, c)?.message : undefined}
-                guidance={actionable[0]}
-              />
-              <div className="workflow-summary">
-                <div>
-                  <Icon name="mic" />
-                  <span>
-                    <b>01 · Listen</b>Capture the conversation
-                  </span>
-                </div>
-                <Icon name="arrow" size={16} />
-                <div>
-                  <Icon name="spark" />
-                  <span>
-                    <b>02 · Understand</b>Fill supported findings
-                  </span>
-                </div>
-                <Icon name="arrow" size={16} />
-                <div>
-                  <Icon name="shield" />
-                  <span>
-                    <b>03 · Anticipate</b>Surface hospital guidance
-                  </span>
-                </div>
-              </div>
               <details className="demo-controls">
                 <summary>Demo controls & scenario launcher</summary>
                 <div className="control-grid">
@@ -1139,14 +923,6 @@ function App() {
                       ))}
                   </nav>
                   <div className="form-body">
-                    <button
-                      className="secondary"
-                      onClick={() =>
-                        setTranscriptBatch(syntheticTranscriptBatch(c))
-                      }
-                    >
-                      Simulate transcript drafts
-                    </button>
                     <div className="form-title">
                       <span className="eyebrow">
                         {label(c.step)} · {c.encounterType}
@@ -1166,20 +942,7 @@ function App() {
                       </p>
                     </div>
                     {fields.map((f) => (
-                      <div
-                        key={f.id}
-                        className={
-                          voiceFields.includes(f.id)
-                            ? "voice-filled"
-                            : "manual-field"
-                        }
-                      >
-                        {voiceFields.includes(f.id) && (
-                          <span className="filled-label">
-                            <Icon name="spark" size={13} /> Filled from voice ·
-                            review anytime
-                          </span>
-                        )}
+                      <div key={f.id} className="manual-field">
                         {forField(f.id).length > 0 && (
                           <div
                             className="field-guidance"
@@ -1264,78 +1027,7 @@ function App() {
                     </button>
                   </footer>
                 </section>
-                <aside
-                  className="guidance-panel"
-                  id="priority-guidance"
-                  aria-label="Hospital guidance"
-                >
-                  <div className="guidance-title">
-                    <div>
-                      <p className="eyebrow">
-                        <span className="live-dot" /> ALWAYS A STEP AHEAD
-                      </p>
-                      <h2>Your next right step</h2>
-                    </div>
-                    <span className="count">{visible.length}</span>
-                  </div>
-                  <div aria-live="polite" aria-atomic="false">
-                    {railCards.length ? (
-                      railCards.map((r) => (
-                        <Card
-                          key={r.id}
-                          r={r}
-                          onDismiss={acknowledge}
-                          onFix={(id) => {
-                            step("sign_off");
-                            requestAnimationFrame(() =>
-                              document.getElementById(`field-${id}`)?.focus(),
-                            );
-                          }}
-                        />
-                      ))
-                    ) : visible.length > railRows.length && !outage ? (
-                      // Everything that applies is pinned to its own field, so
-                      // repeating it here would only split the clinician's
-                      // attention between two places.
-                      <p className="empty-line">
-                        <span>←</span>{" "}
-                        {visible.length - railRows.length === 1
-                          ? "1 item is shown with the field it applies to."
-                          : `${visible.length - railRows.length} items are shown with the fields they apply to.`}
-                      </p>
-                    ) : railRows.length && !outage ? (
-                      <p className="empty-line">
-                        <span>✓</span> Nothing needs action at this step.
-                      </p>
-                    ) : (
-                      <div className="empty">
-                        <span>✓</span>
-                        <h3>
-                          {outage
-                            ? "Guidance unavailable"
-                            : "No applicable guidance"}
-                        </h3>
-                        <p>
-                          {outage
-                            ? "Source-backed checks are unavailable."
-                            : "Continue documenting. Guidance appears when a source rule applies."}
-                        </p>
-                      </div>
-                    )}
-                    {railRows.length > 0 && (
-                      <section className="reference-group">
-                        <p className="reference-heading">
-                          Hospital reference
-                          <span className="reference-count">
-                            {railRows.length}
-                          </span>
-                        </p>
-                        {railRows.map((r) => (
-                          <ReferenceRow key={r.id} r={r} />
-                        ))}
-                      </section>
-                    )}
-                  </div>
+                <aside className="ask-rail" aria-label="Ask the guide">
                   <section className="ask-panel">
                     <p className="eyebrow">ASK THE GUIDE · {h.id}</p>
                     <h2>Just ask, “Bot…”</h2>
