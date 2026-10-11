@@ -240,7 +240,6 @@ function storyboardRows(
   hospital?: string,
 ): Source[] {
   const out: Source[] = [];
-  const seen = new Map<string, number>();
   rows.forEach((row, i) => {
     const where = `${file}, storyboard row ${i + 1}`;
     if (!isRow(row))
@@ -269,12 +268,6 @@ function storyboardRows(
       `${where} ("${original}")`,
     );
     take(row, K.kind, used);
-    const key = `${hospitalId}\u0000${normalize(field)}`;
-    if (seen.has(key))
-      throw new Error(
-        `${file}: storyboard rows ${seen.get(key)} and ${i + 1} both give "${field}" for ${hospitalId}. Keep one.`,
-      );
-    seen.set(key, i + 1);
     const extra = Object.fromEntries(
       Object.entries(row).filter(([k]) => !used.has(k)),
     );
@@ -1028,29 +1021,34 @@ function combine(
     }
   const storyboard: Source[] = [],
     contacts: Contact[] = [];
-  const sbFrom = new Map<string, string>();
-  for (const { label, out } of parsed) {
-    for (const s of out.storyboard) {
-      const k = `${s.hospitalId}\u0000${normalize(s.field)}`;
-      if (sbFrom.has(k))
-        throw new Error(
-          `"${s.field}" for ${s.hospitalId} is in both ${sbFrom.get(k)} and ${label}. Keep one storyboard row per field.`,
-        );
-      sbFrom.set(k, label);
-      storyboard.push(s);
-    }
+  // A hospital's storyboard may hold several rows for one field; all of them
+  // are kept and the engine compares each against the guide.
+  const rowKey = (s: Source) => `${s.hospitalId}\u0000${normalize(s.field)}`;
+  for (const { out } of parsed) {
+    storyboard.push(...out.storyboard);
     contacts.push(...out.contacts);
   }
-  // Rows held from an earlier drop come along, unless this drop replaces them.
+  const incoming = new Set(storyboard.map(rowKey));
+  // Rows held from an earlier drop come along, unless this drop gives the same
+  // field again, in which case the newer rows replace them.
   for (const h of options.held ?? []) {
     for (const s of h.storyboard)
-      if (!sbFrom.has(`${s.hospitalId}\u0000${normalize(s.field)}`))
-        storyboard.push(s);
+      if (!incoming.has(rowKey(s))) storyboard.push(s);
     for (const c of h.contacts)
       if (
         !contacts.some((x) => x.hospitalId === c.hospitalId && x.role === c.role)
       )
         contacts.push(c);
+  }
+  // One ID per row: the first row for a field keeps the plain ID, later rows
+  // for the same field are numbered.
+  const seen = new Map<string, number>();
+  for (const [i, s] of storyboard.entries()) {
+    const k = rowKey(s);
+    const n = (seen.get(k) ?? 0) + 1;
+    seen.set(k, n);
+    const id = `${s.hospitalId}:storyboard:${slug(s.field)}${n > 1 ? `:${n}` : ""}`;
+    if (s.id !== id) storyboard[i] = { ...s, id };
   }
   const ids = (xs: { hospitalId: string }[]) => [
     ...new Set(xs.map((x) => x.hospitalId)),
@@ -1066,14 +1064,13 @@ function combine(
       throw new Error(`${label}, ${String(data.id)}: ${zodMessage(e)}`);
     }
     const rows = sbFor(h.id);
+    const embedded = new Set(
+      h.fields
+        .filter((f) => f.sourceKind === "storyboard")
+        .map((f) => normalize(f.field)),
+    );
     for (const s of rows) {
-      if (
-        h.fields.some(
-          (f) =>
-            f.sourceKind === "storyboard" &&
-            normalize(f.field) === normalize(s.field),
-        )
-      )
+      if (embedded.has(normalize(s.field)))
         throw new Error(
           `${h.name}: "${s.field}" has a storyboard row in the guide file and another in ${s.sourceName}. Keep one.`,
         );
@@ -1108,16 +1105,19 @@ function combine(
     }
     const h: Hospital = structuredClone(base);
     const changedRows: Source[] = [];
-    for (const s of rows) {
-      const at = h.fields.findIndex(
-        (f) =>
-          f.sourceKind === "storyboard" &&
-          normalize(f.field) === normalize(s.field),
-      );
-      if (at >= 0 && sameRow(h.fields[at], s)) continue;
-      if (at >= 0) h.fields.splice(at, 1, s);
-      else h.fields.push(s);
-      changedRows.push(s);
+    // Per field, the incoming rows replace whatever rows the active version
+    // has — unless they are the same rows, in which case nothing changes.
+    for (const field of new Set(rows.map((s) => normalize(s.field)))) {
+      const next = rows.filter((s) => normalize(s.field) === field);
+      const isField = (f: Source) =>
+        f.sourceKind === "storyboard" && normalize(f.field) === field;
+      const now = h.fields.filter(isField);
+      const same =
+        now.length === next.length &&
+        next.every((s) => now.some((f) => sameRow(f, s)));
+      if (same) continue;
+      h.fields = [...h.fields.filter((f) => !isField(f)), ...next];
+      changedRows.push(...next);
     }
     const before = new Set((h.contacts ?? []).map(contactKey));
     const changedContacts = cs.some((c) => !before.has(contactKey(c)));
@@ -1175,12 +1175,16 @@ function validate(h: Hospital, label: string, p: Preview) {
     if (ids.has(s.id))
       throw new Error(`${label}: two sources share the ID ${s.id}.`);
     ids.add(s.id);
-    const identity = `${s.sourceKind}:${normalize(s.field)}`;
-    if (fields.has(identity))
-      throw new Error(
-        `${label}: ${h.name} lists "${s.field}" twice as a ${s.sourceKind} field. Combine the two before importing.`,
-      );
-    fields.add(identity);
+    // A guide gives one value per field. A storyboard may give several, and a
+    // disagreement among them is shown, not resolved.
+    const identity = normalize(s.field);
+    if (s.sourceKind === "guide") {
+      if (fields.has(identity))
+        throw new Error(
+          `${label}: ${h.name} lists "${s.field}" twice as a guide field. Combine the two before importing.`,
+        );
+      fields.add(identity);
+    }
     const state = interpretation(s);
     p.counts[state]++;
     if (state !== "supported")

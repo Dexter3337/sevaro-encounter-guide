@@ -1,0 +1,22 @@
+{
+  "hospitals": [
+    {
+      "hospital_id": "ALN-001",
+      "hospital_name": "St. Aubin Regional (synthetic)",
+      "local_timezone": "America/Anchorage",
+      "fields": {
+        "Video Eval Location": { "value": "Emergency bay 4 for stroke alerts; patient room for other consults" },
+        "Thrombolytic": { "value": "Tenecteplase" },
+        "CT Head": { "value": "24/7", "last_verified": "2026-01-05" },
+        "CTA (head & neck)": { "value": "24/7", "last_verified": "2026-01-05" },
+        "Note title required": { "value": "Telestroke Consultation - Remote", "last_verified": "2026-01-05" },
+        "Charge entry required?": { "value": "Yes", "last_verified": "2026-01-05" },
+        "LVO Protocol": { "value": "Not EVT capable. Teleneurologist notifies ED; ED arranges transfer via Statewide Access.", "last_verified": "2026-01-05" },
+        "EEG": { "value": "Weekdays 7a-5p, weekends on request", "last_verified": "2026-01-05" },
+        "Rounding Timing": { "value": "By arrangement", "last_verified": "2026-01-05" },
+        "When Do We Round?": { "value": "Monday-Friday", "last_verified": "2026-01-05" },
+        "Language Line": { "value": "Dial +1-555-0170 for the synthetic language line", "last_verified": "2026-01-05" }
+      }
+    }
+  ]
+}

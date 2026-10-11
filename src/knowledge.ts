@@ -95,6 +95,11 @@ export function scoped(s: string, consult: string) {
     ? parts.find((x) => /stroke/i.test(x)) || s
     : parts.find((x) => !/stroke/i.test(x)) || s;
 }
+// A hospital that cannot do thrombectomy may say so in several ways: "Not
+// thrombectomy capable", "Not EVT capable", "Not endovascular capable". All
+// mean the same thing to the doctor: transfer.
+export const NOT_THROMBECTOMY_CAPABLE =
+  /^not (?:thrombectomy|evt|endovascular(?: therapy)?|neurointerventional) capable\b/i;
 export function interpretation(
   s: Source,
 ): "supported" | "partial" | "needs_review" | "unsupported" {
@@ -102,7 +107,7 @@ export function interpretation(
     raw = clean(s.raw);
   if (c === "LVO Protocol") {
     if (
-      /^not thrombectomy capable/i.test(raw) ||
+      NOT_THROMBECTOMY_CAPABLE.test(raw) ||
       /thrombectomy capable 24\/7/i.test(raw)
     )
       return "supported";

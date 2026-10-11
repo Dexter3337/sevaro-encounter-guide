@@ -21,6 +21,7 @@ import {
   semantics,
   normalize,
   conceptName,
+  NOT_THROMBECTOMY_CAPABLE,
 } from "./knowledge";
 import {
   ageDays,
@@ -301,7 +302,7 @@ function resolveField(
   }
   if (field === "LVO Protocol") {
     if (
-      /^Not thrombectomy capable/i.test(text) ||
+      NOT_THROMBECTOMY_CAPABLE.test(text) ||
       /thrombectomy capable 24\/7/i.test(text)
     )
       return r;
@@ -736,7 +737,9 @@ export function evaluate(
         const hospitalSet = getSources(h, "Order Set Name").find(
           (s) => s.sourceKind === "guide",
         );
-        if (hospitalSet) {
+        // An order set written as "N/A" or "No" says nothing the permission
+        // rule has not; appending it would only add noise to the nudge.
+        if (hospitalSet && !meansNo(hospitalSet.raw)) {
           const permissionResult = out.find((r) => r.title === "Order Entry");
           if (permissionResult) {
             permissionResult.message += `. ${clean(hospitalSet.raw)}.`;
