@@ -374,7 +374,7 @@ main {
   grid-column: 2;
   grid-row: 1;
   overflow: auto;
-  overscroll-behavior: contain;
+  overscroll-behavior: auto;
   min-width: 0;
   min-height: 0;
   max-height: none;
@@ -1112,4 +1112,27 @@ main > footer {
   *::after {
     scroll-behavior: auto !important;
   }
+}
+
+.dock-launchers {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.dock-chat-launcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  padding: 4px;
+  border-radius: 10px;
+}
+.dock-review {
+  min-height: 44px;
+  border-radius: 12px;
 }

@@ -50,3 +50,13 @@ Finish the platform, rules-as-data and live AI work above; validate the real hos
 - Browser checks cover equal desktop columns, pre-selection CTA guidance, visible active fields with expanded guidance, focus return, three-part misspelled chat, 390px layout, camera denial, and camera track cleanup on stop/navigation. Camera success uses a synthetic canvas stream, not a physical camera or real call.
 - Screenshots: `reports/consultation-desktop.png`, `reports/consultation-guidance.png`, `reports/consultation-chat.png`, `reports/consultation-mobile.png`.
 - No live-provider evaluation, real video integration, full screen-reader/axe audit, clinician acceptance or hosted release rehearsal is claimed.
+
+## Interaction corrections after user review
+
+| Before | After | Why |
+|---|---|---|
+| Form used scroll containment | Native scroll handoff at both form edges | The form consumes scrolling first; the page continues after it reaches an edge |
+| Companion opened cards when nudges existed, chat otherwise | Companion always opens chat; Review guidance opens the cards | Keeps the agent interaction consistent across all six workflow steps |
+| Expanded guidance had no direct general chat launcher | Clickable orb with Ask a question | Chat remains accessible while reviewing recommendations |
+
+Seven consultation browser checks pass, including wheel input at both scroll boundaries and actual chat submissions from all six steps. Existing CTA anticipation, form visibility, keyboard focus, mobile width and camera lifecycle checks remain passing.

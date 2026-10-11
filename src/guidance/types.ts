@@ -5,6 +5,8 @@ import type { Result } from "../domain";
 // change here needs both owners to agree.
 
 export interface NudgeDockProps {
+  /** Opens unseeded chat from the companion in every dock state. */
+  onOpenChat: () => void;
   /** Already ranked by the engine, most important first. */
   results: Result[];
   /** The caselog field the doctor is in, if any. Its guidance is shown first. */

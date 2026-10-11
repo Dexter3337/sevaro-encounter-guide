@@ -15,6 +15,7 @@ import type { NudgeDockProps } from "./types";
 // would be trained away inside a day.
 
 export function NudgeDock({
+  onOpenChat,
   results,
   focusedFieldId,
   fieldLabels,
@@ -120,7 +121,14 @@ export function NudgeDock({
         <section className="dock-panel" data-testid="dock-panel">
           <header className="dock-header">
             <div className="dock-title-group">
-              <AssistantOrb small />
+              <button
+                className="dock-chat-launcher"
+                onClick={onOpenChat}
+                aria-label="Open guide companion"
+              >
+                <AssistantOrb small />
+                <span>Ask a question</span>
+              </button>
               <div>
                 <p className="eyebrow">
                   <span className="live-dot" /> HOSPITAL GUIDANCE ·{" "}
@@ -130,7 +138,7 @@ export function NudgeDock({
                   {focusedLabel ? `For ${focusedLabel}` : "Hospital guidance"}
                 </h2>
                 <span className="dock-subtitle">
-                  Guide companion ? {summary.label}
+                  Guide companion: {summary.label}
                 </span>
               </div>
             </div>
@@ -169,21 +177,30 @@ export function NudgeDock({
           </div>
         </section>
       ) : (
-        <button
-          ref={pillRef}
-          className={`dock-pill ${summary.tier}`}
-          onClick={() => dispatch({ type: "TOGGLE" })}
-          data-testid="dock-pill"
-          aria-expanded={false}
-        >
-          <AssistantOrb />
-          <span className="dock-pill-count">{summary.count}</span>
-          {/* Tier is said in words as well as shown in colour. */}
-          <span className="dock-pill-copy">
-            <strong>Guide companion</strong>
-            <span className="dock-pill-label">{summary.label}</span>
-          </span>
-        </button>
+        <div className="dock-launchers">
+          <button
+            className="secondary dock-review"
+            onClick={() => dispatch({ type: "TOGGLE" })}
+            aria-label="Review hospital guidance"
+          >
+            Review guidance
+          </button>
+          <button
+            ref={pillRef}
+            className={`dock-pill ${summary.tier}`}
+            onClick={onOpenChat}
+            data-testid="dock-pill"
+            aria-label="Open guide companion"
+          >
+            <AssistantOrb />
+            <span className="dock-pill-count">{summary.count}</span>
+            {/* Tier is said in words as well as shown in colour. */}
+            <span className="dock-pill-copy">
+              <strong>Guide companion</strong>
+              <span className="dock-pill-label">{summary.label}</span>
+            </span>
+          </button>
+        </div>
       )}
     </aside>
   );

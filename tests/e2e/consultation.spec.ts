@@ -176,3 +176,76 @@ test("local preview requests no microphone and stops tracks on stop and navigati
     ),
   ).toBe("ended");
 });
+
+test("wheel scrolls the form first, then hands off to the page at both edges", async ({
+  page,
+}) => {
+  await page.getByRole("button", { name: "Imaging", exact: false }).click();
+  const form = page.locator(".caselog");
+  await form.evaluate((e) => {
+    e.scrollTop = 0;
+  });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  const box = (await form.boundingBox())!;
+  await page.mouse.move(box.x + box.width - 35, box.y + 120);
+  await page.mouse.wheel(0, 100);
+  await expect.poll(() => form.evaluate((e) => e.scrollTop)).toBeGreaterThan(0);
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  await form.evaluate((e) => {
+    e.scrollTop = e.scrollHeight;
+  });
+  await page.mouse.wheel(0, 180);
+  await expect
+    .poll(() => page.evaluate(() => window.scrollY))
+    .toBeGreaterThan(0);
+  await form.evaluate((e) => {
+    e.scrollTop = 0;
+  });
+  const pageY = await page.evaluate(() => window.scrollY);
+  const moved = (await form.boundingBox())!;
+  await page.mouse.move(
+    moved.x + moved.width - 35,
+    Math.max(80, moved.y + 120),
+  );
+  await page.mouse.wheel(0, -100);
+  await expect
+    .poll(() => page.evaluate(() => window.scrollY))
+    .toBeLessThan(pageY);
+});
+
+test("companion opens usable chat on every step, with or without guidance", async ({
+  page,
+}) => {
+  for (const step of [
+    "Intake",
+    "History",
+    "Imaging",
+    "Recommendation",
+    "Note",
+    "Sign Off",
+  ]) {
+    await page
+      .getByRole("button", { name: new RegExp(step, "i") })
+      .first()
+      .click();
+    await page
+      .getByRole("button", { name: "Open guide companion", exact: true })
+      .click();
+    const chat = page.getByTestId("chat-panel");
+    await expect(chat.getByRole("textbox")).toBeFocused();
+    await expect(chat.getByRole("textbox")).toBeInViewport();
+    await chat.getByRole("textbox").fill("EEG?");
+    await chat.getByRole("button", { name: "Ask", exact: true }).click();
+    await expect(chat.getByTestId("chat-turn").last()).toContainText("EEG");
+    await chat.getByRole("button", { name: "Close the guide chat" }).click();
+  }
+  await page.getByRole("button", { name: "Imaging", exact: false }).click();
+  await page.getByRole("button", { name: "Review hospital guidance" }).click();
+  await expect(page.getByTestId("dock-panel")).toBeVisible();
+  await page
+    .getByRole("button", { name: "Open guide companion", exact: true })
+    .click();
+  await expect(
+    page.getByTestId("chat-panel").getByRole("textbox"),
+  ).toBeFocused();
+});

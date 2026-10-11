@@ -1149,6 +1149,7 @@ function App() {
                   </button>
                   <GuidanceBoundary key={`dock:${h.id}:${h.version}`}>
                     <NudgeDock
+                      onOpenChat={() => openChat()}
                       results={visible}
                       focusedFieldId={focusedField}
                       fieldLabels={fieldLabels}
