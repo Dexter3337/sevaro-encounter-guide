@@ -283,6 +283,36 @@ describe("Storyboard import (sponsor format)", () => {
   });
 });
 
+describe("Seeds come from the importer", () => {
+  it("src/data/seeds.json is exactly what `pnpm seeds` makes of the official files", () => {
+    const p = previewImportBundle(
+      [
+        G,
+        S,
+        {
+          name: "contacts.json",
+          text: readFileSync("data/seeds/contacts.json", "utf8"),
+          format: "json",
+        },
+      ],
+      { version: "Challenge v2" },
+    );
+    expect(p.errors).toEqual([]);
+    const seeds = JSON.parse(readFileSync("src/data/seeds.json", "utf8"));
+    expect(JSON.parse(JSON.stringify(p.hospitals))).toEqual(seeds);
+    // The kit's two storyboard rows arrive through the real import path.
+    expect(
+      seedHospitals.flatMap((h) =>
+        h.fields.filter((f) => f.sourceKind === "storyboard").map((f) => f.id),
+      ),
+    ).toEqual([
+      "SYN-002:storyboard:video-eval-location",
+      "SYN-005:storyboard:thrombolytic",
+    ]);
+    expect(seedHospitals.every((h) => h.contacts?.length === 3)).toBe(true);
+  });
+});
+
 describe("Contacts", () => {
   const directory = readFileSync("data/seeds/contacts.json", "utf8");
   const ROLES = ["administrator", "nursing_in_charge", "technical_lead"];

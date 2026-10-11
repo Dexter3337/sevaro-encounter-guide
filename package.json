@@ -14,6 +14,7 @@
     "preview": "vite preview --host 127.0.0.1",
     "verify:presentation": "node scripts/verify_presentation.mjs",
     "verify:embedded-demo": "node scripts/verify_embedded_demo.mjs",
+    "seeds": "node scripts/build-seeds.mjs",
     "ship": "node scripts/ship.mjs",
     "sync": "node scripts/sync.mjs"
   },

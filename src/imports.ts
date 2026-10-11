@@ -81,6 +81,8 @@ export type ImportOptions = {
   held?: Held[];
   /** Shown in diagnostics and recorded as each source's sourceName. */
   fileName?: string;
+  /** Version label for hospitals whose file does not give one. */
+  version?: string;
 };
 export type Preview = {
   hospitals: Hospital[];
@@ -470,18 +472,26 @@ function guideField(
       : kind === "guide" && updated
         ? { updatedAt: updated }
         : {}),
-    locator: passed.locator ?? ctx.locator,
+    // Cited on screen beside the answer, so it names the file and the field
+    // as written there — the same form as "PDF p5 · Video Eval Location".
+    locator:
+      passed.locator ??
+      (ctx.sourceName ? `${ctx.sourceName} · ${named}` : ctx.locator),
     ...(fieldAliases.length ? { aliases: fieldAliases } : {}),
     ...(Object.keys(extra).length ? { extra } : {}),
   };
 }
 const HOSPITAL_KEYS = ["fields", "contacts", "storyboard", "mappings"];
+// Where a file's rows came from: its name, when we were given one, and the
+// version label to use when the file does not state its own.
+type Src = { name: string | undefined; version: string };
 function guideHospital(
   raw: unknown,
   file: string,
   index: number,
-  sourceName: string | undefined,
+  src: Src,
 ): Parsed {
+  const sourceName = src.name;
   const where = `${file}, hospital ${index + 1}`;
   if (!isRow(raw)) throw new Error(`${where}: expected a hospital object.`);
   const used = new Set<string>(HOSPITAL_KEYS);
@@ -511,7 +521,7 @@ function guideHospital(
   }
   const versionV = take(raw, K.version, used);
   const version =
-    versionV === undefined ? "Imported v1" : text(versionV, at, "the version");
+    versionV === undefined ? src.version : text(versionV, at, "the version");
   let entries: [string | undefined, unknown, string][];
   if (Array.isArray(raw.fields))
     entries = raw.fields.map((x, i) => [undefined, x, `fields[${i}]`]);
@@ -567,10 +577,11 @@ function guideHospital(
 function fromRecords(
   rows: Row[],
   file: string,
-  sourceName: string | undefined,
+  src: Src,
   map: ColumnMap | undefined,
   rowLabel: (i: number) => string,
 ): Parsed {
+  const sourceName = src.name;
   const take1 = (row: Row, k: string) =>
     map
       ? map[k]
@@ -604,7 +615,7 @@ function fromRecords(
         ? ""
         : String(take1(row, "timezone")),
       version: blank(take1(row, "version"))
-        ? "Imported v1"
+        ? src.version
         : String(take1(row, "version")),
     };
     const g = groups.get(id);
@@ -692,9 +703,10 @@ const rowKind = (r: unknown): RowKind | undefined =>
 function fromList(
   list: unknown[],
   file: string,
-  sourceName: string | undefined,
+  src: Src,
   what: string,
 ): Parsed {
+  const sourceName = src.name;
   if (!list.length) throw new Error(`${file}: ${what} is empty.`);
   if (list.length > 2000)
     throw new Error(`${file}: ${what} has more than 2,000 rows.`);
@@ -722,17 +734,13 @@ function fromList(
     };
   if (kind === "contacts")
     return { guides: [], storyboard: [], ...contactRows(list, file, sourceName) };
-  if (kind === "hospitals") return hospitals(list, file, sourceName);
-  return fromRecords(list as Row[], file, sourceName, undefined, (i) => `record ${i + 1}`);
+  if (kind === "hospitals") return hospitals(list, file, src);
+  return fromRecords(list as Row[], file, src, undefined, (i) => `record ${i + 1}`);
 }
-function hospitals(
-  list: unknown[],
-  file: string,
-  sourceName: string | undefined,
-): Parsed {
+function hospitals(list: unknown[], file: string, src: Src): Parsed {
   if (list.length > 50)
     throw new Error(`${file}: more than 50 hospitals in one file.`);
-  return merge(list.map((h, i) => guideHospital(h, file, i, sourceName)));
+  return merge(list.map((h, i) => guideHospital(h, file, i, src)));
 }
 function merge(parts: Parsed[]): Parsed {
   return {
@@ -744,9 +752,10 @@ function merge(parts: Parsed[]): Parsed {
 }
 // Work out what a file is from its shape, not its name: their files will not be
 // called what ours are.
-function parseFile(f: ImportFile, label: string): Parsed {
+function parseFile(f: ImportFile, label: string, version: string): Parsed {
   preflight(f.text, label);
   const sourceName = f.name || undefined;
+  const src: Src = { name: sourceName, version };
   if (f.format === "csv") {
     const r = csvHeaders(f.text);
     if (r.errors.length)
@@ -772,7 +781,7 @@ function parseFile(f: ImportFile, label: string): Parsed {
     return fromRecords(
       r.rows,
       label,
-      sourceName,
+      src,
       f.map || suggestMap(r.headers),
       (i) => `line ${i + 2}`,
     );
@@ -785,7 +794,7 @@ function parseFile(f: ImportFile, label: string): Parsed {
       `${label} is not valid JSON (${e instanceof Error ? e.message : String(e)}).`,
     );
   }
-  if (Array.isArray(parsed)) return fromList(parsed, label, sourceName, "the list");
+  if (Array.isArray(parsed)) return fromList(parsed, label, src, "the list");
   if (!isRow(parsed))
     throw new Error(
       `${label}: expected hospitals, storyboard rows or contacts, but found ${shown(parsed)}.`,
@@ -819,21 +828,20 @@ function parseFile(f: ImportFile, label: string): Parsed {
           : h,
       ),
       label,
-      sourceName,
+      src,
     );
   }
   const parts: Parsed[] = [];
-  if (Array.isArray(x.hospitals))
-    parts.push(hospitals(x.hospitals, label, sourceName));
-  else if (isRow(x.hospital))
-    parts.push(hospitals([x.hospital], label, sourceName));
+  if (Array.isArray(x.hospitals)) parts.push(hospitals(x.hospitals, label, src));
+  else if (isRow(x.hospital)) parts.push(hospitals([x.hospital], label, src));
   for (const k of ["storyboard", "storyboard_notes", "records"])
-    if (Array.isArray(x[k])) parts.push(fromList(x[k] as unknown[], label, sourceName, `"${k}"`));
+    if (Array.isArray(x[k]))
+      parts.push(fromList(x[k] as unknown[], label, src, `"${k}"`));
   if (Array.isArray(x.contacts) && !isHospital(x))
-    parts.push(fromList(x.contacts, label, sourceName, `"contacts"`));
+    parts.push(fromList(x.contacts, label, src, `"contacts"`));
   if (parts.length) return merge(parts);
-  if (isHospital(x)) return hospitals([x], label, sourceName);
-  if (isStoryboardRow(x)) return fromList([x], label, sourceName, "the row");
+  if (isHospital(x)) return hospitals([x], label, src);
+  if (isStoryboardRow(x)) return fromList([x], label, src, "the row");
   throw new Error(
     `${label}: no hospitals, storyboard rows or contacts found${Object.keys(x).length ? ` (top-level keys: ${Object.keys(x).slice(0, 8).join(", ")})` : ""}.`,
   );
@@ -964,7 +972,7 @@ export function previewImportBundle(
     };
     p.files.push(fp);
     try {
-      const out = parseFile(f, label);
+      const out = parseFile(f, label, options.version ?? "Imported v1");
       fp.hospitals = out.guides.length;
       fp.storyboardRows = out.storyboard.length;
       fp.contacts = out.contacts.length;
