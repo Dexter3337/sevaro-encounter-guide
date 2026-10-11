@@ -26,6 +26,66 @@ import {
   queryInstant,
 } from "./time";
 export const engineVersion = "1.0";
+// The handbook asks four things of every nudge: the answer, where it came
+// from, how sure it is, and what the doctor should do. These derive the fourth.
+//
+// Directives are lifted from the result's own message rather than the raw guide
+// text, because the message has already had the applicable branch chosen. At a
+// hospital that is outside its thrombectomy window, the message holds only the
+// outside-coverage sentence, so the action cannot suggest activating a team
+// that is not on duty.
+const ACTOR =
+  /\b(tele-?neurologist|teleneurology|ED provider|ED physician|ED nurse|hospital provider|primary provider|pharmacy|pharmacist|nursing|nurse|charge nurse|unit clerk|house supervisor|hospitalist|courier)\b/i;
+const DIRECTIVE_VERB =
+  /\b(activates?|initiates?|contacts?|calls?|communicates?|places?|uses?|alerts?|informs?|notifies?|prepares?|mixes?|delivers?|verifies?|sends?|schedules?|administers?|requests?|confirms?|co-signs?)\b/i;
+// A prohibition is not an instruction. "No medication orders entered by
+// teleneurologist" tells the doctor what not to do; the useful action is the
+// clause that follows it, naming who does place the orders.
+const PROHIBITION = /^no\b|\bdoes not\b|\bmay not\b|\bnot permitted\b|\bonly\b/i;
+export function directiveClauses(message: string): string[] {
+  return message
+    .split(/(?<=[.;:])\s+/)
+    .map((s) => s.trim())
+    .filter(
+      (s) =>
+        s.length > 10 &&
+        ACTOR.test(s) &&
+        DIRECTIVE_VERB.test(s) &&
+        !PROHIBITION.test(s),
+    )
+    .map((s) => (/[.!?]$/.test(s) ? s : `${s}.`))
+    .slice(0, 3);
+}
+// Called wherever a result is finished or re-tiered. Idempotent by design: the
+// callers re-tier results after answerField returns, so this runs more than once
+// for the same result and must always agree with the result's final state.
+export function deriveAction(r: Result, h: Hospital): string {
+  const stale = r.flags.includes("stale")
+    ? ` Last verified ${r.citations.find((s) => s.sourceKind === "guide")?.lastVerified ?? "unknown"} — may be out of date.`
+    : "";
+  const core = () => {
+    if (r.blocksCompletion)
+      return r.release === "acknowledge_with_reason"
+        ? `${r.message.split(".")[0]}, or acknowledge with a reason.`
+        : `${r.message.split(".")[0]}.`;
+    if (r.primaryStatus === "conflict")
+      return `Sources disagree. Confirm with ${h.name} which applies.`;
+    if (r.primaryStatus === "not_in_guide")
+      return "Not in this hospital's guide. Confirm locally.";
+    if (r.flags.includes("schedule_unknown"))
+      return "The guide doesn't define these hours. Confirm which applies now.";
+    const directives = directiveClauses(r.message);
+    if (directives.length) return directives.join(" ");
+    // A time-dependent answer is only true for the hospital's clock right now.
+    // "No action needed" would be actively misleading when the answer is that
+    // something is unavailable at this hour and may need arranging elsewhere.
+    if (r.primaryStatus === "time_dependent")
+      return "This depends on the hospital's local time. Re-check if the timing changes.";
+    if (r.tier === "info") return "For reference — no action needed.";
+    return "Review this before you proceed.";
+  };
+  return `${core()}${stale}`;
+}
 function base(h: Hospital, c: Context, field: string, ss: Source[]): Result {
   const flags = new Set<string>();
   for (const s of ss) {
@@ -56,6 +116,18 @@ function base(h: Hospital, c: Context, field: string, ss: Source[]): Result {
   };
 }
 export function answerField(
+  h: Hospital,
+  c: Context,
+  field: string,
+  instant = c.instant,
+): Result {
+  const r = resolveField(h, c, field, instant);
+  r.action = deriveAction(r, h);
+  return r;
+}
+// The resolution logic has several exit points; keeping the action derivation
+// in the wrapper above means no branch can return a result without one.
+function resolveField(
   h: Hospital,
   c: Context,
   field: string,
@@ -263,6 +335,7 @@ export function gates(h: Hospital, c: Context): Result[] {
       r.message +=
         " Prototype policy: uncertain requirement shown for review; no new completion gate introduced.";
       r.tier = "advisory";
+      r.action = deriveAction(r, h);
       out.push(r);
       continue;
     }
@@ -273,11 +346,18 @@ export function gates(h: Hospital, c: Context): Result[] {
       r.blocksCompletion = true;
       r.missingRequirements = [requirement];
       r.anchor = requirement;
+      // D13: the doctor can record a charge themselves, so that gate clears
+      // only by doing it. They cannot make a hospital provider confirm a plan,
+      // so that one can be acknowledged with a reason instead of blocking the
+      // encounter indefinitely.
+      r.release =
+        field === "Charge Entry" ? "fix_only" : "acknowledge_with_reason";
       r.message = `${field === "Charge Entry" ? "Record the required encounter charge before sign-off" : "Record confirmation of the patient plan from the hospital provider before completion"}. Guide: ${raw}.`;
     } else {
       r.message = `Requirement recorded as satisfied. Guide: ${raw}.`;
       r.flags.push("resolved");
     }
+    r.action = deriveAction(r, h);
     out.push(r);
   }
   return out;
@@ -329,13 +409,18 @@ export function ask(
           ? "Completion requirements cannot be fully verified from current source data. "
           : "Known guide completion requirements are recorded as satisfied. ") +
         rs.map((r) => r.message).join(" ");
+      // The composite carries a spread copy of one gate's action, which no
+      // longer describes the combined message.
+      r.action = deriveAction(r, h);
       return { result: r };
     }
     const r = answerField(h, c, field, instant);
-    if (r.primaryStatus !== "not_in_guide")
+    if (r.primaryStatus !== "not_in_guide") {
       r.message =
         "No supported guide-based charge or plan requirement is incomplete in the recorded state. Guide: " +
         r.message;
+      r.action = deriveAction(r, h);
+    }
     return { result: r };
   }
   return { result: answerField(h, c, field, instant) };
@@ -367,6 +452,9 @@ export function evaluate(h: Hospital, c: Context, e: Event): Result[] {
     r.tier = tier;
     r.anchor = anchor;
     if (prefix) r.message = prefix + r.message;
+    // Tier and prefix are applied after resolution, so the action is re-derived
+    // against the result the clinician will actually see.
+    r.action = deriveAction(r, h);
     out.push(r);
   };
   // Capability and schedule facts are shown on arrival at the step, before any
@@ -465,6 +553,9 @@ export function evaluate(h: Hospital, c: Context, e: Event): Result[] {
           if (permissionResult) {
             permissionResult.message += `. ${clean(hospitalSet.raw)}.`;
             permissionResult.citations.push(hospitalSet);
+            // The appended clause names who does place the orders, which is
+            // the only actionable part of a rule that otherwise says "not you".
+            permissionResult.action = deriveAction(permissionResult, h);
           }
         }
       }
@@ -521,5 +612,10 @@ export function ctaConcern(h: Hospital, c: Context): Result | undefined {
   r.tier = "advisory";
   r.anchor = "cta_done";
   r.flags.push("recorded_capability_conflict");
+  // A recorded observation outranks the guide here: the scan may have happened
+  // elsewhere. The action asks the doctor to reconcile, never to change a
+  // clinical fact to match a document.
+  r.action =
+    "Confirm where the scan was performed, or correct the recorded value.";
   return r;
 }
