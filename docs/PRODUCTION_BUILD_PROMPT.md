@@ -1,7 +1,7 @@
 # Sevaro Workflow Companion — production build: planning prompt
 
 > Paste this whole file into a new Claude Code session opened at
-> `C:\Users\harsh\Downloads\Sevaro Challenge`. It asks for a plan, not code.
+> the repository root. It asks for a plan, not code.
 
 ---
 
@@ -70,10 +70,10 @@ The doctor's escalation ladder:
 
 | # | Source | Path | Authority |
 |---|---|---|---|
-| 1 | Challenge 1 Handbook (newest sponsor document) | `C:\Users\harsh\Downloads\Challenge_1_Handbook.pdf` | Highest. Wins any conflict. |
+| 1 | Challenge 1 Handbook (newest sponsor document) | `docs/sources/Challenge_1_Handbook.pdf` | Highest. Wins any conflict. |
 | 2 | Kit data (6 files) | `developer-kit/Sevaro_Rutgers_Health_Hack_Developer_Kit/Challenge_1_Guided_Workflow/data/` (identical copies in `sevaro-encounter-guide/data/official/`) | Authoritative for file formats and expected behaviour: `validation_set.csv` (V01–V20), `nudge_scenarios.json` (N1–N9). |
 | 3 | Original brief v2 | `developer-kit/.../Challenge_1_Guided_Workflow/Sevaro_Rutgers_Health_Hack_Challenge_1_Guided_Workflow.pdf`; extracted text at `sevaro-encounter-guide/research/challenge1.txt` | Authoritative where the handbook is silent. |
-| 4 | User's research conversation with Gemini | `C:\Users\harsh\Downloads\Sevaro Teleneurology Protocol Agent Hackathon - Google Gemini.pdf` | Context for intent only. Not a spec. It proposes things outside the brief (dose calculation, airlift recommendations, an "Order CTA" checkbox, a right-hand sidebar). This prompt's decisions supersede it. |
+| 4 | User's research conversation with Gemini | `docs/sources/Sevaro_research_conversation_Gemini.pdf` | Context for intent only. Not a spec. It proposes things outside the brief (dose calculation, airlift recommendations, an "Order CTA" checkbox, a right-hand sidebar). This prompt's decisions supersede it. |
 | 5 | Repo docs | `sevaro-encounter-guide/README.md`, `TEAM_HANDOFF.md`, `docs/*.md` (especially `DECISIONS.md`, `DATA_CONTRACT.md`, `SEVARO_ALIGNMENT_REVIEW.md`), workspace-root `PROJECT_CONTEXT.md`, `Sevaro_Challenge_1_Standalone_Build_Plan.md` (prior plan, 1,220 lines — skim §§6–12) | Describes the current system. May be stale. |
 | 6 | Code and tests | `sevaro-encounter-guide/src/`, `tests/` | Ground truth for current behaviour. |
 

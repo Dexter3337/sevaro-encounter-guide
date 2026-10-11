@@ -22,7 +22,7 @@ and you call the alien-data dry run at 17:30.
 ## Read first
 
 1. `docs/sprint/SPRINT_PLAN.md` — all of it; you run §7 and §9
-2. `C:\Users\harsh\Downloads\Challenge_1_Handbook.pdf` — chapter 4 (the test), chapter 12 ("easy
+2. `docs/sources/Challenge_1_Handbook.pdf` — chapter 4 (the test), chapter 12 ("easy
    ways to lose ground")
 3. `docs/PRODUCTION_PLAN.md` §20 — the 30 guardrails; today you test the subset that ships
 4. `tests/e2e/workflow.spec.ts` — the existing suite you are extending and repointing

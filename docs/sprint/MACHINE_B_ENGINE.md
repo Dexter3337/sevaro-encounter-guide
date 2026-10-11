@@ -22,7 +22,7 @@ our code, and to restore one sponsor-exact sentence we broke.
 ## Read first
 
 1. `docs/sprint/SPRINT_PLAN.md` §6 contracts and §8 guardrails
-2. `C:\Users\harsh\Downloads\Challenge_1_Handbook.pdf` — chapter 2 (all 13 issues), chapter 5 (six
+2. `docs/sources/Challenge_1_Handbook.pdf` — chapter 2 (all 13 issues), chapter 5 (six
    statuses, "How it should behave")
 3. `data/official/validation_set.csv` (V01–V20) and `nudge_scenarios.json` (N1–N9) — the oracle
 4. `src/engine.ts`, `src/time.ts`, `src/knowledge.ts` in full

@@ -23,7 +23,7 @@ Until then, read the sources below.
 ## Read first
 
 1. `docs/sprint/SPRINT_PLAN.md` §6 contracts (your prop signatures are frozen there), §8 guardrails
-2. `C:\Users\harsh\Downloads\Challenge_1_Handbook.pdf` — chapter 3 ("every nudge and answer must
+2. `docs/sources/Challenge_1_Handbook.pdf` — chapter 3 ("every nudge and answer must
    show"), chapter 5 (six statuses)
 3. `data/official/validation_set.csv` — all 20 questions and expected answers; these are what chat
    must handle

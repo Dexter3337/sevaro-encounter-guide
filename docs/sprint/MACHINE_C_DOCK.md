@@ -20,7 +20,7 @@ to `sprint/demo`.
 ## Read first
 
 1. `docs/sprint/SPRINT_PLAN.md` §6 contracts, §8 guardrails, §9 demo script
-2. `C:\Users\harsh\Downloads\Challenge_1_Handbook.pdf` — chapter 2 issue 3 (staying quiet), issue
+2. `docs/sources/Challenge_1_Handbook.pdf` — chapter 2 issue 3 (staying quiet), issue
    10 (when to block), chapter 3 (the three tiers)
 3. `docs/PRODUCTION_PLAN.md` §16 — the full UI spec you are implementing a subset of
 4. `src/main.tsx` as it stands (1,841 lines — you are going to break it up)

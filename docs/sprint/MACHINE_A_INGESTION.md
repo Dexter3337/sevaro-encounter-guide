@@ -22,7 +22,7 @@ commits.
 ## Read first
 
 1. `docs/sprint/SPRINT_PLAN.md` — especially §8 guardrails
-2. `C:\Users\harsh\Downloads\Challenge_1_Handbook.pdf` — chapter 4 (the test) and issues 1, 6, 8, 12
+2. `docs/sources/Challenge_1_Handbook.pdf` — chapter 4 (the test) and issues 1, 6, 8, 12
 3. `data/official/hospital_guides.json`, `data/official/storyboard_notes.json` — the exact formats
 4. `src/imports.ts` in full, and `src/domain.ts` (`sourceSchema`, `hospitalSchema`, `activate`)
 5. `data/official/README.md`
