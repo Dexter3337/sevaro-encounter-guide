@@ -34,6 +34,7 @@ import { GateBanner } from "./encounter/GateBanner";
 import { StoryboardCard } from "./encounter/StoryboardCard";
 import { ChatPanel } from "./chat/ChatPanel";
 import { ContactsSheet } from "./contacts/ContactsSheet";
+import { fetchShared, newFromShared, publishShared } from "./sharedLibrary";
 import { clean, interpretation } from "./knowledge";
 import {
   previewImportBundle,
@@ -262,6 +263,24 @@ function App() {
   // drops so the guide can arrive second.
   const [held, setHeld] = useState<Held[]>(initial.current?.held || []);
   const [dragging, setDragging] = useState(false);
+  // Hospitals published by teammates, pulled from the cloud library on load.
+  const [sharedStatus, setSharedStatus] = useState("");
+  useEffect(() => {
+    let live = true;
+    void fetchShared().then((shared) => {
+      if (!live || !shared) return;
+      setHs((prev) => {
+        const add = newFromShared(prev, shared);
+        setSharedStatus(
+          `Team library connected · ${shared.length} shared hospital version(s)${add.length ? `, ${add.length} added here` : ""}.`,
+        );
+        return add.length ? [...prev, ...add] : prev;
+      });
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
   const lastCompletion = useRef("");
   const [search, setSearch] = useState("");
   const [report, setReport] = useState<ReturnType<typeof runEvaluation>>();
@@ -566,6 +585,16 @@ function App() {
           ? `Activated ${preview.hospitals.length} hospital version(s). Select a new hospital or refresh the active version explicitly.`
           : "Nothing new to activate. Held rows are kept until their hospital's guide is imported.",
       );
+      // Share the new versions with the team. If the library is unreachable
+      // the activation still stands on this device.
+      if (preview.hospitals.length)
+        void publishShared(preview.hospitals).then((r) =>
+          setSharedStatus(
+            r
+              ? `Shared with the team library (${r.stored} new, ${r.existing} already there).`
+              : "Saved on this device only — the shared library is not reachable.",
+          ),
+        );
     } catch (e) {
       setImportNotice(e instanceof Error ? e.message : String(e));
     }
@@ -1514,6 +1543,11 @@ function App() {
                   </div>
                 )}
                 {importNotice && <p role="status">{importNotice}</p>}
+                {sharedStatus && (
+                  <p className="muted" data-testid="shared-status">
+                    {sharedStatus}
+                  </p>
+                )}
                 {!preview &&
                   importHistory.length > 0 &&
                   (() => {

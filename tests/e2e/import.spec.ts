@@ -100,3 +100,43 @@ test("one broken file rejects the whole drop and names the file", async ({ page 
     page.getByLabel("Hospital", { exact: true }).locator("option"),
   ).toHaveCount(7);
 });
+
+test("the team library: shared hospitals arrive on load, new activations are published", async ({
+  page,
+}) => {
+  const shared = JSON.parse(readFileSync("src/data/seeds.json", "utf8"))[1];
+  const remote = {
+    ...shared,
+    id: "TEAM-01",
+    name: "Team Library Hospital (synthetic)",
+    fields: shared.fields.map((f: any) => ({ ...f, hospitalId: "TEAM-01" })),
+    contacts: [],
+  };
+  const published: any[] = [];
+  await page.route("**/api/hospitals", async (route) => {
+    if (route.request().method() === "POST") {
+      published.push(...JSON.parse(route.request().postData() || "[]"));
+      await route.fulfill({ json: { stored: 1, existing: 0 } });
+    } else await route.fulfill({ json: [remote] });
+  });
+  await page.reload();
+  await expect(page.getByLabel("Hospital", { exact: true }).locator("option")).toHaveCount(8);
+  await page.getByRole("button", { name: "Guide library" }).click();
+  await expect(page.getByTestId("shared-status")).toContainText("Team library connected");
+  await page.getByLabel("Choose import files").setInputFiles([guide, storyboard]);
+  await page.getByRole("button", { name: "Preview & validate" }).click();
+  await page.getByRole("button", { name: "Activate validated bundle" }).click();
+  await expect(page.getByTestId("shared-status")).toContainText("Shared with the team library");
+  expect(published.map((h) => h.id)).toEqual(["SYN-108"]);
+});
+
+test("without the library the app works exactly as before", async ({ page }) => {
+  await page.route("**/api/hospitals", (route) => route.abort());
+  await page.reload();
+  await expect(page.getByLabel("Hospital", { exact: true }).locator("option")).toHaveCount(7);
+  await page.getByRole("button", { name: "Guide library" }).click();
+  await page.getByLabel("Choose import files").setInputFiles([guide, storyboard]);
+  await page.getByRole("button", { name: "Preview & validate" }).click();
+  await page.getByRole("button", { name: "Activate validated bundle" }).click();
+  await expect(page.getByTestId("shared-status")).toContainText("this device only");
+});

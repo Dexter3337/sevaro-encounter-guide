@@ -1,12 +1,18 @@
 name: Verify prototype
+# Every push to any branch, and every pull request, runs the same gates the
+# team's ship script runs locally — plus the sponsor oracle and the real-browser
+# suite, which a laptop can skip but CI does not.
 on:
   push:
-    branches: [main]
   pull_request:
 permissions:
   contents: read
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  verify:
+  unit:
+    name: Typecheck, unit tests, sponsor oracle, build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,4 +26,33 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm test
+      - name: Sponsor oracle (N1–N9, V01–V20 must be 29/29)
+        run: |
+          pnpm evaluate | tee evaluation.txt
+          grep -q '"passed":29' evaluation.txt
       - run: pnpm build
+  browser:
+    name: Browser workflows, guardrails and latency
+    runs-on: ubuntu-latest
+    needs: unit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Playwright (bundled Chromium)
+        run: pnpm test:e2e
+        env:
+          PW_CHANNEL: chromium
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-results
+          path: test-results/
+          retention-days: 7
