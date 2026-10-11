@@ -9,7 +9,7 @@ Five developers, five machines, demo tomorrow.
 ## 1. Set up (10 minutes)
 
 ```bash
-git clone https://github.com/hsa70-ui/sevaro-encounter-guide.git
+git clone https://github.com/Dexter3337/sevaro-encounter-guide.git
 cd sevaro-encounter-guide
 corepack enable           # if `pnpm` is not found; otherwise: npm i -g pnpm@11
 git checkout sprint/demo

@@ -22,7 +22,7 @@ Agree on this in the group chat first. One person per letter.
 ## Step 1 — Get access (the repo owner does this once)
 
 The repo owner opens
-`https://github.com/hsa70-ui/sevaro-encounter-guide` → **Settings** → **Collaborators** →
+`https://github.com/Dexter3337/sevaro-encounter-guide` → **Settings** → **Collaborators** →
 **Add people** → adds the other four by GitHub username.
 
 Everyone else: check your email and accept the invite. **Nobody can push code until this is done.**
@@ -34,7 +34,7 @@ Everyone else: check your email and accept the invite. **Nobody can push code un
 Open a terminal (PowerShell on Windows, Terminal on Mac) and run these one at a time:
 
 ```bash
-git clone https://github.com/hsa70-ui/sevaro-encounter-guide.git
+git clone https://github.com/Dexter3337/sevaro-encounter-guide.git
 cd sevaro-encounter-guide
 git checkout sprint/demo
 corepack enable

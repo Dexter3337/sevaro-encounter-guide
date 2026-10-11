@@ -32,9 +32,10 @@ That scores better than a backend that falls over.
 
 ## 2. Prerequisites (do these before anyone starts coding — 10 minutes)
 
-1. **Repo access.** Everyone works on the fork `hsa70-ui/sevaro-encounter-guide`. The fork owner
-   adds the other four as collaborators (Settings → Collaborators). Upstream
-   `Dexter3337/sevaro-encounter-guide` is read-only for us.
+1. **Repo access.** Everyone works on `Dexter3337/sevaro-encounter-guide` directly. Rohit adds all
+   five of us as collaborators (Settings → Collaborators); accept the emailed invitation before
+   you try to push. This is the team's single source of truth — the earlier fork is no longer
+   used.
 2. **Integration branch.** From `feature/anticipatory-guidance`, create and push `sprint/demo`.
    This is the branch we demo from.
 3. **Everyone:** clone, `pnpm install --frozen-lockfile`, `pnpm test`, `pnpm dev`. Confirm 110
