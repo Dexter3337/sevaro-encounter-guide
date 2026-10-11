@@ -750,6 +750,16 @@ function merge(parts: Parsed[]): Parsed {
     notes: parts.flatMap((p) => p.notes),
   };
 }
+/** What a CSV holds, judged by its headers. Only guide records take a column
+ * map; storyboard and contacts files are read by their own column names. */
+export function csvKind(text: string): "storyboard" | "contacts" | "records" {
+  const head = Object.fromEntries(csvHeaders(text).headers.map((h) => [h, ""]));
+  return isStoryboardRow(head)
+    ? "storyboard"
+    : isContactRow(head)
+      ? "contacts"
+      : "records";
+}
 // Work out what a file is from its shape, not its name: their files will not be
 // called what ours are.
 function parseFile(f: ImportFile, label: string, version: string): Parsed {

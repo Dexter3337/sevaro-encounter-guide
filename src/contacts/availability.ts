@@ -35,8 +35,12 @@ export function availabilityAt(
   const ws = text ? windows(text) : [];
   if (!ws.length)
     return { state: "unknown", label: "Hours not listed — call to check" };
+  // We have no holiday calendar, so "except holidays" stays a stated unknown.
+  const holidays = scheduleNotes(text!).includes("holidays_unknown")
+    ? " — except holidays, which aren't listed; call to check on one"
+    : "";
   if (matchWindow(ws, instant, zone))
-    return { state: "available", label: "Available now" };
+    return { state: "available", label: `Available now${holidays}` };
   const m = untilOpen(ws, instant, zone);
   if (m !== undefined) {
     const opens = localTime(instant, zone)
@@ -45,7 +49,7 @@ export function availabilityAt(
       .toString({ smallestUnit: "minute" });
     return {
       state: "opens_later",
-      label: `Opens in ${duration(m)} (${opens} ${zoneName(instant, zone)})`,
+      label: `Opens in ${duration(m)} (${opens} ${zoneName(instant, zone)})${holidays}`,
     };
   }
   if (scheduleNotes(text!).includes("conditional_cover"))

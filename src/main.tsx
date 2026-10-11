@@ -45,6 +45,7 @@ import {
   previewImportBundle,
   activate,
   csvHeaders,
+  csvKind,
   suggestMap,
   columnKeys,
   importSummary,
@@ -1276,6 +1277,48 @@ function App() {
                       ))}
                     </ul>
                   )}
+                  {/* An uploaded CSV of guide records may use column names we
+                      have never seen; the mapping is shown, never guessed. */}
+                  {importFiles
+                    .filter(
+                      (f) => f.format === "csv" && csvKind(f.text) === "records",
+                    )
+                    .map((f) => {
+                      const headers = csvHeaders(f.text).headers;
+                      const map = f.map ?? suggestMap(headers);
+                      return (
+                        <div key={f.name} className="file-column-map">
+                          <p className="file-column-title">
+                            Columns in {f.name}
+                          </p>
+                          <div className="column-grid">
+                            {columnKeys.map((k) => (
+                              <label key={k}>
+                                {k}
+                                <select
+                                  aria-label={`${f.name} ${k}`}
+                                  value={map[k] || ""}
+                                  onChange={(e) => {
+                                    const next = { ...map, [k]: e.target.value };
+                                    setImportFiles((p) =>
+                                      p.map((x) =>
+                                        x.name === f.name ? { ...x, map: next } : x,
+                                      ),
+                                    );
+                                    setPreview(undefined);
+                                  }}
+                                >
+                                  <option value="">Unmapped</option>
+                                  {headers.map((v) => (
+                                    <option key={v}>{v}</option>
+                                  ))}
+                                </select>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
                 </div>
                 {held.length > 0 && (
                   <p className="banner" data-testid="held-rows">

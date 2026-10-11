@@ -51,9 +51,11 @@ function minute(s: string): number | undefined {
   // in hand-written guides.
   const m = s.match(/^(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m?\.?$/);
   if (m) {
-    const hr = Number(m[1]);
-    if (hr < 1 || hr > 12) return;
-    return (hr % 12) * 60 + (m[3] === "p" ? 720 : 0) + Number(m[2] || 0);
+    const hr = Number(m[1]),
+      mm = Number(m[2] || 0);
+    // "7:99am" is a typo, not 08:39. A time we cannot read is no window at all.
+    if (hr < 1 || hr > 12 || mm > 59) return;
+    return (hr % 12) * 60 + (m[3] === "p" ? 720 : 0) + mm;
   }
   const x = s.replace(":", "");
   if (!/^\d{4}$/.test(x)) return;
@@ -68,8 +70,14 @@ const RANGE = new RegExp(`(${TIME})\\s*(?:-|–|—|to)\\s*(${TIME})`, "gi");
 // before the split or the time is torn in half.
 const tidy = (raw: string) =>
   raw.replace(/(\d\s*)([ap])\.\s*m\.?/gi, "$1$2m").replace(/\s+/g, " ");
+// "24/7" means always only when the sentence saying it is not negated. "Not
+// available 24/7; call for hours" is the opposite of continuous cover.
+const NEGATED = /\b(not|no|never|isn't|aren't|unavailable|without)\b/i;
 export function windows(raw: string, defaultDays?: number[]): Window[] {
-  if (/24\/7/.test(raw))
+  const always = tidy(raw)
+    .split(/[;.]\s*/)
+    .filter((part) => /24\/7/.test(part));
+  if (always.some((part) => !NEGATED.test(part)))
     return [{ days: [1, 2, 3, 4, 5, 6, 7], start: 0, end: 1440, raw: "24/7" }];
   const out: Window[] = [];
   for (const part of tidy(raw).split(/[;.]\s*/)) {

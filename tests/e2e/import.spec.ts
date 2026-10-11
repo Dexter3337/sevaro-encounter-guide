@@ -59,6 +59,34 @@ test("storyboard first is held, then attaches when the guide arrives", async ({ 
   await expect(page.getByTestId("held-rows")).toHaveCount(0);
 });
 
+test("an uploaded CSV with unfamiliar headers is mapped on screen, not guessed", async ({
+  page,
+}) => {
+  await page
+    .getByLabel("Choose import files")
+    .setInputFiles(["data/holdout/mapped-import.csv"]);
+  const name = "mapped-import.csv";
+  // Nothing matches "Site Code" automatically, so the mapper is open and empty.
+  await expect(page.getByLabel(`${name} hospitalId`, { exact: true })).toHaveValue("");
+  const map = {
+    hospitalId: "Site Code",
+    name: "Site Name",
+    timezone: "Zone",
+    field: "Rule Label",
+    raw: "Original Text",
+    lastVerified: "Checked",
+    version: "Revision",
+  };
+  for (const [key, v] of Object.entries(map))
+    await page.getByLabel(`${name} ${key}`, { exact: true }).selectOption(v);
+  await page.getByRole("button", { name: "Preview & validate" }).click();
+  await expect(page.locator(".preview")).toContainText("1 hospital(s) ready");
+  await page.getByRole("button", { name: "Activate validated bundle" }).click();
+  await expect(
+    page.getByLabel("Hospital", { exact: true }).locator("option"),
+  ).toHaveCount(8);
+});
+
 test("one broken file rejects the whole drop and names the file", async ({ page }) => {
   await page.getByLabel("Choose import files").setInputFiles([
     { name: "hospital_guides.json", mimeType: "application/json", buffer: readFileSync(guide) },

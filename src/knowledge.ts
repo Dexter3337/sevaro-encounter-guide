@@ -158,6 +158,11 @@ export function resolveConcept(
     ...Object.keys(concepts),
     ...h.fields.map((s) => s.field),
   ]);
+  // Asking for a field by its exact label means that field. Without this,
+  // "When Do We Round?" tied with Rounding Timing's alias "when do we round"
+  // and a clarification chip naming the field re-asked the same question.
+  const exact = [...labels].find((f) => normalize(f) === n);
+  if (exact) return { field: conceptName(exact), candidates: [] };
   for (const field of labels) {
     const aliases = [
       field,
