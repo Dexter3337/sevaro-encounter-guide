@@ -2,6 +2,9 @@
 
 Five developers, five machines, demo tomorrow.
 
+> **Three machines, not five.** Read [`THREE_MACHINES.md`](THREE_MACHINES.md) for who owns
+> what now and the two commands that keep everyone in step.
+
 > **New to this? Read [`HOW_TO_START.md`](HOW_TO_START.md) instead.** It walks through every step
 > in plain language: getting access, cloning, which file to point Claude at, and the order to do
 > things in. The rest of this page is the short version for people who already know the setup.
