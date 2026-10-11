@@ -1,3 +1,0 @@
-﻿storyboard_id,hospital_id,guide_field_id,field,value,updated,note,source_id,locator,classification,comparison
-SB-001,SYN-002,GF-002,Video Eval Location,Patient room,2025-09-14,Hospital storyboard card shown in the caselog header. Disagrees with the on-call guide for stroke alerts.,SRC-001,p10,Synthetic example,Conflict for stroke alerts
-SB-002,SYN-005,GF-003,Thrombolytic,Tenecteplase,2026-01-20,Agrees with the guide. Included so teams do not flag every second source as a conflict.,SRC-001,p10,Synthetic example,Agreement

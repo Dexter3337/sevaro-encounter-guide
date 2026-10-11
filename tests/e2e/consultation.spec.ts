@@ -10,7 +10,7 @@ type Box = { x: number; y: number; width: number; height: number };
 const overlaps = (a: Box, b: Box) =>
   a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
 
-test("one screen: video, caselog and guide side by side, nothing covering the form", async ({
+test("balanced video and caselog, guidance inline without covering active fields", async ({
   page,
 }) => {
   const video = page.getByTestId("consultation-pane");
@@ -22,7 +22,8 @@ test("one screen: video, caselog and guide side by side, nothing covering the fo
     (await guide.boundingBox())!,
   ];
   expect(v.x + v.width).toBeLessThan(f.x);
-  expect(f.x + f.width).toBeLessThan(g.x);
+  expect(g.x).toBeGreaterThanOrEqual(f.x);
+  expect(v.width / f.width).toBeGreaterThan(0.95);
   await expect(video).toContainText("No live Sevaro call is connected");
   // The page itself does not scroll on a laptop screen.
   expect(
@@ -44,7 +45,7 @@ test("one screen: video, caselog and guide side by side, nothing covering the fo
   await lvo.selectOption("yes");
   await expect(page.getByTestId("nudge-dock")).toHaveAttribute("data-state", "panel");
   const panel = (await page.getByTestId("dock-panel").boundingBox())!;
-  expect(overlaps(panel, (await form.boundingBox())!)).toBe(false);
+  expect(panel.x).toBeGreaterThanOrEqual((await form.boundingBox())!.x);
   expect(overlaps(panel, (await lvo.boundingBox())!)).toBe(false);
   // Exactly one rule is open at a time.
   await expect(page.getByTestId("nudge-dock").getByTestId("nudge-card")).toHaveCount(1);

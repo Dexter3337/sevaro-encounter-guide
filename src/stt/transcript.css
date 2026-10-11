@@ -1,0 +1,148 @@
+/* Live transcript, inside the dark consultation pane. */
+.live-transcript {
+  margin: 0 20px 16px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #ffffff0d;
+  border: 1px solid #5275675c;
+  color: #e7f2e9;
+  display: grid;
+  gap: 10px;
+}
+.transcript-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.transcript-head > div {
+  display: grid;
+  gap: 2px;
+}
+.transcript-head strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+.transcript-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #c3d6ce;
+}
+.transcript-status.listening {
+  color: #9fe3bf;
+}
+.transcript-status.error {
+  color: #ffc4b8;
+}
+.rec-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff6b5b;
+  animation: rec-pulse 1.4s ease-in-out infinite;
+}
+@keyframes rec-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rec-dot {
+    animation: none;
+  }
+}
+.transcript-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 10px;
+  background: #e9f2e9;
+  color: #163e31;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.transcript-control.is-on {
+  background: #ffdcd5;
+  color: #6b1d12;
+}
+.transcript-control:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.transcript-consent,
+.transcript-code {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 12px;
+  color: #d5e5dc;
+  min-height: 24px;
+}
+.transcript-code {
+  flex-direction: column;
+}
+.transcript-code input {
+  min-height: 36px;
+  color: #163e31;
+}
+.transcript-problem {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #ffdcd51f;
+  color: #ffd9d0;
+  font-size: 12px;
+}
+.transcript-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow: auto;
+  display: grid;
+  gap: 6px;
+}
+.transcript-lines li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.transcript-lines time {
+  color: #93b1a6;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  padding-top: 2px;
+}
+.transcript-lines span {
+  overflow-wrap: anywhere;
+}
+.transcript-lines .partial span {
+  color: #b9cfc6;
+  font-style: italic;
+}
+.transcript-empty,
+.transcript-disclosure {
+  margin: 0;
+  font-size: 11px;
+  color: #a9c2b8;
+}
+.transcript-actions {
+  display: flex;
+  gap: 14px;
+}
+.transcript-actions .link {
+  color: #bfe9d4;
+  min-height: 36px;
+}
+.live-transcript :is(button, input):focus-visible {
+  outline: 3px solid #9fe3bf;
+  outline-offset: 2px;
+}

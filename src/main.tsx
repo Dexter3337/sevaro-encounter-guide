@@ -4,6 +4,7 @@ import React, {
   useLayoutEffect,
   useEffect,
   useMemo,
+  useCallback,
 } from "react";
 import { createRoot } from "react-dom/client";
 import {
@@ -75,6 +76,8 @@ import "./consultation.css";
 import { ConsultationPane } from "./encounter/ConsultationPane";
 import "./shell.css";
 import "./demo-polish.css";
+import { TranscriptDrafts } from "./llm/TranscriptDrafts";
+import type { Segment } from "./stt/protocol";
 import type { GuideMode, ReportReason } from "./guidance/types";
 import {
   makeReport,
@@ -249,6 +252,11 @@ function App() {
   const [mode, setMode] = useState<GuideMode>("guidance");
   const [attention, setAttention] = useState(false);
   const chatOpen = mode === "chat";
+  const [transcriptState, setTranscriptState] = useState<{ id: string; segments: Segment[] }>({ id: "", segments: [] });
+  const transcriptKey = `${c.id}:${h.version}`;
+  const transcript = transcriptState.id === transcriptKey ? transcriptState.segments : [];
+  const onTranscript = useCallback((segments: Segment[]) => setTranscriptState({ id: transcriptKey, segments }), [transcriptKey]);
+  const [llmAccessCode, setLlmAccessCode] = useState("");
   const [chatSeed, setChatSeed] = useState<Result>();
   const [contactsFor, setContactsFor] = useState<{ reason?: string }>();
   const showContacts = (reason?: string) => {
@@ -1121,6 +1129,7 @@ function App() {
                 {ui.video ? (
                   <ConsultationPane
                     key={c.id}
+                    onTranscript={onTranscript}
                     hospital={h.name}
                     onHide={() => setUiPref({ video: false })}
                   />
@@ -1220,6 +1229,12 @@ function App() {
                         onAcknowledge={acknowledgeGate}
                       />
                     )}
+                    <details className="ai-drafting-tools">
+                      <summary>Transcript & AI field suggestions</summary>
+                      <TranscriptDrafts key={transcriptKey} hospital={h} context={c} transcript={transcript}
+                        accessCode={llmAccessCode} onAccessCode={setLlmAccessCode}
+                        onApply={(field, text) => change(field, known(text))} />
+                    </details>
                     {fields.map((f) => (
                       <div key={f.id} className="manual-field">
                         <InputField
@@ -1249,6 +1264,94 @@ function App() {
                         )}
                       </div>
                     ))}
+                <aside className={`eg-guide${chatOpen ? " is-chat-open" : ""}`} aria-label="Guide companion">
+                  <div className="eg-guide-tabs" role="tablist" aria-label="Guide companion">
+                    <button
+                      role="tab"
+                      aria-selected={mode === "guidance"}
+                      className={`eg-tab${attention ? " attention" : ""}`}
+                      onClick={() => {
+                        setMode("guidance");
+                        setAttention(false);
+                      }}
+                    >
+                      <Icon name="book" size={17} /> Guidance
+                      {guidanceCount > 0 && (
+                        <span className={`eg-count ${loudest}`}>{guidanceCount}</span>
+                      )}
+                    </button>
+                    <button
+                      role="tab"
+                      aria-selected={mode === "contacts"}
+                      className="eg-tab call"
+                      onClick={() => showContacts()}
+                    >
+                      <Icon name="phone" size={17} /> Care team contacts
+                    </button>
+                  </div>
+                  <div className="eg-guide-body">
+                    <div className="eg-pane" hidden={mode !== "guidance"}>
+                      <GuidanceBoundary key={`dock:${h.id}:${h.version}`}>
+                        <NudgeDock
+                          results={visible}
+                          acknowledged={acknowledged}
+                          reported={reported}
+                          focusedFieldId={focusedField}
+                          fieldLabels={fieldLabels}
+                          hospitalName={h.name}
+                          onAsk={openChat}
+                          onAcknowledge={acknowledge}
+                          onUndoAcknowledge={undoAcknowledge}
+                          onContacts={showContacts}
+                          onReport={reportNudge}
+                          unavailable={outage || guidanceFailed}
+                          openRequest={dockRequest}
+                          onNewNudge={() => {
+                            if (mode !== "guidance") setAttention(true);
+                          }}
+                          storyboard={
+                            <GuidanceBoundary key={`sb:${h.id}:${h.version}`} quiet>
+                              <StoryboardCard
+                                hospital={h}
+                                context={c}
+                                onOpenConflict={openConflict}
+                              />
+                            </GuidanceBoundary>
+                          }
+                        />
+                      </GuidanceBoundary>
+                    </div>
+                    <div className="eg-pane chat-pane" hidden={mode !== "chat"}>
+                      <GuidanceBoundary key={`chat:${h.id}:${h.version}`} quiet>
+                        <ChatPanel
+                          transcript={transcript}
+                          accessCode={llmAccessCode}
+                          onAccessCode={setLlmAccessCode}
+                          open={chatOpen && !outage}
+                          hospital={h}
+                          context={c}
+                          seed={chatSeed}
+                          onClose={() => setMode("guidance")}
+                          onContacts={showContacts}
+                        />
+                      </GuidanceBoundary>
+                    </div>
+                    <div className="eg-pane" hidden={mode !== "contacts"}>
+                      <GuidanceBoundary key={`contacts:${h.id}`} quiet>
+                        <ContactsSheet
+                          open={mode === "contacts"}
+                          hospitalId={h.id}
+                          hospitalName={h.name}
+                          contacts={h.contacts ?? []}
+                          instant={c.instant}
+                          timezone={h.timezone}
+                          reason={contactsFor?.reason}
+                          onClose={() => setMode("guidance")}
+                        />
+                      </GuidanceBoundary>
+                    </div>
+                  </div>
+                </aside>
                     {c.step === "note" && (
                       <details className="eg-note-preview">
                         <summary>Draft note preview</summary>
@@ -1311,97 +1414,13 @@ function App() {
                     )}
                   </footer>
                 </section>
-                <aside className="eg-guide" aria-label="Guide companion">
-                  <div className="eg-guide-tabs" role="tablist" aria-label="Guide companion">
-                    <button
-                      role="tab"
-                      aria-selected={mode === "guidance"}
-                      className={`eg-tab${attention ? " attention" : ""}`}
-                      onClick={() => {
-                        setMode("guidance");
-                        setAttention(false);
-                      }}
-                    >
-                      <Icon name="book" size={17} /> Guidance
-                      {guidanceCount > 0 && (
-                        <span className={`eg-count ${loudest}`}>{guidanceCount}</span>
-                      )}
-                    </button>
-                    <button
-                      role="tab"
-                      aria-selected={mode === "contacts"}
-                      className="eg-tab call"
-                      onClick={() => showContacts()}
-                    >
-                      <Icon name="phone" size={17} /> Care team contacts
-                    </button>
-                  </div>
-                  <div className="eg-guide-body">
-                    <div className="eg-pane" hidden={mode !== "guidance"}>
-                      <GuidanceBoundary key={`dock:${h.id}:${h.version}`}>
-                        <NudgeDock
-                          results={visible}
-                          acknowledged={acknowledged}
-                          reported={reported}
-                          focusedFieldId={focusedField}
-                          fieldLabels={fieldLabels}
-                          hospitalName={h.name}
-                          onAsk={openChat}
-                          onAcknowledge={acknowledge}
-                          onUndoAcknowledge={undoAcknowledge}
-                          onContacts={showContacts}
-                          onReport={reportNudge}
-                          unavailable={outage || guidanceFailed}
-                          openRequest={dockRequest}
-                          onNewNudge={() => {
-                            if (mode !== "guidance") setAttention(true);
-                          }}
-                          storyboard={
-                            <GuidanceBoundary key={`sb:${h.id}:${h.version}`} quiet>
-                              <StoryboardCard
-                                hospital={h}
-                                context={c}
-                                onOpenConflict={openConflict}
-                              />
-                            </GuidanceBoundary>
-                          }
-                        />
-                      </GuidanceBoundary>
-                    </div>
-                    <div className="eg-pane chat-pane" hidden={mode !== "chat"}>
-                      <GuidanceBoundary key={`chat:${h.id}:${h.version}`} quiet>
-                        <ChatPanel
-                          open={chatOpen && !outage}
-                          hospital={h}
-                          context={c}
-                          seed={chatSeed}
-                          onClose={() => setMode("guidance")}
-                          onContacts={showContacts}
-                        />
-                      </GuidanceBoundary>
-                    </div>
-                    <div className="eg-pane" hidden={mode !== "contacts"}>
-                      <GuidanceBoundary key={`contacts:${h.id}`} quiet>
-                        <ContactsSheet
-                          open={mode === "contacts"}
-                          hospitalId={h.id}
-                          hospitalName={h.name}
-                          contacts={h.contacts ?? []}
-                          instant={c.instant}
-                          timezone={h.timezone}
-                          reason={contactsFor?.reason}
-                          onClose={() => setMode("guidance")}
-                        />
-                      </GuidanceBoundary>
-                    </div>
-                  </div>
                   <button type="button" className="eg-guide-launcher" aria-label="Ask the Guide"
                     aria-expanded={chatOpen} onClick={() => chatOpen ? setMode("guidance") : openChat()}>
                     <span className="guide-orb"><Icon name="chat" size={22} /></span>
                     <span><strong>Ask the Guide</strong><small>{chatOpen ? "Return to guidance" : "Hospital answers, with sources"}</small></span>
                     <Icon name={chatOpen ? "close" : "right"} size={18} />
                   </button>
-                </aside>
+
               </div>
             )}
           {tab === "guides" && (

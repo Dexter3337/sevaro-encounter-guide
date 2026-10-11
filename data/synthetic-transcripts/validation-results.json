@@ -1,0 +1,97 @@
+{
+  "passed": true,
+  "validation_scope": "Corpus integrity, evidence matching and source grounding only",
+  "application_extraction_tested": false,
+  "speech_recognition_tested": false,
+  "latency_measured": false,
+  "transcript_count": 4,
+  "total_scripted_duration_seconds": 3400,
+  "total_dialogue_words": 4613,
+  "cases": [
+    {
+      "id": "ST01",
+      "file": "01_cedar_ridge_corrected_timeline.txt",
+      "duration_seconds": 580,
+      "dialogue_word_count": 904,
+      "speaker_turn_counts": {
+        "Consultant": 21,
+        "Patient": 19,
+        "Nurse": 7
+      },
+      "events": 2,
+      "evidence_quotes_checked": 10,
+      "guide_records_checked": 6,
+      "missing_guide_fields_checked": [],
+      "stale_source_ages": [],
+      "passed": true
+    },
+    {
+      "id": "ST02",
+      "file": "02_redwood_wake_up_unknown_lkw.txt",
+      "duration_seconds": 975,
+      "dialogue_word_count": 1246,
+      "speaker_turn_counts": {
+        "Consultant": 31,
+        "Patient": 23,
+        "Partner": 9,
+        "Nurse": 7
+      },
+      "events": 3,
+      "evidence_quotes_checked": 11,
+      "guide_records_checked": 6,
+      "missing_guide_fields_checked": [],
+      "stale_source_ages": [],
+      "passed": true
+    },
+    {
+      "id": "ST03",
+      "file": "03_highland_valley_after_hours_lvo.txt",
+      "duration_seconds": 755,
+      "dialogue_word_count": 1056,
+      "speaker_turn_counts": {
+        "Consultant": 23,
+        "Nurse": 8,
+        "Patient": 20,
+        "ED Physician": 7
+      },
+      "events": 3,
+      "evidence_quotes_checked": 10,
+      "guide_records_checked": 6,
+      "missing_guide_fields_checked": [
+        "CTA Head/Neck",
+        "CT Perfusion",
+        "AI"
+      ],
+      "stale_source_ages": [
+        {
+          "source_id": "SYN-006:import:2",
+          "age_days": 214
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "ST04",
+      "file": "04_meadowlands_seizure_stale_eeg_handoff.txt",
+      "duration_seconds": 1090,
+      "dialogue_word_count": 1407,
+      "speaker_turn_counts": {
+        "Consultant": 36,
+        "Patient": 25,
+        "Sibling": 5,
+        "Nurse": 9
+      },
+      "events": 4,
+      "evidence_quotes_checked": 11,
+      "guide_records_checked": 6,
+      "missing_guide_fields_checked": [],
+      "stale_source_ages": [
+        {
+          "source_id": "SYN-004:import:19",
+          "age_days": 282
+        }
+      ],
+      "passed": true
+    }
+  ]
+}

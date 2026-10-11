@@ -1,0 +1,20 @@
+.transcript-drafts {padding:18px;border:1px solid #b7d6d0;border-radius:12px;background:#f4faf8;margin:0 0 24px;color:#153f48;}
+.transcript-drafts header {position:static;z-index:auto;height:auto;min-height:0;padding:0;margin:0;background:none;border:0;box-shadow:none;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:center;}
+.transcript-drafts p {margin:8px 0;}
+.llm-toggle,.llm-code {display:flex;gap:8px;align-items:center;font-size:.85rem;}
+.llm-code {margin-top:14px;flex-wrap:wrap;}
+.llm-code input {max-width:220px;}
+.llm-toggle input,.llm-draft input {width:auto;}
+.llm-draft-grid {display:grid;gap:12px;margin-top:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));}
+.llm-draft {background:white;border:1px solid #c6dcda;border-radius:10px;padding:14px;min-width:0;}
+.llm-draft h3 {font-size:1rem;margin:0;}
+.llm-draft p,.llm-chat-answer {white-space:pre-wrap;overflow-wrap:anywhere;}
+.llm-draft-value {max-height:200px;overflow:auto;font-size:.9rem;}
+.llm-draft label {display:flex;gap:8px;font-size:.85rem;margin:12px 0;}
+.llm-draft button {margin-top:12px;}
+.llm-evidence {font-size:.85rem;margin:10px 0;}
+.llm-evidence summary {cursor:pointer;color:#176c61;}
+.llm-evidence blockquote {margin:10px 0;padding:10px;border-left:3px solid #75aaa1;background:#eef7f5;}
+.llm-evidence blockquote p {margin:6px 0;white-space:pre-wrap;overflow-wrap:anywhere;}
+.llm-chat-answer {margin-top:10px;background:#f2f8f6;border-radius:10px;padding:14px;}
+.llm-questions {font-size:.9rem;}

@@ -5,6 +5,10 @@ import type { QuestionTurn } from "./questions";
 import type { Context, Hospital, Result } from "../domain";
 import { Evidence, NudgeCard } from "../guidance/NudgeCard";
 import { suggestionsFor } from "./suggestions";
+import { buildLlmInput, requestLlm, LlmError } from "../llm/client";
+import { transcriptIdentity } from "../llm/contracts";
+import { EvidenceList } from "../llm/TranscriptDrafts";
+import type { Segment } from "../stt/protocol";
 import {
   askField,
   escalationReason,
@@ -24,6 +28,9 @@ export interface ChatPanelProps {
   /** The nudge the doctor clicked, if they arrived from one. */
   seed?: Result;
   interpreter?: QuestionInterpreter;
+  transcript?: Segment[];
+  accessCode?: string;
+  onAccessCode?: (code: string) => void;
   onClose: () => void;
   onContacts: (reason: string) => void;
 }
@@ -82,6 +89,12 @@ export function TurnView({
       {turn.interpreted && (
         <p className="chat-interpreted">{turn.interpreted}</p>
       )}
+      {turn.ai && <div className="llm-chat-answer">
+        <p>{turn.ai.answer}</p>
+        {!!turn.ai.evidence.length && <EvidenceList evidence={turn.ai.evidence} transcript={turn.transcript ?? []} />}
+        {!!turn.ai.questions.length && <ul>{turn.ai.questions.map((q,i) => <li key={i}>{q}</li>)}</ul>}
+        <small>AI draft · clinician review · {turn.ai.latencyMs} ms</small>
+      </div>}
       {turn.result && <NudgeCard r={turn.result} onAsk={onAsk} />}
       {reason && (
         <button
@@ -121,6 +134,9 @@ export function ChatPanel({
   context,
   seed,
   interpreter,
+  transcript = [],
+  accessCode,
+  onAccessCode,
   onClose,
   onContacts,
 }: ChatPanelProps) {
@@ -130,6 +146,11 @@ export function ChatPanel({
   const thread = threadFor(stored, key);
   const text = draft.key === key ? draft.text : "";
   const nextId = useRef(1);
+  const [useAi,setUseAi] = useState(true);
+  const [shareTranscript,setShareTranscript] = useState(false);
+  const aiController = useRef<AbortController | undefined>(undefined);
+  const aiKey = `${transcriptIdentity(hospital,context,transcript)}:${JSON.stringify(context.values)}:${context.step}`;
+  const latestAiKey = useRef(aiKey);latestAiKey.current = aiKey;
   const latest = useRef({ hospital, context });
   latest.current = { hospital, context };
   const session = useMemo(
@@ -145,9 +166,10 @@ export function ChatPanel({
     setFailure("");
     return () => {
       lastRequest.current++;
+      aiController.current?.abort();
       session.dispose();
     };
-  }, [session, key, open]);
+  }, [session, key, open, aiKey, useAi, shareTranscript, accessCode]);
   const input = useRef<HTMLTextAreaElement>(null);
   const inputId = useId();
   const shownSeed = seedFits(seed, hospital) ? seed : undefined;
@@ -159,11 +181,32 @@ export function ChatPanel({
   if (!open) return null;
 
   const submit = async (q: string) => {
-    if (!q.trim()) return;
+    if (!q.trim() || pending) return;
     const ticket = ++lastRequest.current;
     setPending(true);
     setFailure("");
     try {
+      if (useAi && !interpreter) {
+        aiController.current?.abort();
+        const controller = new AbortController();aiController.current = controller;
+        const snapshotKey = aiKey;
+        try {
+          const history = thread.turns.flatMap(t => [
+            {role:"user" as const,text:t.question},
+            {role:"assistant" as const,text:t.ai?.answer || t.result?.message || t.clarification || ""},
+          ]);
+          const request = buildLlmInput("chat",hospital,context,shareTranscript ? transcript : [],q,history);
+          const reply = await requestLlm(request,controller.signal,accessCode);
+          if (ticket !== lastRequest.current || snapshotKey !== latestAiKey.current) return;
+          setStored(t => withTurn(t,key,{id:nextId.current++,question:q,ai:reply,transcript:shareTranscript ? transcript : []}));
+          setDraft({key,text:""});setMode(`AI assistant · ${shareTranscript ? "transcript and " : ""}selected hospital guide`);
+          return;
+        } catch (e) {
+          if (controller.signal.aborted || ticket !== lastRequest.current) return;
+          setMode("AI unavailable; local guide answers");
+          setFailure(e instanceof LlmError ? `${e.message} Showing a local guide answer.` : "AI unavailable. Showing a local guide answer.");
+        }
+      }
       const reply = await session.submit(
         q,
         thread.turns.at(-1)?.result?.title || shownSeed?.title,
@@ -221,7 +264,7 @@ export function ChatPanel({
         <p>
           <strong>Ask {hospital.name}'s guide</strong>
           <small>
-            Answers come only from this hospital's guide · {hospital.version}
+            This hospital's guide and the transcript you choose to share · {hospital.version}
           </small>
         </p>
         <button
@@ -236,6 +279,13 @@ export function ChatPanel({
         </button>
       </header>
       {shownSeed && <SeedContext seed={shownSeed} />}
+      <div className="ai-chat-options">
+        <label className="llm-toggle"><input type="checkbox" checked={useAi} onChange={e => setUseAi(e.target.checked)} />Use Gemini / AI assistant</label>
+        {useAi && <details><summary>Transcript sharing & access</summary>
+          <label className="llm-toggle"><input type="checkbox" checked={shareTranscript} onChange={e => setShareTranscript(e.target.checked)} />Share this encounter's transcript with AI chat ({transcript.length} lines)</label>
+          {onAccessCode && <label className="llm-code">AI access code (if configured)<input type="password" autoComplete="off" value={accessCode || ""} onChange={e => onAccessCode(e.target.value)} /></label>}
+        </details>}
+      </div>
       {!thread.turns.length && (
         <div className="chat-suggestions">
           <p>Try asking:</p>
@@ -265,7 +315,7 @@ export function ChatPanel({
         ))}
       </div>
       <p className="chat-mode" role="status">
-        {pending ? "Checking this hospital's guide..." : failure || mode}
+        {pending ? "Reading the question and checking the available evidence..." : [failure,mode].filter(Boolean).join(" ")}
       </p>
       <form
         className="chat-form"

@@ -13,7 +13,7 @@ for (const size of [{ width: 1366, height: 768 }, { width: 1440, height: 900 }])
     await page.getByRole("button", { name: "Play demo", exact: true }).click();
     await expect(page.getByRole("button", { name: "Pause demo", exact: true })).toBeVisible();
     await video.evaluate((v: HTMLVideoElement) => { v.currentTime = 12; });
-    await expect(page.locator(".captured-keywords")).toContainText("Penicillin allergy");
+    await expect(page.locator(".caption-strip")).toContainText("penicillin allergy");
     await page.getByRole("button", { name: "Pause demo", exact: true }).click();
     await page.getByRole("button", { name: "Fullscreen", exact: true }).click();
     await expect.poll(() => page.evaluate(() => !!document.fullscreenElement)).toBe(true);

@@ -1,0 +1,96 @@
+SYNTHETIC TEST TRANSCRIPT — entirely fictional; no real patient or recording.
+ID: ST04
+Title: A first reported shaking episode, stale EEG hours and an unconfirmed provider handoff
+Patient token: PAT-ST04
+Hospital: SYN-004 | Meadowlands Community Hospital
+Guide version: Challenge v2
+Consult type: General Neuro
+Encounter type: Acute
+Encounter start: 2026-03-19T14:48:00-04:00
+Hospital timezone: America/New_York
+Consultant timezone: America/New_York
+Duration: 18:10
+Speakers: Consultant (remote neurologist), Patient, Sibling, Nurse (bedside)
+Timing: Elapsed turn-start times; quiet examinations and a local-team wait are included. Scripted timing, not measured audio.
+
+--- TRANSCRIPT START ---
+[00:00] Consultant: Hello. I'm the neurologist joining remotely. You look more awake than the first handoff described. How are you feeling now?
+[00:12] Patient: Embarrassed, mostly. Everyone keeps saying I had a seizure and I don't remember having one.
+[00:25] Consultant: We'll start with what each person actually saw. Before we do, is it okay for this conversation to be transcribed?
+[00:36] Patient: Yes. My sibling can help. I remember getting to the checkout and then being in the ambulance.
+[00:47] Consultant: What do you remember just before that gap?
+[00:53] Patient: I was hot and a bit lightheaded. I hadn't eaten much. I put my bag down because I thought I might drop it. That's the last clear bit.
+[01:12] Consultant: Any unusual smell, sensation, pain, or warning before you lost track?
+[01:22] Patient: No smell. My stomach felt odd, but I thought it was because I'd skipped lunch. I don't know if that matters.
+[01:34] Consultant: It belongs in the account. Sibling, what did you see?
+[01:41] Sibling: Their knees bent and they went down. Then the arms were shaking. I thought maybe a minute, but looking at the message I sent, it could have been less. I wasn't timing it.
+[01:58] Consultant: We'll keep the duration approximate. Did you see the beginning clearly?
+[02:05] Sibling: Not every second. I was getting the basket. I heard something fall, turned, and saw them on the floor. Someone else had already reached them.
+[02:18] Consultant: And afterward?
+[02:23] Sibling: They were awake but kept asking why they were on the floor. About ten minutes later they were talking more normally. That's an estimate too.
+[02:39] Patient: I remember asking about the groceries. Apparently I asked five times. Very important groceries, obviously.
+[02:49] Consultant: It can be unsettling to hear about a gap like that. Has anything similar happened to you before?
+[02:57] Patient: Not to me. My cousin has epilepsy. I said that in the ambulance and then somebody wrote 'history of seizures.' That's not my history.
+[03:12] Consultant: Thank you for correcting it. Family history and your own history are different. Have you ever taken a seizure medicine yourself?
+[03:23] Patient: No. My cousin does. I don't know the name. I take a tablet for blood pressure, and sometimes something for hay fever.
+[03:38] Nurse: I'll correct the family-history attribution in the handoff. The current medication list is still being reconciled.
+[03:47] Consultant: Any recent missed medicines, illness, poor sleep, or alcohol change you want the local team to know about?
+[03:57] Patient: I've slept badly all week. Not a big drinking week or anything. I didn't take an extra pill. I had one coffee, which is normal for me.
+[04:12] Consultant: Any medication allergies?
+[04:18] Patient: Sulfa gave me a rash once. That's what the chart says. I couldn't tell you which exact medicine it was.
+[04:30] Consultant: We'll preserve that uncertainty. Is there a new headache or weakness now?
+[04:39] Patient: My shoulder is sore where I landed. Both hands work. No new headache, just a heavy tired feeling.
+[04:52] Consultant: Please don't stand for the examination. Nurse, can you adjust the camera so I can watch both arms and face?
+[05:05] Event: Nurse positions the patient and camera. Facial movements and sustained-arm observation proceed with approximately 55 seconds of little speech.
+[06:00] Patient: I had a CT angiogram years ago for a headache. Is that the test you want again? I really don't like the warm feeling.
+[06:12] Consultant: That was a past study. We haven't established that a CTA was performed or is planned today. I won't copy an old scan into today's imaging status.
+[06:26] Nurse: No CTA has been performed in this encounter. Today's other investigations are in the ED record for the physician to review.
+[06:36] Consultant: Thank you. Patient, follow my finger with your eyes. Then touch your nose with each hand.
+[06:47] Patient: This shoulder doesn't like lifting, but the hand is okay. Tell me if I'm going too fast.
+[06:57] Consultant: You're doing fine. Now tell me the month and where we are.
+[07:06] Patient: March. Meadowlands. Thursday, I think. I know I had a shopping list for Thursday.
+[07:19] Consultant: Thank you. I want to discuss a routine EEG as part of the current plan with the hospital physician. We need to verify the actual local arrangements for today.
+[07:34] Patient: Is that another scan? My cousin had wires on their head.
+[07:41] Consultant: It's the test with electrodes. We can explain it further if the bedside team arranges it. Discussing it now does not mean it has been ordered or completed.
+[07:50] Nurse: The guide entry says Tuesday and Thursday, 08:00 to 15:00. It's 14:55 here, but that entry was last verified on June tenth last year.
+[08:05] Consultant: Then let's verify with the local service. The old schedule alone isn't a reliable promise that a technician is available now, especially this close to the listed end time.
+[08:20] Patient: If nobody is here, does that mean I have to wait until next Thursday?
+[08:27] Consultant: We haven't established that. The hospital physician can confirm the current process and any alternative arrangements. I won't invent a next appointment from an old entry.
+[08:42] Nurse: Should I put in the EEG order under your name?
+[08:49] Consultant: Please ask the hospital physician to review the plan and confirm the appropriate local EEG ordering workflow. The medication-order restriction in this guide doesn't establish permission for an EEG order. I haven't placed an order.
+[09:11] Patient: Are you telling me I definitely have epilepsy now?
+[09:18] Consultant: No diagnosis is established by this conversation alone. I'm documenting a reported episode, the witness's uncertainty, and the evaluation plan for the treating team.
+[09:32] Patient: Good. I was worried you were just copying my cousin's label onto me.
+[09:42] Consultant: We won't. Nurse, can we ask the local physician to confirm the plan before the consultation is completed?
+[09:52] Nurse: I've sent a message. They're with another patient. It hasn't been read yet.
+[10:00] Event: Patient and nurse wait while the consultant reviews the available record. Approximately 90 seconds of quiet; no reply from the hospital physician arrives.
+[11:30] Patient: Can I ask something while we're waiting? I remember shaking once when I was freezing after swimming as a child. Is that the same history?
+[11:42] Consultant: We'll record how you describe it, but that doesn't establish a previous seizure diagnosis. Was there a loss of awareness then?
+[11:51] Patient: No. I was cold and annoyed. I remember everything. I don't think it was anything like today.
+[12:06] Consultant: That's a different reported event. I'm keeping today's unexplained gap and witnessed movements distinct from that memory.
+[12:18] Sibling: I also didn't see their eyes very clearly today. People keep asking, but there were people around them. I don't want to make it up.
+[12:30] Consultant: That's helpful. An unobserved feature should remain unobserved. We'll attribute the witness statements to you.
+[12:41] Patient: I can talk normally now, but I feel wiped out. I don't want to sit an exam all over again.
+[12:52] Consultant: We can pause. Is there any new numbness or difficulty saying words since we started?
+[13:00] Patient: No. Just tired, and my shoulder hurts when I move it.
+[13:11] Nurse: I'll let the ED team know about the shoulder separately. Still no response to the plan message.
+[13:22] Consultant: Thank you. I'm putting the EEG discussion in the assessment and plan, with availability unconfirmed. It should be visible while the local team verifies it, without appearing as a completed test.
+[13:44] Patient: Could the test happen tomorrow morning instead? I need to tell someone whether to collect my car.
+[13:53] Consultant: I can't promise an appointment. Let's have the local physician explain the disposition and timing once they confirm the service arrangements.
+[14:08] Nurse: It's now 15:02 Eastern. We're past the old guide's Thursday end time. I still haven't reached the service.
+[14:20] Consultant: Right. The clock has crossed that listed boundary during this conversation, but the source remains stale. Don't turn that into a definite statement that EEG is unavailable or that an appointment is booked.
+[14:40] Sibling: I'll stay until the team comes back. We don't need an exact answer from you if nobody has confirmed it yet.
+[14:48] Consultant: Thank you. I'll use Neuro Tele Consult as the site's note title. The patient discussion is complete, but the hospital provider hasn't confirmed the patient plan.
+[15:04] Nurse: I can tell you I've heard the plan. Is that enough to close the consultation?
+[15:13] Consultant: The requirement specifies the hospital provider's confirmation. Your acknowledgment is useful, but it doesn't substitute for that. The encounter should stay open for the appropriate confirmation.
+[15:31] Patient: I understand what you've said. Does my agreement count?
+[15:38] Consultant: Your understanding matters, and I'll document it. It doesn't replace the local provider's handoff confirmation either.
+[15:54] Event: Nurse assists the patient with a comfortable seated position; approximately 60 seconds of quiet observation and chart review.
+[16:54] Patient: Please put that I didn't take my cousin's medicine. I think somebody asked that twice.
+[17:03] Consultant: I will. No seizure medicine from a relative is reported as taken. We'll keep your medication reconciliation in the local record.
+[17:15] Nurse: Message still unread. I'll speak directly to the hospital physician when they're available.
+[17:24] Consultant: I'll leave the completion requirement unresolved and pass on the plan. No EEG is reported as ordered or completed in this call.
+[17:39] Patient: Okay. I'll wait for the person here to tell me what's next.
+[17:49] Consultant: That's the next handoff. Let the nurse know if anything changes while you're waiting.
+[18:10] Event: Video consultation ends. Hospital-provider plan confirmation and current EEG availability remain unconfirmed.
+--- TRANSCRIPT END ---

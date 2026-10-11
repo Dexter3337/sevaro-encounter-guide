@@ -1,0 +1,814 @@
+{
+  "schema_version": "1.0",
+  "dataset": "Sevaro synthetic teleneurology consultation corpus",
+  "synthetic": true,
+  "case_count": 4,
+  "created_on": "2026-10-11",
+  "dates_note": "Encounter dates are fixed March 2026 test clocks to match the Challenge v2 fixtures; they are not today's date.",
+  "purpose": "Human-reviewed test oracle for transcript-to-caselog proposals and subsequent hospital-specific guidance. These annotations are expectations, not results from an app extractor.",
+  "application_extraction_tested": false,
+  "assumptions": [
+    "Start each case as a separate synthetic encounter with no inherited patient facts; hospital identity and guide version come from host context, not name matching.",
+    "Utterance timestamps are elapsed turn starts. Durations, pauses and dialogue are scripted; no audio was recorded and no real transcription latency was measured.",
+    "Speaker labels are supplied ground truth; the corpus does not establish STT diarization accuracy.",
+    "Expected draft facts require clinician review and evidence binding before any write. Ambiguous values remain unset; explicit Unknown is different from a field never discussed.",
+    "Patient facts must not overwrite hospital protocols. Missing guide fields mean not_in_guide; live conversation is not authoritative guide verification.",
+    "Charge, provider confirmation, clinical consent, signed-note state, orders and administration must use their appropriate host records; transcript statements alone do not authorize or perform those actions.",
+    "No treatment eligibility, diagnosis, medication choice or dose should be generated from the test oracle.",
+    "These four cases deliberately focus on acute stroke and general-neurology evaluation. Rounding, multilingual interpreting, unfamiliar hospitals and real audio are not covered in this reduced set."
+  ],
+  "cases": [
+    {
+      "id": "ST01",
+      "file": "01_cedar_ridge_corrected_timeline.txt",
+      "title": "Corrected stroke timeline and pending vessel result",
+      "duration_seconds": 580,
+      "context": {
+        "hospital_id": "SYN-001",
+        "guide_version": "Challenge v2",
+        "consult_type": "Stroke",
+        "encounter_type": "Acute",
+        "start": "2026-03-17T12:40:00-05:00",
+        "hospital_timezone": "America/Chicago",
+        "consultant_timezone": "America/New_York"
+      },
+      "speakers": [
+        "Consultant",
+        "Patient",
+        "Nurse"
+      ],
+      "test_elements": [
+        "patient self-correction",
+        "conflicting initial handoff",
+        "symptom onset versus last known well",
+        "contrast reaction versus drug allergy",
+        "completed scan versus pending result",
+        "undefined staffing hours",
+        "supplies or IV fluid versus medication"
+      ],
+      "expected_draft_facts": {
+        "last_known_well_status": {
+          "value": "Known",
+          "evidence": [
+            {
+              "timestamp": "02:12",
+              "speaker": "Consultant",
+              "quote": "Thank you for correcting it. We're in Central time here, on March seventeenth. You're saying you were speaking normally at 12:20 this afternoon, then the trouble began at about 12:30?"
+            },
+            {
+              "timestamp": "02:27",
+              "speaker": "Patient",
+              "quote": "Yes. That's it. I know because the soup was still too hot."
+            }
+          ]
+        },
+        "last_known_well_time": {
+          "value": "2026-03-17T12:20:00-05:00",
+          "evidence": [
+            {
+              "timestamp": "01:53",
+              "speaker": "Patient",
+              "quote": "No, sorry, that's my mistake. I said eleven when they were asking all those questions. Lunch was late today. Twelve twenty, not eleven twenty. I hadn't even started cooking at eleven."
+            },
+            {
+              "timestamp": "02:12",
+              "speaker": "Consultant",
+              "quote": "Thank you for correcting it. We're in Central time here, on March seventeenth. You're saying you were speaking normally at 12:20 this afternoon, then the trouble began at about 12:30?"
+            },
+            {
+              "timestamp": "02:27",
+              "speaker": "Patient",
+              "quote": "Yes. That's it. I know because the soup was still too hot."
+            }
+          ]
+        },
+        "allergies": {
+          "value": "Reported prior scan-contrast itching; exact agent uncertain. No reported prior alteplase exposure/reaction.",
+          "evidence": [
+            {
+              "timestamp": "03:35",
+              "speaker": "Patient",
+              "quote": "The dye for a scan once. I got itchy. They wrote iodine, I think. Is that the same as being allergic to the clot medicine?"
+            },
+            {
+              "timestamp": "03:59",
+              "speaker": "Patient",
+              "quote": "No. I've never had that drug, as far as I know. Just the scan dye. No swelling or trouble breathing that time, just itching."
+            },
+            {
+              "timestamp": "04:13",
+              "speaker": "Nurse",
+              "quote": "We have a recorded contrast reaction. The ED team reviewed it before the vessel scan today. I'll bring the medication record up separately."
+            }
+          ]
+        },
+        "cta_done": {
+          "value": true,
+          "evidence": [
+            {
+              "timestamp": "05:56",
+              "speaker": "Nurse",
+              "quote": "Noncontrast CT and CTA of the head and neck are completed. CTA finished at 12:44 Central. The final vessel interpretation is still pending."
+            }
+          ]
+        },
+        "thrombolytic_given": {
+          "value": false,
+          "evidence": [
+            {
+              "timestamp": "06:47",
+              "speaker": "Nurse",
+              "quote": "No thrombolytic has been given. Pharmacy has not prepared it either. We're awaiting the physician's decision."
+            }
+          ]
+        }
+      },
+      "leave_unresolved": {
+        "lvo_present": "CTA is completed but its final vessel interpretation is pending. Do not set False.",
+        "thrombolytic_order_placed": "No signed-order status is explicitly established. No administration does not establish no order."
+      },
+      "corrections": [
+        {
+          "field": "last_known_well_time",
+          "superseded_claim": "11:20 in the initial handoff",
+          "correction_at": "01:53",
+          "confirmed_at": "02:27",
+          "final_value": "2026-03-17T12:20:00-05:00",
+          "rule": "Retain the superseded claim as provenance; do not erase or reuse it as the final value."
+        }
+      ],
+      "expected_hospital_guidance": [
+        "CTA availability is 24/7 in the selected guide; this is separate from the report confirming CTA completion.",
+        "Preserve the reported contrast reaction without fabricating an alteplase allergy or treatment eligibility decision.",
+        "If LVO workflow is queried, quote the staffed-coverage condition; a precise current coverage branch cannot be established from undefined staffing hours.",
+        "Required note title is Tele-Neurology Consult; a stated intention to use it is not a signed note.",
+        "Charge Entry is No; do not invent a charge gate."
+      ],
+      "guide_evidence": [
+        {
+          "id": "SYN-001:import:17",
+          "hospitalId": "SYN-001",
+          "field": "CTA Head/Neck",
+          "raw": "24/7",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        },
+        {
+          "id": "SYN-001:import:1",
+          "hospitalId": "SYN-001",
+          "field": "Thrombolytic",
+          "raw": "Alteplase",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        },
+        {
+          "id": "SYN-001:import:2",
+          "hospitalId": "SYN-001",
+          "field": "Thrombolytic Mix Model",
+          "raw": "Pharmacy prepares and delivers to bedside",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        },
+        {
+          "id": "SYN-001:import:3",
+          "hospitalId": "SYN-001",
+          "field": "LVO Protocol",
+          "raw": "Thrombectomy capable during staffed neurointerventional coverage. Teleneurologist alerts ED provider and activates the synthetic neurovascular response line. Outside coverage hours, use the transfer pathway.",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        },
+        {
+          "id": "SYN-001:import:8",
+          "hospitalId": "SYN-001",
+          "field": "Required Note Title",
+          "raw": "Tele-Neurology Consult",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        },
+        {
+          "id": "SYN-001:import:7",
+          "hospitalId": "SYN-001",
+          "field": "Charge Entry",
+          "raw": "No",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        }
+      ],
+      "must_not_infer": [
+        "LVO negative because the report is pending",
+        "12:30 symptom onset as last known well",
+        "alteplase allergy from contrast itching",
+        "IV fluid as thrombolytic administration",
+        "staffed coverage ending at a time copied from another hospital",
+        "note signed or encounter completed from a farewell"
+      ]
+    },
+    {
+      "id": "ST02",
+      "file": "02_redwood_wake_up_unknown_lkw.txt",
+      "title": "Wake-up stroke with unknown baseline and a negative final CTA report",
+      "duration_seconds": 975,
+      "context": {
+        "hospital_id": "SYN-003",
+        "guide_version": "Challenge v2",
+        "consult_type": "Stroke",
+        "encounter_type": "Acute",
+        "start": "2026-03-17T03:10:00-07:00",
+        "hospital_timezone": "America/Los_Angeles",
+        "consultant_timezone": "America/New_York"
+      },
+      "speakers": [
+        "Consultant",
+        "Patient",
+        "Partner",
+        "Nurse"
+      ],
+      "test_elements": [
+        "overnight symptom discovery",
+        "unknown last known well",
+        "timestamped text message that does not establish baseline",
+        "caregiver attribution",
+        "negative final imaging result",
+        "family history versus patient history",
+        "video loss and limited exam",
+        "drug discussion versus administration"
+      ],
+      "expected_draft_facts": {
+        "last_known_well_status": {
+          "value": "Unknown",
+          "evidence": [
+            {
+              "timestamp": "03:03",
+              "speaker": "Patient",
+              "quote": "No. I didn't get up. I couldn't honestly say."
+            },
+            {
+              "timestamp": "03:14",
+              "speaker": "Partner",
+              "quote": "I didn't see them then either. I don't want midnight written down as if we checked."
+            },
+            {
+              "timestamp": "03:23",
+              "speaker": "Consultant",
+              "quote": "Understood. Last known well remains unknown. The text timestamp doesn't establish a normal neurologic baseline. I'll keep the estimated 02:15 symptom-discovery time separately in the narrative."
+            }
+          ]
+        },
+        "allergies": {
+          "value": "No known medication allergies reported; remote unnamed stomach-upset intolerance remains unverified.",
+          "evidence": [
+            {
+              "timestamp": "07:13",
+              "speaker": "Patient",
+              "quote": "None that I know of. A pain tablet upset my stomach once, but no rash, swelling, or breathing trouble. I don't remember its name."
+            },
+            {
+              "timestamp": "07:28",
+              "speaker": "Consultant",
+              "quote": "We'll document the uncertain intolerance description without assigning a drug allergy that we can't identify."
+            }
+          ]
+        },
+        "cta_done": {
+          "value": true,
+          "evidence": [
+            {
+              "timestamp": "07:39",
+              "speaker": "Nurse",
+              "quote": "CTA of the head and neck is completed. The finalized report states no large vessel occlusion. I've read the final report, not just the scanner status."
+            }
+          ]
+        },
+        "lvo_present": {
+          "value": false,
+          "evidence": [
+            {
+              "timestamp": "07:39",
+              "speaker": "Nurse",
+              "quote": "CTA of the head and neck is completed. The finalized report states no large vessel occlusion. I've read the final report, not just the scanner status."
+            }
+          ]
+        },
+        "thrombolytic_given": {
+          "value": false,
+          "evidence": [
+            {
+              "timestamp": "08:05",
+              "speaker": "Nurse",
+              "quote": "No. None administered as of now. The treatment review is still in progress."
+            },
+            {
+              "timestamp": "12:46",
+              "speaker": "Nurse",
+              "quote": "We discussed tenecteplase as the drug named in our local guide. That conversation was not administration. There is still no dose given."
+            }
+          ]
+        }
+      },
+      "leave_unresolved": {
+        "last_known_well_time": "No reliable last-known-well time; leave blank. 02:15 is estimated discovery and 00:03 is a text timestamp.",
+        "thrombolytic_order_placed": "Discussion of the drug and absence of administration do not establish order status."
+      },
+      "narrative_only": [
+        {
+          "meaning": "Estimated symptom-discovery time",
+          "value": "2026-03-17T02:15:00-07:00",
+          "uncertainty": "approximate",
+          "evidence": [
+            {
+              "timestamp": "01:22",
+              "speaker": "Patient",
+              "quote": "Maybe two fifteen. The clock was glowing. I remember the fifteen part more than the two."
+            },
+            {
+              "timestamp": "01:35",
+              "speaker": "Partner",
+              "quote": "I looked at my phone when they called me. That was 02:18. We told the ambulance two fifteen as an estimate for noticing the problem."
+            }
+          ]
+        }
+      ],
+      "expected_hospital_guidance": [
+        "Unknown last known well in a stroke consultation should surface this hospital's Wake Up Protocol = Yes before the doctor has to ask.",
+        "The local guide lists 24/7 thrombectomy capability; preserve it as site capability, without activating an LVO-positive pathway after the final negative report.",
+        "Required note title is Neurology Consult - Remote; no signed note is demonstrated.",
+        "Charge Entry is No; do not introduce a charge gate."
+      ],
+      "guide_evidence": [
+        {
+          "id": "SYN-003:import:4",
+          "hospitalId": "SYN-003",
+          "field": "Wake Up Protocol",
+          "raw": "Yes",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        },
+        {
+          "id": "SYN-003:import:3",
+          "hospitalId": "SYN-003",
+          "field": "LVO Protocol",
+          "raw": "Thrombectomy capable 24/7. Teleneurologist communicates LVO concern to ED provider and activates the synthetic Neurointerventional Hotline.",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        },
+        {
+          "id": "SYN-003:import:1",
+          "hospitalId": "SYN-003",
+          "field": "Thrombolytic",
+          "raw": "Tenecteplase",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        },
+        {
+          "id": "SYN-003:import:17",
+          "hospitalId": "SYN-003",
+          "field": "CTA Head/Neck",
+          "raw": "24/7",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        },
+        {
+          "id": "SYN-003:import:8",
+          "hospitalId": "SYN-003",
+          "field": "Required Note Title",
+          "raw": "Neurology Consult - Remote",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        },
+        {
+          "id": "SYN-003:import:7",
+          "hospitalId": "SYN-003",
+          "field": "Charge Entry",
+          "raw": "No",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        }
+      ],
+      "must_not_infer": [
+        "00:03 emoji as a normal neurologic baseline",
+        "02:15 discovery as last known well",
+        "father's stroke or medicines as patient history",
+        "a negative LVO report as proof of no stroke or suitability for discharge",
+        "a proposed drug as administered",
+        "examination results during the frozen-video interval",
+        "family agreement as provider plan confirmation"
+      ]
+    },
+    {
+      "id": "ST03",
+      "file": "03_highland_valley_after_hours_lvo.txt",
+      "title": "Confirmed LVO after coverage with missing imaging fields and stale preparation data",
+      "duration_seconds": 755,
+      "context": {
+        "hospital_id": "SYN-006",
+        "guide_version": "Challenge v2",
+        "consult_type": "Stroke",
+        "encounter_type": "Acute",
+        "start": "2026-03-17T19:30:00-05:00",
+        "hospital_timezone": "America/Chicago",
+        "consultant_timezone": "America/New_York"
+      },
+      "speakers": [
+        "Consultant",
+        "Patient",
+        "Nurse",
+        "ED Physician"
+      ],
+      "test_elements": [
+        "confirmed positive final report",
+        "hospital clock versus Eastern phone clock",
+        "after-hours transfer actor",
+        "missing guide field versus unavailable service",
+        "stale source",
+        "undefined pharmacy hours",
+        "planned transfer versus accepted transfer"
+      ],
+      "expected_draft_facts": {
+        "last_known_well_status": {
+          "value": "Known",
+          "evidence": [
+            {
+              "timestamp": "01:25",
+              "speaker": "Patient",
+              "quote": "Six forty. I called him then. We spoke normally. That's evening, not morning. I looked at the wall clock because he was late."
+            },
+            {
+              "timestamp": "01:58",
+              "speaker": "Nurse",
+              "quote": "The brother's account in the handoff agrees: normal conversation at 18:40, symptoms around 18:50, both Central time today."
+            }
+          ]
+        },
+        "last_known_well_time": {
+          "value": "2026-03-17T18:40:00-05:00",
+          "evidence": [
+            {
+              "timestamp": "01:25",
+              "speaker": "Patient",
+              "quote": "Six forty. I called him then. We spoke normally. That's evening, not morning. I looked at the wall clock because he was late."
+            },
+            {
+              "timestamp": "01:58",
+              "speaker": "Nurse",
+              "quote": "The brother's account in the handoff agrees: normal conversation at 18:40, symptoms around 18:50, both Central time today."
+            },
+            {
+              "timestamp": "11:22",
+              "speaker": "Patient",
+              "quote": "Just that I was normal on that call at six forty. I wasn't already having trouble then."
+            }
+          ]
+        },
+        "allergies": {
+          "value": "Reported penicillin rash; no known prior tenecteplase exposure or reaction reported.",
+          "evidence": [
+            {
+              "timestamp": "03:09",
+              "speaker": "Patient",
+              "quote": "Penicillin gave me a rash years ago. That's the only one I know. Nobody has ever told me I'm allergic to tenecteplase. I don't think I've had it."
+            }
+          ]
+        },
+        "cta_done": {
+          "value": true,
+          "evidence": [
+            {
+              "timestamp": "04:48",
+              "speaker": "ED Physician",
+              "quote": "I'm here with the imaging update. CTA head and neck is completed. The final radiology report identifies a large vessel occlusion; I've reviewed that report with the radiologist."
+            }
+          ]
+        },
+        "lvo_present": {
+          "value": true,
+          "evidence": [
+            {
+              "timestamp": "04:48",
+              "speaker": "ED Physician",
+              "quote": "I'm here with the imaging update. CTA head and neck is completed. The final radiology report identifies a large vessel occlusion; I've reviewed that report with the radiologist."
+            }
+          ]
+        },
+        "thrombolytic_given": {
+          "value": false,
+          "evidence": [
+            {
+              "timestamp": "06:45",
+              "speaker": "ED Physician",
+              "quote": "No thrombolytic has been administered. We're reviewing that decision in the clinical record now. No thrombolytic order has been signed yet either."
+            }
+          ]
+        },
+        "thrombolytic_order_placed": {
+          "value": false,
+          "evidence": [
+            {
+              "timestamp": "06:45",
+              "speaker": "ED Physician",
+              "quote": "No thrombolytic has been administered. We're reviewing that decision in the clinical record now. No thrombolytic order has been signed yet either."
+            }
+          ]
+        }
+      },
+      "leave_unresolved": {
+        "receiving_hospital_or_transfer_acceptance": "Transfer request is being arranged, but no destination or acceptance is confirmed.",
+        "pharmacy_staffing": "No defined pharmacy staffed-hour schedule or live confirmation is supplied."
+      },
+      "expected_hospital_guidance": [
+        "Once LVO is confirmed at 04:48, proactively surface the selected hospital's LVO Protocol: Tuesday evening is outside Mon-Fri 0700-1900 Central coverage; ED provider initiates transfer.",
+        "Use America/Chicago, not the patient phone or consultant Eastern clock. At call start the consultant clock is 20:30 Eastern.",
+        "CTA Head/Neck, CT Perfusion and AI are absent from this loaded guide. Mark not_in_guide rather than unavailable; do not overwrite the separately confirmed CTA-completed fact.",
+        "Thrombolytic Mix Model is stale: 214 local calendar days since 2025-08-15 at this encounter date, above the current engine's 180-day threshold.",
+        "Pharmacy staffed hours are undefined; do not borrow the thrombectomy schedule to choose the preparation actor.",
+        "Required note title is MD Progress Note - Neuro; Charge Entry is No."
+      ],
+      "guide_evidence": [
+        {
+          "id": "SYN-006:import:3",
+          "hospitalId": "SYN-006",
+          "field": "LVO Protocol",
+          "raw": "Thrombectomy capable Mon-Fri 0700-1900. During coverage, teleneurologist activates the synthetic EVT team. Outside coverage, ED provider initiates transfer to a regional comprehensive stroke center.",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        },
+        {
+          "id": "SYN-006:import:2",
+          "hospitalId": "SYN-006",
+          "field": "Thrombolytic Mix Model",
+          "raw": "ED pharmacist prepares during staffed hours; nursing mixes overnight",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2025-08-15"
+        },
+        {
+          "id": "SYN-006:import:1",
+          "hospitalId": "SYN-006",
+          "field": "Thrombolytic",
+          "raw": "Tenecteplase",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        },
+        {
+          "id": "SYN-006:import:5",
+          "hospitalId": "SYN-006",
+          "field": "Order Entry",
+          "raw": "Thrombolytic order set only",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        },
+        {
+          "id": "SYN-006:import:8",
+          "hospitalId": "SYN-006",
+          "field": "Required Note Title",
+          "raw": "MD Progress Note - Neuro",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        },
+        {
+          "id": "SYN-006:import:7",
+          "hospitalId": "SYN-006",
+          "field": "Charge Entry",
+          "raw": "No",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        }
+      ],
+      "expected_missing_guide_fields": [
+        "CTA Head/Neck",
+        "CT Perfusion",
+        "AI"
+      ],
+      "must_not_infer": [
+        "a kit arriving as drug preparation or administration",
+        "CT perfusion unavailable because its guide entry is absent",
+        "19:00 as pharmacy staffing cutoff",
+        "receiving hospital accepted from a planned transfer-center call",
+        "transfer arranged by the remote neurologist when the local guide assigns the ED provider",
+        "a guide update or conversation as source re-verification",
+        "charge or provider confirmation from thanks"
+      ]
+    },
+    {
+      "id": "ST04",
+      "file": "04_meadowlands_seizure_stale_eeg_handoff.txt",
+      "title": "General-neurology seizure evaluation spanning a stale EEG-hours boundary",
+      "duration_seconds": 1090,
+      "context": {
+        "hospital_id": "SYN-004",
+        "guide_version": "Challenge v2",
+        "consult_type": "General Neuro",
+        "encounter_type": "Acute",
+        "start": "2026-03-19T14:48:00-04:00",
+        "hospital_timezone": "America/New_York",
+        "consultant_timezone": "America/New_York"
+      },
+      "speakers": [
+        "Consultant",
+        "Patient",
+        "Sibling",
+        "Nurse"
+      ],
+      "test_elements": [
+        "reported episode versus confirmed diagnosis",
+        "uncertain witness duration",
+        "family versus personal seizure history",
+        "historical CTA versus current scan",
+        "current EEG plan versus completed test",
+        "stale schedule crossing 15:00",
+        "nurse and patient acknowledgment versus provider confirmation",
+        "unknown drug name"
+      ],
+      "expected_draft_facts": {
+        "allergies": {
+          "value": "Reported sulfa-associated rash; exact medication uncertain.",
+          "evidence": [
+            {
+              "timestamp": "04:18",
+              "speaker": "Patient",
+              "quote": "Sulfa gave me a rash once. That's what the chart says. I couldn't tell you which exact medicine it was."
+            }
+          ]
+        },
+        "cta_done": {
+          "value": false,
+          "evidence": [
+            {
+              "timestamp": "06:26",
+              "speaker": "Nurse",
+              "quote": "No CTA has been performed in this encounter. Today's other investigations are in the ED record for the physician to review."
+            }
+          ]
+        },
+        "assessment_plan": {
+          "value": "Discuss a routine EEG in the current plan with the hospital physician; verify current availability and local ordering workflow. No EEG order or completed study is established.",
+          "evidence": [
+            {
+              "timestamp": "07:19",
+              "speaker": "Consultant",
+              "quote": "Thank you. I want to discuss a routine EEG as part of the current plan with the hospital physician. We need to verify the actual local arrangements for today."
+            },
+            {
+              "timestamp": "08:49",
+              "speaker": "Consultant",
+              "quote": "Please ask the hospital physician to review the plan and confirm the appropriate local EEG ordering workflow. The medication-order restriction in this guide doesn't establish permission for an EEG order. I haven't placed an order."
+            },
+            {
+              "timestamp": "13:22",
+              "speaker": "Consultant",
+              "quote": "Thank you. I'm putting the EEG discussion in the assessment and plan, with availability unconfirmed. It should be visible while the local team verifies it, without appearing as a completed test."
+            },
+            {
+              "timestamp": "17:24",
+              "speaker": "Consultant",
+              "quote": "I'll leave the completion requirement unresolved and pass on the plan. No EEG is reported as ordered or completed in this call."
+            }
+          ]
+        }
+      },
+      "leave_unresolved": {
+        "last_known_well_status": "Not assessed in this general-neurology conversation. Do not manufacture the explicit value Unknown.",
+        "last_known_well_time": "Not assessed.",
+        "lvo_present": "No current vessel interpretation is provided.",
+        "thrombolytic_given": "Not discussed; do not infer False from a seizure consult.",
+        "thrombolytic_order_placed": "Not discussed.",
+        "epilepsy_diagnosis": "Not established; the witness episode remains a reported event.",
+        "EEG_available_now": "Old schedule is stale and no live service confirmation arrives."
+      },
+      "timeline_checkpoints": [
+        {
+          "elapsed": "07:50",
+          "local_time": "2026-03-19T14:55:50-04:00",
+          "expectation": "Before the listed Thursday 15:00 EEG end time, but source staleness still prevents a confident availability promise."
+        },
+        {
+          "elapsed": "14:20",
+          "local_time": "2026-03-19T15:02:20-04:00",
+          "expectation": "Past the listed EEG end time. Keep staleness and unconfirmed live status visible; do not claim a booked next appointment."
+        }
+      ],
+      "expected_hospital_guidance": [
+        "The current routine EEG plan is relevant; surface this hospital's EEG source with its staleness warning, not a silent availability guarantee.",
+        "EEG source verification is 2025-06-10: 282 calendar days old on 2026-03-19, beyond the current 180-day threshold.",
+        "Medication-order restriction must not be generalized into a proven prohibition or permission for EEG orders; verify that workflow separately.",
+        "Consult Completion Rule requires hospital-provider plan confirmation. An unread message, nurse acknowledgment and patient understanding do not satisfy it.",
+        "Required note title is Neuro Tele Consult. Charge Entry is No; provider confirmation is the relevant gate, not a charge gate."
+      ],
+      "guide_evidence": [
+        {
+          "id": "SYN-004:import:19",
+          "hospitalId": "SYN-004",
+          "field": "EEG",
+          "raw": "Tue/Thu 0800-1500",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2025-06-10"
+        },
+        {
+          "id": "SYN-004:import:5",
+          "hospitalId": "SYN-004",
+          "field": "Order Entry",
+          "raw": "No medication orders entered by teleneurologist",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        },
+        {
+          "id": "SYN-004:import:6",
+          "hospitalId": "SYN-004",
+          "field": "Order Set Name",
+          "raw": "Hospital provider uses local stroke order set",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        },
+        {
+          "id": "SYN-004:import:9",
+          "hospitalId": "SYN-004",
+          "field": "Consult Completion Rule",
+          "raw": "Do not complete the consult in Synapse until the hospital provider confirms the patient plan",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        },
+        {
+          "id": "SYN-004:import:8",
+          "hospitalId": "SYN-004",
+          "field": "Required Note Title",
+          "raw": "Neuro Tele Consult",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        },
+        {
+          "id": "SYN-004:import:7",
+          "hospitalId": "SYN-004",
+          "field": "Charge Entry",
+          "raw": "No",
+          "sourceKind": "guide",
+          "version": "Challenge v2",
+          "lastVerified": "2026-02-02"
+        }
+      ],
+      "completion_assertion": {
+        "required": "plan_confirmed",
+        "authoritative_confirmation_received": false,
+        "expected": "Keep provider-confirmation gate unresolved until the host records confirmation from the required actor.",
+        "evidence": [
+          {
+            "timestamp": "09:52",
+            "speaker": "Nurse",
+            "quote": "I've sent a message. They're with another patient. It hasn't been read yet."
+          },
+          {
+            "timestamp": "15:04",
+            "speaker": "Nurse",
+            "quote": "I can tell you I've heard the plan. Is that enough to close the consultation?"
+          },
+          {
+            "timestamp": "15:13",
+            "speaker": "Consultant",
+            "quote": "The requirement specifies the hospital provider's confirmation. Your acknowledgment is useful, but it doesn't substitute for that. The encounter should stay open for the appropriate confirmation."
+          },
+          {
+            "timestamp": "15:31",
+            "speaker": "Patient",
+            "quote": "I understand what you've said. Does my agreement count?"
+          },
+          {
+            "timestamp": "17:15",
+            "speaker": "Nurse",
+            "quote": "Message still unread. I'll speak directly to the hospital physician when they're available."
+          }
+        ]
+      },
+      "must_not_infer": [
+        "a cousin's epilepsy or medicine as the patient's history or medication",
+        "uncertain witness estimate as a precise seizure duration",
+        "childhood cold-related shaking as a diagnosed seizure",
+        "past CTA as completed today",
+        "discussion of EEG as an order or completed test",
+        "a definite cause of the collapse",
+        "patient or nurse acknowledgment as hospital-provider confirmation",
+        "an unmentioned LKW field as explicitly Unknown",
+        "a stale schedule as current service verification"
+      ]
+    }
+  ]
+}

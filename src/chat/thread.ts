@@ -1,5 +1,7 @@
 import type { Context, Hospital, Result } from "../domain";
 import { answerField, ask } from "../engine";
+import type { LlmReply } from "../llm/contracts";
+import type { Segment } from "../stt/protocol";
 
 export type Turn = {
   id: number;
@@ -8,6 +10,8 @@ export type Turn = {
   clarification?: string;
   /** Guide fields `ask()` could not choose between. Each re-asks by exact name. */
   candidates?: string[];
+  ai?: LlmReply;
+  transcript?: Segment[];
 };
 // A thread belongs to one hospital, one guide version and one encounter. It is
 // looked up by that identity on every render rather than cleared afterwards, so

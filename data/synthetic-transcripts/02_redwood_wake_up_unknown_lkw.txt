@@ -1,0 +1,90 @@
+SYNTHETIC TEST TRANSCRIPT — entirely fictional; no real patient or recording.
+ID: ST02
+Title: Wake-up symptoms with an unobserved overnight baseline
+Patient token: PAT-ST02
+Hospital: SYN-003 | Redwood University Medical Center
+Guide version: Challenge v2
+Consult type: Stroke
+Encounter type: Acute
+Encounter start: 2026-03-17T03:10:00-07:00
+Hospital timezone: America/Los_Angeles
+Consultant timezone: America/New_York
+Duration: 16:15
+Speakers: Consultant (remote neurologist), Patient, Partner, Nurse (bedside)
+Timing: Elapsed turn-start times; explicit exam and camera pauses are included. Scripted timing, not measured audio.
+
+--- TRANSCRIPT START ---
+[00:00] Consultant: Hello. I'm joining from the neurology service. I can see two of you at the bedside. Who am I speaking with?
+[00:12] Patient: I'm the patient. That's my partner. Sorry, I'm still waking up. Everything's loud in here.
+[00:24] Consultant: That's all right. Is it okay for this consultation to be transcribed?
+[00:33] Patient: Yes, that's okay. Can my partner help with the times? I'm not good at remembering them right now.
+[00:45] Consultant: Please do. First, tell me what you noticed yourself.
+[00:54] Patient: I woke up because I needed the bathroom. My left leg felt like it wasn't attached properly. I tried to get up and sat straight back down. Then my hand wouldn't grip the blanket.
+[01:16] Consultant: When did you wake up and notice that?
+[01:22] Patient: Maybe two fifteen. The clock was glowing. I remember the fifteen part more than the two.
+[01:35] Partner: I looked at my phone when they called me. That was 02:18. We told the ambulance two fifteen as an estimate for noticing the problem.
+[01:49] Consultant: Thank you. Noticing symptoms is one time. Being definitely at your usual baseline is a separate time. When were you last clearly walking and using that hand normally?
+[02:07] Patient: Before bed. But I went to bed early and I wasn't really paying attention. I was tired.
+[02:17] Partner: I was working in another room. I heard them say good night, but I didn't see them walk. I couldn't say whether their voice was different.
+[02:31] Consultant: What about midnight? There is a midnight phone entry in the handoff.
+[02:41] Patient: I sent a text at midnight. Well, the phone says 00:03. It was just an emoji. I was half asleep and used my right hand.
+[02:56] Consultant: Does that let either of you say the left hand and leg were normal at midnight?
+[03:03] Patient: No. I didn't get up. I couldn't honestly say.
+[03:14] Partner: I didn't see them then either. I don't want midnight written down as if we checked.
+[03:23] Consultant: Understood. Last known well remains unknown. The text timestamp doesn't establish a normal neurologic baseline. I'll keep the estimated 02:15 symptom-discovery time separately in the narrative.
+[03:42] Patient: Unknown sounds bad, like I've done something wrong.
+[03:48] Consultant: It just means we don't have a reliable observation. You haven't done anything wrong. This hospital has a wake-up pathway listed, so we'll make sure the local team reviews that context.
+[04:03] Nurse: The camera cart is in the patient room. We've finished the initial scans and I can assist with the examination.
+[04:14] Consultant: Great. Patient, please keep both feet supported. Can you show me your teeth, then lift your eyebrows?
+[04:28] Patient: Like this? I feel silly doing it on a screen.
+[04:34] Consultant: That's perfect. Now hold your arms up together. Nurse, tilt the camera so I can see both hands.
+[04:47] Event: Camera repositioning and sustained-arm observation; approximately 50 seconds without speech.
+[05:37] Patient: The left one keeps sinking. It's not painful. It just won't stay there.
+[05:48] Consultant: I can see that. Do you have pins and needles, or is it mostly weakness?
+[05:56] Patient: Mostly weakness. Maybe a little numb at the fingertips. It's hard to tell with the blood pressure cuff squeezing me.
+[06:10] Consultant: Tell me about any previous problems like this.
+[06:17] Patient: Nothing like this. My dad had a stroke, but I haven't. I had headaches years ago, not this.
+[06:32] Consultant: And medicines at home? Especially anything taken to thin the blood.
+[06:42] Patient: I don't take a blood thinner. There's a cholesterol pill. My partner has the list. My dad took a whole lot more tablets than I do.
+[06:55] Partner: I can show the nurse the list. It's the patient's current list, not the old family one.
+[07:05] Consultant: Thank you. Any medication allergies that you know about?
+[07:13] Patient: None that I know of. A pain tablet upset my stomach once, but no rash, swelling, or breathing trouble. I don't remember its name.
+[07:28] Consultant: We'll document the uncertain intolerance description without assigning a drug allergy that we can't identify.
+[07:39] Nurse: CTA of the head and neck is completed. The finalized report states no large vessel occlusion. I've read the final report, not just the scanner status.
+[07:55] Consultant: Thank you. CTA completed and no LVO on that report. Has any thrombolytic been given yet?
+[08:05] Nurse: No. None administered as of now. The treatment review is still in progress.
+[08:14] Patient: If there's no big blockage, does that mean we can just leave?
+[08:21] Consultant: That single result doesn't answer all the questions about your symptoms. We need the clinical assessment and the rest of the imaging reviewed together. I'm not making a treatment decision from the guide alone.
+[08:42] Partner: Do we have to wait until morning for someone to read things? It's the middle of the night here.
+[08:51] Consultant: This site's guide lists around-the-clock neurointerventional coverage and several imaging services. That's the local guide, not a rule copied from a different hospital. The team still verifies the actual service response today.
+[09:11] Patient: I can hear you, but your face froze.
+[09:17] Consultant: I hear you as well. Nurse, let's pause the movement exam until we can see each other reliably.
+[09:27] Event: Video freezes; audio remains connected. Nurse reconnects the cart. No examination finding is inferred during the 70-second video gap.
+[10:37] Nurse: Picture is back. Patient hasn't moved from the chair position on the bed.
+[10:45] Consultant: Thank you. Can you touch your nose with your right hand, and then try with the left? Don't worry about speed.
+[10:59] Patient: Right is easy. Left... I'm getting there. It feels slow more than shaky.
+[11:17] Consultant: Now repeat this sentence after me: the weather is clear today.
+[11:25] Patient: The weather is clear today. I can say it. My partner thought I sounded sleepy before.
+[11:38] Partner: Yes. I said sleepy, not slurred. I couldn't tell what was causing it.
+[11:46] Consultant: That's a useful distinction. I'll attribute your observations separately rather than turn them into a confirmed examination finding.
+[12:00] Patient: How much longer do we need to sit still? My leg is uncomfortable.
+[12:08] Nurse: I can help you change position safely once this part is done. Don't stand without us.
+[12:20] Consultant: The rest of my plan is to discuss the findings and pending treatment review with your hospital physician. I won't document medication administration until someone can confirm it actually occurred.
+[12:38] Patient: The nurse said a drug name earlier. Ten... something. I can't remember it.
+[12:46] Nurse: We discussed tenecteplase as the drug named in our local guide. That conversation was not administration. There is still no dose given.
+[13:01] Consultant: Exactly. Mentioning a drug and receiving it are different events. Any final decision belongs in the clinical workflow, with the responsible clinician.
+[13:16] Partner: Could the note say when we found the problem, even if the other time is unknown?
+[13:23] Consultant: Yes. Discovery around 02:15 Pacific, with your phone call at 02:18 supporting that estimate. Last known well unknown. The 00:03 emoji is not used as last known well.
+[13:45] Patient: That's right. I'm glad you asked. I would've just said midnight because it was the last thing I remembered.
+[13:55] Consultant: I'll use the site's Neurology Consult - Remote note title. That is a documentation requirement, not proof that the note is signed or the encounter is complete.
+[14:12] Nurse: The hospital physician is ready to speak with you after this call. I'll pass along the distinction between discovery and baseline.
+[14:21] Consultant: Before we finish, have either of you remembered any definite normal walking after bedtime?
+[14:30] Partner: No. I checked our messages while you were examining. Nothing that helps.
+[14:39] Patient: No. I don't want to invent it just to fill the box.
+[14:49] Consultant: We'll leave the unknown honest. Nurse, please keep the video issue in the examination notes, including which part we paused.
+[15:01] Patient: Will somebody explain the plan to my partner as well? I might forget bits.
+[15:10] Consultant: Yes, we'll ask the bedside team to review it with both of you. For now, the final vessel report is negative for LVO, the baseline time is unresolved, and treatment administration is not recorded.
+[15:38] Partner: Okay. We'll stay here with the nurse.
+[15:48] Consultant: Thank you. I'm switching to the local physician handoff now.
+[16:15] Event: Patient consultation ends. Subsequent physician handoff and any later treatment are outside this transcript.
+--- TRANSCRIPT END ---

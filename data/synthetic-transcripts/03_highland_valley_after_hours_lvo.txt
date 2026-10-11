@@ -1,0 +1,78 @@
+SYNTHETIC TEST TRANSCRIPT — entirely fictional; no real patient or recording.
+ID: ST03
+Title: Confirmed LVO after local coverage hours, with uncertain preparation staffing
+Patient token: PAT-ST03
+Hospital: SYN-006 | Highland Valley Hospital
+Guide version: Challenge v2
+Consult type: Stroke
+Encounter type: Acute
+Encounter start: 2026-03-17T19:30:00-05:00
+Hospital timezone: America/Chicago
+Consultant timezone: America/New_York
+Duration: 12:35
+Speakers: Consultant (remote neurologist), Patient, Nurse (bedside), ED Physician
+Timing: Elapsed turn-start times; explicit exam pauses are included. Scripted timing, not measured audio.
+
+--- TRANSCRIPT START ---
+[00:00] Consultant: Hi, I'm the neurologist on the video cart. I can see you, but the light behind you is very bright. Could we turn that one down?
+[00:12] Nurse: Better now? We're in the patient room at Highland Valley.
+[00:20] Patient: Yes, I can see you now. Is this the person I was waiting for?
+[00:27] Consultant: Yes. I'd like to hear what happened and examine you with the nurse's help. May we transcribe our conversation?
+[00:38] Patient: That's fine. I'm having trouble finding words, though.
+[00:45] Consultant: We'll go slowly. What were you doing when things changed?
+[00:53] Patient: At the kitchen table. I was... sorting some papers. My right hand went floppy. I knew what I wanted to say to my brother but it wasn't... coming.
+[01:17] Consultant: Do you remember when you were definitely speaking and moving normally?
+[01:25] Patient: Six forty. I called him then. We spoke normally. That's evening, not morning. I looked at the wall clock because he was late.
+[01:40] Consultant: And the hand and speech difficulty started after that?
+[01:46] Patient: Around six fifty. He got here and said my face looked odd. He drove me straight in.
+[01:58] Nurse: The brother's account in the handoff agrees: normal conversation at 18:40, symptoms around 18:50, both Central time today.
+[02:11] Consultant: Thank you. Patient, can you say what you're feeling now?
+[02:18] Patient: The hand is still wrong. I can get some words. This leg feels heavy too. I'm scared I'll be moved before somebody tells my brother.
+[02:34] Consultant: We'll include him in the updates. First, medicines and allergies. Do you take a blood thinner?
+[02:43] Patient: No. Blood pressure tablets. One for cholesterol. I don't know the names; the nurse photographed my list.
+[02:55] Nurse: The ED physician is reviewing that list. It's attached to this encounter.
+[03:03] Consultant: Any drug reaction you remember?
+[03:09] Patient: Penicillin gave me a rash years ago. That's the only one I know. Nobody has ever told me I'm allergic to tenecteplase. I don't think I've had it.
+[03:25] Consultant: I'll distinguish the penicillin history from a thrombolytic allergy. Now, look at the camera and show your teeth for me.
+[03:35] Event: Nurse adjusts the camera and assists with facial and arm examination. There is approximately 40 seconds of quiet observation.
+[04:15] Consultant: Keep those arms up another moment. Now lower them. Tell me what this object is.
+[04:26] Patient: A... key. That came out. The other picture is harder.
+[04:37] Consultant: Take your time. We'll note which tasks you could do and which were difficult.
+[04:48] ED Physician: I'm here with the imaging update. CTA head and neck is completed. The final radiology report identifies a large vessel occlusion; I've reviewed that report with the radiologist.
+[05:03] Consultant: Confirmed LVO, and CTA complete. Thank you. Patient, that finding means we need to coordinate the next part of your care with the local team.
+[05:19] Patient: But they have a scanner here. Why would I go elsewhere?
+[05:26] Consultant: Having a scanner doesn't tell us whether a particular treatment team is staffed here right now. We'll verify today's arrangements rather than assume.
+[05:42] ED Physician: Local time is 19:35 Central. The guide lists weekday thrombectomy coverage ending at 19:00. Outside that window, I initiate the transfer pathway to a regional comprehensive stroke center.
+[05:56] Consultant: Agreed. I'll communicate the findings and recommendation to you. You initiate the transfer and verify the destination and acceptance. We shouldn't announce a receiving hospital until it's confirmed.
+[06:10] Patient: My phone says eight thirty-six. Does that mean you've got another hour?
+[06:18] Nurse: Your phone is set to Eastern time. It's 19:36 here. The hospital's coverage uses its Central clock.
+[06:28] Patient: Oh. I changed it visiting family and never changed it back.
+[06:35] Consultant: That's easy to miss. We'll keep the times labeled. ED physician, has a thrombolytic actually been administered?
+[06:45] ED Physician: No thrombolytic has been administered. We're reviewing that decision in the clinical record now. No thrombolytic order has been signed yet either.
+[06:58] Patient: Somebody brought a packet to the door. I thought that meant I was getting it.
+[07:07] Nurse: I brought the supplies while the doctors review things. Bringing a kit doesn't mean medication has been mixed or given.
+[07:18] Consultant: Who is responsible for preparing it if the decision is made? The local preparation entry splits pharmacist and nursing responsibility but doesn't define the pharmacy staffing hours.
+[07:33] ED Physician: I'll verify with the charge nurse and pharmacy. We can't use the thrombectomy team's 19:00 cutoff as a pharmacy cutoff.
+[07:44] Nurse: I also notice that preparation entry was last verified in August. I'll check the current process before anyone acts on that wording.
+[07:55] Patient: So you are checking who does it, not telling me I've had it?
+[08:01] Consultant: Correct. No administration has occurred in this conversation. We'll discuss any proposed treatment directly with you.
+[08:14] Patient: They said another kind of scan might help. Is that the one with colors? My brother saw it on television.
+[08:24] Consultant: That may refer to perfusion imaging. I don't see CT perfusion documented in this hospital's loaded guide. That is missing information, not proof that the service doesn't exist.
+[08:39] ED Physician: I'll ask radiology what is available and appropriate locally. We haven't ordered or performed a perfusion study in this encounter.
+[08:50] Patient: Okay. I don't want to be taken back and forth just because everyone has a different idea.
+[08:58] Consultant: The bedside physician will coordinate that. We will keep the documented patient findings separate from gaps in the reference information.
+[09:12] Event: Nurse assists with lower-limb movements and camera positioning; approximately 45 seconds of mostly silent examination.
+[09:57] Consultant: Thank you. Your brother should be updated before movement. Nurse, is he reachable at the bedside?
+[10:07] Nurse: He's just outside. I'll bring him in after we finish this part; there's no contact number read aloud here.
+[10:19] Patient: Tell him where I'm going when you know, please. Don't tell him the first name somebody guesses.
+[10:28] ED Physician: I will. I'm starting the transfer-center call after this. Acceptance is not obtained yet.
+[10:41] Consultant: I'll use MD Progress Note - Neuro for the consultation documentation. The confirmed report and the transfer request will be described separately from any later acceptance or treatment.
+[10:58] Patient: Can I have a minute before you go? I thought being able to say some words meant it was going away.
+[11:09] Consultant: Being able to do some tasks doesn't settle the whole assessment. We'll explain the findings and the plan together. Is there anything else you want the team to know?
+[11:22] Patient: Just that I was normal on that call at six forty. I wasn't already having trouble then.
+[11:32] Consultant: I've recorded that clarification, with the Central time zone. Nurse, please keep the report and medication status visible during the handoff.
+[11:46] Nurse: CTA complete, final report positive for LVO, no thrombolytic administered, no signed thrombolytic order. Transfer request is being arranged by the ED physician.
+[12:02] ED Physician: I'll update the patient and family once the transfer center responds. Nothing is accepted yet.
+[12:14] Patient: All right. Thank you. Please keep explaining it in small bits.
+[12:35] Event: Video consultation ends. Transfer acceptance, pharmacy verification and treatment decisions remain unresolved in this transcript.
+--- TRANSCRIPT END ---

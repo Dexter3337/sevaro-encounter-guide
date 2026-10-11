@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "../Icon";
+import { LiveTranscript } from "../stt/LiveTranscript";
+import type { Segment } from "../stt/protocol";
 
 const demoCues = [
   { at: 0, speaker: "Doctor", text: "Tell me what brought you in today.", keywords: [] },
@@ -12,10 +14,12 @@ const demoCues = [
 export function ConsultationPane({
   hospital,
   onHide,
+  onTranscript,
 }: {
   hospital: string;
   /** Folds the video away so the form can use the space. */
   onHide?: () => void;
+  onTranscript?: (segments: Segment[]) => void;
 }) {
   const [preview, setPreview] = useState(false);
   const [pending, setPending] = useState(false);
@@ -25,6 +29,13 @@ export function ConsultationPane({
   const demoVideo = useRef<HTMLVideoElement>(null);
   const [demoTime, setDemoTime] = useState(0);
   const [playing, setPlaying] = useState(false);
+  const [transcriptMode, setTranscriptMode] = useState<"demo" | "live">("demo");
+  const transcriptDialog = useRef<HTMLDialogElement>(null);
+  const [liveSegments, setLiveSegments] = useState<Segment[]>([]);
+  const captureTranscript = useCallback((segments: Segment[]) => {
+    setLiveSegments(segments);
+    onTranscript?.(segments);
+  }, [onTranscript]);
   const cues = demoCues.filter((cue) => cue.at <= demoTime);
   const stream = useRef<MediaStream | undefined>(undefined);
   const generation = useRef(0);
@@ -133,6 +144,14 @@ export function ConsultationPane({
           </span>
         )}
       </div>
+      <section className={`caption-strip${playing ? " is-capturing" : ""}`} aria-label="Consultation captions">
+        <div><span className="capture-indicator">{transcriptMode === "demo" ? "SCRIPTED CAPTIONS" : "ELEVENLABS TRANSCRIPT"}</span>
+          <p key={transcriptMode === "demo" ? cues.at(-1)?.at : liveSegments.at(-1)?.id} aria-live="polite">
+            {transcriptMode === "demo" ? `${cues.at(-1)?.speaker}: ${cues.at(-1)?.text}` : liveSegments.at(-1)?.text || "Open transcript to start live transcription."}
+          </p>
+        </div>
+        <button type="button" onClick={() => transcriptDialog.current?.showModal()}>Open transcript <Icon name="right" size={16} /></button>
+      </section>
       {!preview && <div className="demo-playback">
         <button type="button" onClick={() => {
           if (playing) demoVideo.current?.pause();
@@ -143,11 +162,21 @@ export function ConsultationPane({
         }}>Fullscreen</button>
       </div>}
       <p className="demo-disclosure">Recorded preview · No live Sevaro call is connected.</p>
-      <section className={`demo-transcript${playing ? " is-capturing" : ""}`} aria-label="Scripted demo transcript">
+      <dialog ref={transcriptDialog} className="full-transcript-dialog" aria-label="Full consultation transcript">
+        <header><div><strong>Consultation transcript</strong><p>Review the conversation and prepare field suggestions.</p></div>
+          <button type="button" aria-label="Close transcript" onClick={() => transcriptDialog.current?.close()}><Icon name="close" size={20} /></button></header>
+      <label className="transcript-mode">Transcript source
+        <select value={transcriptMode} onChange={(e) => {
+          demoVideo.current?.pause();
+          setTranscriptMode(e.target.value as "demo" | "live");
+          onTranscript?.([]);
+        }}><option value="demo">Scripted demo</option><option value="live">Live · ElevenLabs</option></select>
+      </label>
+      {transcriptMode === "live" ? <LiveTranscript onTranscript={captureTranscript} /> : <section className={`demo-transcript${playing ? " is-capturing" : ""}`} aria-label="Scripted demo transcript">
         <header><strong>Transcript preview</strong><span className="capture-indicator">{playing ? "Capturing" : "Demo"}</span></header>
         <p className="transcript-disclaimer">Scripted example, not transcribed from this video. Play to reveal.</p>
         <div className="transcript-lines" aria-live="polite" aria-atomic="false">
-          {cues.slice(-2).map((cue) => <p className="transcript-cue" key={cue.at}>
+          {cues.map((cue) => <p className="transcript-cue" key={cue.at}>
             <span>{`00:${String(cue.at).padStart(2, "0")}`} · {cue.speaker}</span>{cue.text}
           </p>)}
         </div>
@@ -155,7 +184,14 @@ export function ConsultationPane({
           <div>{cues.flatMap((cue) => cue.keywords).map((word) => <span key={word}>{word}</span>)}</div>
           {cues.length === 1 && <p>Symptoms, timing and allergies appear here.</p>}
         </div>
-      </section>
+        <button className="demo-use-transcript" type="button" onClick={() => {
+          onTranscript?.(demoCues.map((cue, i) => ({ id: i + 1, text: `${cue.speaker}: ${cue.text}`, at: new Date().toISOString() })));
+          const tools = document.querySelector<HTMLDetailsElement>(".ai-drafting-tools");
+          if (tools) tools.open = true;
+          transcriptDialog.current?.close();
+        }}>Use scripted example for AI drafts</button>
+      </section>}
+      </dialog>
       <div className="video-controls">
         <div>
           <Icon name="shield" size={16} />

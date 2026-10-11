@@ -1,0 +1,66 @@
+SYNTHETIC TEST TRANSCRIPT — entirely fictional; no real patient or recording.
+ID: ST01
+Title: A corrected last-known-well time during an acute stroke consultation
+Patient token: PAT-ST01
+Hospital: SYN-001 | Cedar Ridge Medical Center
+Guide version: Challenge v2
+Consult type: Stroke
+Encounter type: Acute
+Encounter start: 2026-03-17T12:40:00-05:00
+Hospital timezone: America/Chicago
+Consultant timezone: America/New_York
+Duration: 09:40
+Speakers: Consultant (remote neurologist), Patient, Nurse (bedside)
+Timing: Elapsed turn-start times; explicit exam pauses are included. Scripted timing, not measured audio.
+
+--- TRANSCRIPT START ---
+[00:00] Consultant: Hello, I'm the neurologist joining on the screen. Can you hear me without the speaker crackling?
+[00:09] Patient: I can hear you. It's the picture that's a little small. Am I supposed to look at you or that little camera?
+[00:20] Consultant: Either is fine. I'll ask some questions and watch you move. Are you comfortable with this conversation being transcribed?
+[00:31] Patient: Yes. Just give me a second if I can't get the words out.
+[00:40] Consultant: Of course. What made you come in today?
+[00:47] Patient: My right hand wouldn't do what I wanted. I was holding a mug and it slipped. Then I tried to tell my wife and it came out... wrong. Not all wrong, just slow.
+[01:04] Consultant: Was that all at once, or had you been feeling different earlier?
+[01:12] Patient: All at once, I think. Around half past twelve. We were having lunch.
+[01:24] Consultant: Before the mug slipped, when do you remember speaking and using that hand normally?
+[01:33] Patient: Twelve twenty. I remember looking at the microwave clock. I was joking with her about the soup.
+[01:44] Nurse: The arrival sheet says eleven twenty for last known well. That's what came through in the first handoff.
+[01:53] Patient: No, sorry, that's my mistake. I said eleven when they were asking all those questions. Lunch was late today. Twelve twenty, not eleven twenty. I hadn't even started cooking at eleven.
+[02:12] Consultant: Thank you for correcting it. We're in Central time here, on March seventeenth. You're saying you were speaking normally at 12:20 this afternoon, then the trouble began at about 12:30?
+[02:27] Patient: Yes. That's it. I know because the soup was still too hot.
+[02:38] Consultant: I'll preserve the correction so the first time doesn't quietly remain in the note. Any difficulty with the left hand or either leg?
+[02:48] Patient: Left is fine. My right leg feels heavy, but I walked to the car. My wife didn't let me drive.
+[03:01] Consultant: That was helpful. Tell me about medicines you take, even if you don't remember the names perfectly.
+[03:10] Patient: A blood pressure pill in the morning. Not a blood thinner, if that's what you're asking. I keep the list in my wallet, but the wallet is at home.
+[03:25] Consultant: We'll reconcile it with the bedside team rather than guess the name. Have you had an allergic reaction to a medicine?
+[03:35] Patient: The dye for a scan once. I got itchy. They wrote iodine, I think. Is that the same as being allergic to the clot medicine?
+[03:48] Consultant: Those are different entries to review. Do you remember ever receiving alteplase, or being told you reacted to it?
+[03:59] Patient: No. I've never had that drug, as far as I know. Just the scan dye. No swelling or trouble breathing that time, just itching.
+[04:13] Nurse: We have a recorded contrast reaction. The ED team reviewed it before the vessel scan today. I'll bring the medication record up separately.
+[04:25] Consultant: Let's do a few movements. Keep seated. Hold both arms out, palms up, and leave them there while I watch.
+[04:37] Event: Bedside nurse positions the camera; approximately 25 seconds of the examination are silent.
+[05:02] Patient: This one is drifting, isn't it? I'm trying to keep it up.
+[05:09] Consultant: I can see the movement. Now smile, then tell me what you see in this picture. Take your time.
+[05:22] Patient: A woman... at a sink. And the boy's taking the... the biscuit. Cookie. I know what it is.
+[05:43] Consultant: Thank you. Nurse, can you clarify which scans have actually finished? The patient remembers going through the scanner but not which part.
+[05:56] Nurse: Noncontrast CT and CTA of the head and neck are completed. CTA finished at 12:44 Central. The final vessel interpretation is still pending.
+[06:11] Patient: I thought the scan was normal because the person said, 'You're all done.'
+[06:22] Consultant: They meant the scan was finished. That doesn't tell us its result. I haven't received a confirmed large-vessel finding yet.
+[06:33] Nurse: Correct. No final LVO result in the report at this moment.
+[06:40] Consultant: And has any thrombolytic been administered?
+[06:47] Nurse: No thrombolytic has been given. Pharmacy has not prepared it either. We're awaiting the physician's decision.
+[06:59] Patient: The bag on the pole isn't it, then?
+[07:07] Nurse: That's the fluid already documented on your chart. It isn't the clot medicine.
+[07:18] Consultant: I know that's a lot of different pieces of information. We'll explain any treatment decision before proceeding. The hospital's preparation instructions and your actual treatment record are separate.
+[07:32] Patient: I mostly want to know if I'll need to move somewhere else. My wife is outside and she gets worried when nobody tells her.
+[07:43] Consultant: I can't tell you that from a pending vessel report. This site's guide refers to staffed coverage but doesn't give me a precise cutoff in that entry. I'll verify the operational pathway with the local team if we need it.
+[08:02] Patient: Okay. Please don't write that I had the medicine already. I haven't agreed to anything yet.
+[08:11] Consultant: I won't. The working record is: CTA completed, vessel result pending, no thrombolytic administered. The last-known-well time is your corrected 12:20 Central, subject to clinical review.
+[08:28] Nurse: I've corrected the handoff time too. I'll tell the ED physician the report is still outstanding.
+[08:36] Consultant: I'll document this under Tele-Neurology Consult, as this site's guide specifies. A note title isn't the same as signing or finishing the encounter.
+[08:51] Patient: Will you stay on while they check the picture?
+[08:58] Consultant: We'll keep the bedside team updated and reconnect if necessary. Before I go, anything else that happened before lunch?
+[09:10] Patient: No. I was normal all morning. And... thank you for letting me fix the time. I was scared and just said the first thing.
+[09:23] Consultant: That's why we check it together. Nurse, please keep the pending report and corrected timeline visible in the handoff.
+[09:40] Event: Consultation connection ends; no final vessel report or medication administration occurs in this transcript.
+--- TRANSCRIPT END ---

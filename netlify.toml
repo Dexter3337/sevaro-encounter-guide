@@ -12,6 +12,21 @@
   directory = "netlify/functions"
 
 [[redirects]]
+  from = "/api/llm"
+  to = "/.netlify/functions/llm"
+  status = 200
+
+[[redirects]]
+  from = "/api/stt-token"
+  to = "/.netlify/functions/stt-token"
+  status = 200
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-store"
+
+[[redirects]]
   from = "/api/hospitals"
   to = "/.netlify/functions/hospitals"
   status = 200

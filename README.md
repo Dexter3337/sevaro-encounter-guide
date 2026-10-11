@@ -1,125 +1,47 @@
-# Encounter Guide
+# Sevaro Encounter Guide
 
-A workflow companion for Sevaro Challenge 1. It sits inside the caselog and puts *this hospital's*
-rule in front of the teleneurologist at the step where it matters, at the hospital's own local
-time, without being asked — and stays quiet when nothing applies.
+A synthetic teleneurology workflow prototype: large consultation video, compact captions, contextual hospital guidance, completion gates, and a conversational assistant.
 
-Proactive nudges are the primary deliverable. Typed questions, answered only from the selected
-hospital's guide, are the secondary one. When the guide cannot answer, the doctor is pointed at a
-person to call.
+- **Live demo:** https://dynamic-cat-513c19.netlify.app/
+- **Mentor presentation:** https://dynamic-cat-513c19.netlify.app/presentation.html
+- **Repository:** https://github.com/Dexter3337/sevaro-encounter-guide
 
-Every nudge and answer says four things: what the rule is, which hospital and guide field it came
-from, how sure we are (answered, not in guide, time-dependent, stale, conflict or hard stop), and
-what the doctor should do.
+## Run locally
 
-**Illustrative Synapse workflow companion · synthetic demo.** All hospitals, rules, destinations,
-contacts and encounter information are fictional. This is not clinical guidance.
-
-## Building this
-
-The team is working to a one-day sprint plan: **[docs/sprint/README.md](docs/sprint/README.md)**
-is the entry point, and **[docs/sprint/HOW_TO_START.md](docs/sprint/HOW_TO_START.md)** walks
-through setup step by step. The longer-term design is in
-[docs/PRODUCTION_PLAN.md](docs/PRODUCTION_PLAN.md).
-
-The supplied developer-kit files are in `data/official/`. The importer accepts their
-`local_timezone` key, and the encounter adapter applies their step, field event, provider zone
-and Boolean completion state.
-
-## Run
-
-From `C:\Users\rohit\Sevaro\encounter-guide`, on this machine:
-
-```powershell
-.\start-demo.ps1
-```
-
-Open [the local demo](http://127.0.0.1:5173). The application starts at Highland Valley, Tuesday March 17, 2026, 19:30 Central. Select **Imaging**, then **Large vessel occlusion present → Yes**. The guidance dock opens by itself on the LVO advisory: outside coverage, the ED provider initiates transfer, with its source and the "Do" line. The header shows the hospital's clock (19:30 Central) beside the doctor's (20:30 Eastern). No account, `.env`, API key, hospital access or paid service is required.
-
-For a fresh checkout on another computer, install Node 22.12+ (tested with 24.19.0) and pnpm 11.25.0, then:
+Requires Node 22.12+ and pnpm 11.25.0.
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Dependencies are downloaded during setup. The guidance core uses bundled data and local computation and works with the network disabled after loading. Offline reload is not promised: there is no service worker. Guides/drafts are stored only under `encounter-guide:v1` in this browser's localStorage. Use synthetic data only; Reset demo clears this prototype key, imported versions, drafts and session reports. Storage is tied to the origin (5173 and 4173 have separate state).
+Open http://127.0.0.1:5173. The hospital and doctor clocks use the current time. Demo scenarios explicitly pin their own reference time. No API key is needed for the hospital guidance engine, imports, evaluation, recorded video, scripted captions or local guide questions.
+
+## Gemini and ElevenLabs
+
+See [AI setup](docs/LLM_SETUP.md). Keys belong only in ignored `.env.local` or Netlify environment variables, never `VITE_*` variables. The server-side Gemini adapter supports transcript-grounded suggestions for Reason for Consult, Allergies, Note title and Note body, plus conversational chat. Each draft requires a doctor's explicit click and cites transcript excerpts. Existing field text is protected by a replacement confirmation.
+
+Open **Open transcript** below the video. Choose **Live ? ElevenLabs** for microphone transcription, or **Use scripted example for AI drafts** for a reproducible synthetic demonstration. Expand **Transcript & AI field suggestions**, then enable suggestions. The floating **Ask the Guide** button opens chat; transcript sharing is a separate choice.
+
+## Verify and deploy
 
 ```sh
 pnpm typecheck
-pnpm test                  # sponsor, unfamiliar-hospital and edge tests
-pnpm test:acceptance       # N1–N9 and V01–V20 only
-pnpm evaluate             # reports/acceptance.json
-pnpm build                # typecheck + production assets in dist/
-pnpm preview              # http://127.0.0.1:4173
-pnpm test:e2e             # real browser workflows and latency
-```
-
-Browser tests use installed Google Chrome by default and a fresh isolated browser context; they do not use your personal profile. Set `PW_CHANNEL=msedge` for installed Edge. Alternatively install Playwright Chromium and change the channel in `playwright.config.ts`. The tests automatically start the dev server if needed. To test production:
-
-```powershell
-$env:DEMO_URL = 'http://127.0.0.1:4173'
+pnpm test
+pnpm evaluate
+pnpm build
 pnpm test:e2e
+pnpm verify:ai-secrets
 ```
 
-In this Codex environment `npm` is absent and Node's process/user APIs are restricted in the sandbox. The bundled pnpm works; tests/build/server were run with sandbox escalation. The equivalent direct pnpm command on this host is:
+Browser checks use installed Chrome by default; CI uses Playwright Chromium. Set `DEMO_URL` to test a running preview or deployment. Netlify builds with `pnpm build`, publishes `dist`, and deploys the bundled `netlify/functions` endpoints. Deploy the functions as well as the assets; a static ZIP alone does not supply AI endpoints.
 
-```powershell
-& "$env:USERPROFILE/.cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback/pnpm.cmd" test
-```
+## Submission contents
 
-## Demonstrate
+`src/` application and rules; `functions-src/` server-only API handlers; `data/` synthetic hospital fixtures and sponsor validation data; `tests/` unit and browser checks; `public/` recorded demo and presentation; `docs/` maintained implementation notes. Research archives, source PDFs, original problem statements, sprint coordination notes and generated reports are excluded from the submission tree. Git history is preserved.
 
-Follow [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) for a rehearsable five-minute walkthrough. All 29 source scenarios are launchable from Demo controls and from evaluation results. A launch is visibly a fixture, not a fake precomputed answer; form edits, clock changes and completion clicks run the same engine.
+## Limitations
 
-To load a hospital the app has never seen, drop its files on **Guide library → Import hospital files** — guides, storyboards and contact directories together, in any order — then preview and activate. [data/fixtures/syn-108/](data/fixtures/syn-108/) is a ready-made unseen hospital (Riverbend, America/Phoenix); `tests/fixtures/alien/` holds two adversarial ones. Rows for a hospital that is not loaded yet are held until its guide arrives.
+Synthetic demonstration only. The recorded video is not a connected consultation. Scripted captions are illustrative, not extracted from its audio. Live AI needs configured provider keys and account access; mocked integration tests do not measure model quality or live latency. Exact quote validation verifies provenance, not clinical correctness. There is no production Sevaro/EHR connection, clinical sign-off, patient authentication or production privacy assessment. Do not use real patient data. The core remains usable if AI is unavailable.
 
-Import [data/holdout/unfamiliar-hospitals.json](data/holdout/unfamiliar-hospitals.json) in **Guide library**, preview, then activate. Four new hospitals appear immediately. `ORBIT-91` has different hours/actors, a new searchable **Interpreter connection procedure**, a new declarative form field, and a deliberately unsupported conditional field. [data/holdout/mapped-import.csv](data/holdout/mapped-import.csv) exercises the column mapper.
-
-**Evaluation** runs a separate sponsor oracle against the actual engine and exports actual responses, status/flag/source assertions, failures, engine timings, browser measurements and encounter audit JSON/CSV. Its pass counts start empty and are calculated on demand. Browser measurements come from actual interactions, not fixture constants.
-
-## Source and architecture
-
-The original plan, research package and ZIP remain untouched in the parent folder. Both archive PDF checksums match the existing source folder. The running seeds (`src/data/seeds.json`) are generated by `pnpm seeds` from the official developer-kit files through the same importer a judge's file uses: **162 guide fields**, 2 storyboard rows and 21 contacts across 7 hospitals. The earlier PDF reconstruction had 169 rows (site counts 25, 22, 26, 25, 23, 24, 24) because it also carried each hospital's time zone as a field; zones are hospital metadata in the official files. The two are different artifacts, not competing counts. Default/overridden verification dates and deliberate missing fields are retained. See [data/raw/seed_provenance.json](data/raw/seed_provenance.json).
-
-- `src/domain.ts`: runtime schemas, tri-state values, revision-checked reducer and field registry.
-- `src/time.ts`: IANA zones, DST rejection, schedules, weekdays, overnight windows and calendar-day freshness.
-- `src/knowledge.ts`: label/alias index, scoped meanings and interpretation diagnostics.
-- `src/engine.ts`: hospital-bound guidance, shared question/source evaluation and explicit gates. No known-hospital ID branches.
-- `src/imports.ts`: bounded JSON/CSV adapters, column mapping, runtime validation, preserved originals and atomic immutable activation.
-- `src/adapter.ts`: illustrative external-context boundary with offset/local-zone consistency checks; no production SDK integration.
-- `src/main.tsx`: interactive workflow, library/importer, workbench, local persistence and browser latency instrumentation.
-- `src/guidance/`: the floating dock (four states, driven by `dockMachine.ts`), cards and field markers. `src/encounter/`: the Complete-button gate banner and the storyboard card.
-- `src/chat/`, `src/contacts/`: asking the guide (answers from `ask()` only, thread cleared on any hospital or version change) and the person to call, read in the hospital's time.
-- `src/fixtures.ts` and `tests/`: independent sponsor assertions and unfamiliar configurations. Product evaluation code never reads expected answers.
-
-The core uses React/TypeScript/Vite, Zod, Temporal polyfill and Papa Parse. Versions are pinned by `pnpm-lock.yaml`. Runtime requirements were checked against [Vite's official guide](https://vite.dev/guide/); time handling follows the [Temporal model](https://tc39.es/proposal-temporal/docs/).
-
-Read [docs/DATA_CONTRACT.md](docs/DATA_CONTRACT.md) for accepted shapes and grammar, [docs/DECISIONS.md](docs/DECISIONS.md) for assumptions and source boundaries, [reports/TEST_RESULTS.md](reports/TEST_RESULTS.md) for measured results, and [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) for milestone completion.
-
-## Remaining limitations
-
-- This is a synthetic workflow prototype, without clinical validation or a real Synapse connection. Recording completion posts no hospital charge and signs no clinical note.
-- Supported concept aliases/schedule grammar are finite. Arbitrary clinical policies, holiday exceptions, complex temporal phrases, DST-disambiguated wall-time questions and every possible judging schema are not automatically understood. Unknown conditional text is quoted with review flags; no branch or executable policy is invented.
-- No LLM/provider, voice or transcript capture, PDF-upload interpreter or production access is implemented. Voice and transcript features were removed from scope on 10 October 2026.
-- Source conflict equivalence is conservative (known context qualifiers, normalized wording); sophisticated semantic reconciliation still needs review. Missing verification is shown explicitly; storyboard update dates are not treated as verification dates.
-- Stale/conflicting/unsupported mandatory facts are shown as uncertain without introducing a new gate; unavailable guides allow mock completion labeled unverified. These are documented prototype policies, not production safety rules.
-- Browser latency is handler-to-commit plus two animation frames, a paint-readiness approximation. Tests measure this computer and browser; they establish no universal hardware/network performance guarantee.
-- Storage/audit are browser-local and bounded, without encryption, authentication, collaboration or tamper resistance. No real patient information belongs here.
-- Keyboard, evidence and narrow-screen paths were inspected, but no formal accessibility or clinician usability certification was performed.
-
-## Team review and mentor presentation
-
-Open `/presentation.html` for the animated 12-slide mentor presentation, `/workflow.html` for the detailed visual workflow, and [docs/APP_WORKFLOW.md](docs/APP_WORKFLOW.md) for the written specification. [docs/MENTOR_PRESENTATION.md](docs/MENTOR_PRESENTATION.md) gives the talk track and rehearsal sequence. The deck has speaker notes, keyboard navigation, a real embedded demo, reduced-motion support and print/PDF export.
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the feature-branch / pull-request workflow. Vercel configuration (`vercel.json`) uses Vite, `pnpm build` and `dist`; Netlify configuration remains available as an alternative. The GitHub workflow checks typecheck, unit tests and production build. Visual workflow HTML and public evidence are checked in; after changing their source docs run `python scripts/build_workflow.py` to regenerate them. Ordinary application builds do not require Python.
-
-## Sevaro integration review
-
-See [docs/SEVARO_ALIGNMENT_REVIEW.md](docs/SEVARO_ALIGNMENT_REVIEW.md) or `/integration-review.html` for the sponsor alignment audit, missing integration contracts and privacy research. That review predates the 10 October scope change; its transcript-review sections describe features no longer in the app.
-
-Order guidance now remains present while the order field is displayed, including after unrelated edits. Manual EEG plan relevance uses conservative finite grammar, with explicit limits in the review. The source/oracle inventory is in `reports/research-review-inventory.json`; all 131 research scenario expectations are exported in `reports/research-scenario-review.csv`, without claiming those exact scenarios were run. To regenerate this review from its source and the original adjacent research package, run `node scripts/build_alignment_review.mjs`. The checked-in review and normal app build do not require the research package.
-
-## Complete team handoff
-
-Start with [TEAM_HANDOFF.md](TEAM_HANDOFF.md). This repository now includes the original build plan, challenge ZIP/PDFs, all research scripts, the foundation workbook/CSV/JSON exports and previews, development/held-out inputs, and independent expected outputs. `research/` and `outputs/` are copied from the original Sevaro workspace; the application remains at the repository root. Ordinary setup needs Node/pnpm only. Research-rebuild dependencies and limitations are documented in the handoff. Dependencies, caches, Git internals, browser trace archives and generated `dist/` are excluded; rebuild them locally.
+See [validation](docs/VALIDATION.md) and [contributing](CONTRIBUTING.md).
