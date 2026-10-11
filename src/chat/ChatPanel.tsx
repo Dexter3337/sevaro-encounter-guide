@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import type { Context, Hospital, Result } from "../domain";
-import { NudgeCard } from "../guidance/NudgeCard";
+import { Evidence, NudgeCard } from "../guidance/NudgeCard";
 import { suggestionsFor } from "./suggestions";
 import {
   askField,
@@ -54,6 +54,7 @@ export function SeedContext({ seed }: { seed: Result }) {
         <span>Do</span>
         {seed.action}
       </p>
+      <Evidence r={seed} />
     </div>
   );
 }

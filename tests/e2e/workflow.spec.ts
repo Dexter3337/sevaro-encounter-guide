@@ -8,6 +8,26 @@ async function launch(page: any, id: string) {
     .click();
   await page.locator(".demo-controls > summary").click();
 }
+// A dock card by its guide field.
+const card = (page: any, title: string) =>
+  page
+    .getByTestId("nudge-dock")
+    .getByTestId("nudge-card")
+    .filter({ has: page.locator("h3", { hasText: title }) });
+const chat = (page: any) => page.getByTestId("chat-panel");
+async function ask(page: any, question: string) {
+  if (!(await chat(page).isVisible()))
+    await page
+      .getByRole("button", { name: "Ask this hospital’s guide" })
+      .click();
+  await chat(page)
+    .getByPlaceholder("Ask about this hospital's guide…")
+    .fill(question);
+  await chat(page).getByRole("button", { name: "Ask", exact: true }).click();
+}
+// The answer card for the most recent question in the chat.
+const answer = (page: any) =>
+  chat(page).getByTestId("chat-turn").last().getByTestId("nudge-card");
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
   await page.evaluate(() => localStorage.clear());
@@ -22,23 +42,33 @@ test("N2 live edit, clock boundary, cited evidence; desktop inspection", async (
   await page
     .getByLabel("Large vessel occlusion present", { exact: true })
     .selectOption("yes");
-  await expect(page.locator(".field-guidance .card > p")).toContainText(
-    "Outside coverage",
+  // A new advisory opens the dock by itself.
+  await expect(page.getByTestId("nudge-dock")).toHaveAttribute(
+    "data-state",
+    "panel",
   );
-  await expect(page.locator(".field-guidance .card > p")).toContainText(
+  const lvo = card(page, "LVO Protocol");
+  await expect(lvo.locator(".card-answer")).toContainText("Outside coverage");
+  await expect(lvo.locator(".card-answer")).toContainText(
     "ED provider initiates transfer",
   );
-  await expect(page.locator(".field-guidance .card > p")).not.toContainText(
+  await expect(lvo.locator(".card-answer")).not.toContainText(
     "teleneurologist activates",
   );
-  await page
-    .locator(".field-guidance")
-    .getByText("View source evidence", { exact: false })
-    .click();
-  await expect(page.locator(".evidence-body")).toContainText(
+  await expect(lvo.locator(".card-action")).toContainText(
+    "ED provider initiates transfer",
+  );
+  await lvo.getByText("View source evidence", { exact: false }).click();
+  await expect(lvo.locator(".evidence-body")).toContainText(
     "hospital_guides.json · LVO Protocol",
   );
-  await expect(page.locator(".evidence-body")).toContainText("Verified 2026-02-02");
+  await expect(lvo.locator(".evidence-body")).toContainText(
+    "Verified 2026-02-02",
+  );
+  // The field itself says there is guidance for it.
+  await expect(
+    page.locator('[data-field="lvo_present"]').getByTestId("field-marker"),
+  ).toContainText("Advisory");
   mkdirSync("reports", { recursive: true });
   await page.screenshot({ path: "reports/desktop-n2.png", fullPage: true });
   await page.locator(".demo-controls > summary").click();
@@ -46,9 +76,7 @@ test("N2 live edit, clock boundary, cited evidence; desktop inspection", async (
     .getByLabel("Encounter instant", { exact: true })
     .fill("2026-03-17T17:00:00Z");
   await page.getByRole("button", { name: "Apply clock" }).click();
-  await expect(page.locator(".field-guidance")).toContainText(
-    "Within coverage",
-  );
+  await expect(lvo.locator(".card-answer")).toContainText("Within coverage");
   expect(errors).toEqual([]);
 });
 test("N5 gate blocks, acknowledgement cannot replace charge; recorded state resolves", async ({
@@ -56,13 +84,15 @@ test("N5 gate blocks, acknowledgement cannot replace charge; recorded state reso
 }) => {
   await launch(page, "N5");
   await page.getByRole("button", { name: "Complete mock encounter" }).click();
-  await expect(page.locator(".completion-error")).toContainText(
-    "Completion blocked",
-  );
-  await expect(page.locator(".field-guidance")).toContainText("Hard Stop");
+  const gate = page.getByTestId("gate-banner");
+  await expect(gate).toHaveAttribute("role", "alert");
+  await expect(gate).toContainText("Charge Entry");
+  // A charge is the doctor's to record: there is no acknowledge route.
+  await expect(gate.getByText("Acknowledge with a reason")).toHaveCount(0);
   await page
     .getByLabel("Encounter charge recorded", { exact: true })
     .selectOption("yes");
+  await expect(gate).toHaveCount(0);
   await page.getByRole("button", { name: "Complete mock encounter" }).click();
   await expect(page.locator(".success")).toContainText(
     "Known supported guide requirements are satisfied",
@@ -73,8 +103,8 @@ test("N7 plan confirmation blocks until explicitly recorded", async ({
 }) => {
   await launch(page, "N7");
   await page.getByRole("button", { name: "Complete mock encounter" }).click();
-  await expect(page.locator(".completion-error")).toContainText(
-    "Completion blocked",
+  await expect(page.getByTestId("gate-banner")).toContainText(
+    "Consult Completion Rule",
   );
   await page
     .getByLabel("Hospital provider confirmed patient plan", { exact: true })
@@ -82,23 +112,43 @@ test("N7 plan confirmation blocks until explicitly recorded", async ({
   await page.getByRole("button", { name: "Complete mock encounter" }).click();
   await expect(page.locator(".case-status")).toContainText("Completed");
 });
+test("N7 can be released only with a written reason, which is shown", async ({
+  page,
+}) => {
+  await launch(page, "N7");
+  await page.getByRole("button", { name: "Complete mock encounter" }).click();
+  const gate = page.getByTestId("gate-banner");
+  const release = gate.getByRole("button", { name: "Acknowledge and complete" });
+  await expect(release).toBeDisabled();
+  await gate
+    .getByLabel("Acknowledge with a reason")
+    .fill("Plan confirmed by phone with the synthetic ED attending");
+  await release.click();
+  await expect(page.locator(".case-status")).toContainText("Completed");
+  await expect(page.locator(".success")).toContainText(
+    "acknowledged without confirmation",
+  );
+});
 test("V12 conflicting source evidence and V14 missing field", async ({
   page,
 }) => {
   await launch(page, "V12");
-  const card = page.locator(".ask-panel .card");
-  await expect(card).toContainText("Conflict");
-  await card.locator("summary").click();
-  await expect(card).toContainText("CT holding bay");
-  await expect(card).toContainText("Patient room");
-  await expect(card).toContainText("Updated 2025-09-14 (not verification)");
-  await page
-    .getByLabel("Guide question")
-    .fill("Who covers pediatric neurology?");
-  await page.getByRole("button", { name: "Ask this hospital’s guide" }).click();
-  await expect(page.locator(".ask-panel")).toContainText("Not In Guide");
-  await expect(page.locator(".ask-panel")).not.toContainText(
-    "Regional children",
+  const seed = chat(page).getByTestId("chat-seed");
+  await expect(seed).toContainText("Conflict");
+  await expect(seed).toContainText("CT holding bay");
+  await expect(seed).toContainText("Patient room");
+  await seed.locator(".evidence summary").click();
+  await expect(seed).toContainText("Updated 2025-09-14 (not verification)");
+  await ask(page, "Who covers pediatric neurology?");
+  await expect(answer(page)).toContainText("Not In Guide");
+  await expect(answer(page).locator(".card-answer")).toContainText(
+    "Not available in this hospital's guide.",
+  );
+  await expect(chat(page)).not.toContainText("Regional children");
+  // The next rung: a person, with the reason carried over.
+  await chat(page).getByRole("button", { name: /Call someone/ }).click();
+  await expect(page.getByTestId("contacts-sheet")).toContainText(
+    "Guide doesn't cover Pediatric Neurology",
   );
 });
 test("N8 silence, outage usability and isolated hospital switch", async ({
@@ -106,9 +156,7 @@ test("N8 silence, outage usability and isolated hospital switch", async ({
 }) => {
   await launch(page, "N8");
   await page.getByLabel("Allergies", { exact: true }).fill("none");
-  await expect(
-    page.locator(".field-guidance .card"),
-  ).toHaveCount(0);
+  await expect(page.getByTestId("nudge-card")).toHaveCount(0);
   await page.locator(".demo-controls > summary").click();
   await page.getByLabel("Simulate guide outage").check();
   await page
@@ -136,17 +184,17 @@ test("unfamiliar import, new static field, dynamic mapping, persistence, inert m
   await page.getByRole("button", { name: "Activate validated bundle" }).click();
   await page.getByLabel("Hospital", { exact: true }).selectOption("ORBIT-91");
   await page.getByRole("button", { name: "Encounter", exact: true }).click();
-  await page
-    .getByLabel("Guide question")
-    .fill("What is the interpreter connection procedure?");
-  await page.getByRole("button", { name: "Ask this hospital’s guide" }).click();
-  await expect(page.locator(".ask-panel .card")).toContainText("SYN-778");
+  await ask(page, "What is the interpreter connection procedure?");
+  await expect(answer(page)).toContainText("SYN-778");
+  await chat(page).getByRole("button", { name: "Close the guide chat" }).click();
   await page
     .getByLabel("Interpreter needed (enter Yes)", { exact: true })
     .fill("Yes");
-  await expect(page.locator(".caselog")).toContainText(
-    "SYN-778",
-  );
+  await page
+    .locator('[data-field="interpreter_needed"]')
+    .getByTestId("field-marker")
+    .click();
+  await expect(page.getByTestId("nudge-dock")).toContainText("SYN-778");
   await page.reload();
   await expect(page.getByLabel("Hospital", { exact: true })).toHaveValue(
     "ORBIT-91",
@@ -176,18 +224,17 @@ test("unfamiliar import, new static field, dynamic mapping, persistence, inert m
   await page.getByRole("button", { name: "Activate validated bundle" }).click();
   await page.getByLabel("Hospital", { exact: true }).selectOption("HTML-TEST");
   await page.getByRole("button", { name: "Encounter", exact: true }).click();
-  await page.getByLabel("Guide question").fill("Connection instructions");
-  await page.getByRole("button", { name: "Ask this hospital’s guide" }).click();
-  await expect(page.locator(".ask-panel .card")).toContainText("<img src=x");
+  await ask(page, "Connection instructions");
+  await expect(answer(page)).toContainText("<img src=x");
   expect(await page.evaluate(() => (window as any).pwned)).toBeUndefined();
-  await expect(page.locator(".ask-panel img")).toHaveCount(0);
+  await expect(chat(page).locator("img")).toHaveCount(0);
   await page.locator(".demo-controls > summary").click();
   await page.getByRole("button", { name: "Reset demo data" }).click();
   await expect(
     page.getByLabel("Hospital", { exact: true }).locator("option"),
   ).toHaveCount(7);
   await expect(page.locator(".context-strip")).toContainText("19:30");
-  await expect(page.getByLabel("Guide question")).toHaveValue("");
+  await expect(chat(page)).toHaveCount(0);
 });
 test("workbench computes 29 passes; keyboard evidence and narrow layout inspection", async ({
   page,
@@ -201,10 +248,16 @@ test("workbench computes 29 passes; keyboard evidence and narrow layout inspecti
   await page
     .getByLabel("Large vessel occlusion present", { exact: true })
     .selectOption("yes");
-  const summary = page.locator(".field-guidance .evidence summary").first();
+  const summary = card(page, "LVO Protocol").locator(".evidence summary");
   await summary.focus();
   await page.keyboard.press("Enter");
   await expect(summary.locator("..")).toHaveAttribute("open", "");
+  // Esc returns the panel to the pill.
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("nudge-dock")).toHaveAttribute(
+    "data-state",
+    "pill",
+  );
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -328,13 +381,14 @@ test("CSV mapping and explicit guide-version refresh preserve pinned encounter",
   await page.getByRole("button", { name: "Activate validated bundle" }).click();
   await expect(page.locator(".context-strip")).toContainText("csv-v1");
   await page.getByRole("button", { name: "Encounter", exact: true }).click();
-  await page.getByLabel("Guide question").fill("CT perfusion");
-  await page.getByRole("button", { name: "Ask this hospital’s guide" }).click();
-  await expect(page.locator(".ask-panel .card > p")).toHaveText("No");
+  await ask(page, "CT perfusion");
+  await expect(answer(page).locator(".card-answer")).toHaveText("No");
+  // A new guide version clears the thread: no answer from the old version
+  // may stay on screen.
   await page.getByRole("button", { name: "Refresh to csv-v2" }).click();
-  await expect(page.locator(".ask-panel .card")).toHaveCount(0);
-  await page.getByRole("button", { name: "Ask this hospital’s guide" }).click();
-  await expect(page.locator(".ask-panel .card > p")).toHaveText("24/7");
+  await expect(chat(page).getByTestId("chat-turn")).toHaveCount(0);
+  await ask(page, "CT perfusion");
+  await expect(answer(page).locator(".card-answer")).toHaveText("24/7");
 });
 test("loaded core operates without network access", async ({
   page,
@@ -347,12 +401,11 @@ test("loaded core operates without network access", async ({
   await page
     .getByLabel("Large vessel occlusion present", { exact: true })
     .selectOption("yes");
-  await expect(page.locator(".field-guidance .card > p")).toContainText(
+  await expect(card(page, "LVO Protocol").locator(".card-answer")).toContainText(
     "ED provider initiates transfer",
   );
-  await page.getByLabel("Guide question").fill("Who mixes the TNK?");
-  await page.getByRole("button", { name: "Ask this hospital’s guide" }).click();
-  await expect(page.locator(".ask-panel .card > p")).toContainText(
+  await ask(page, "Who mixes the TNK?");
+  await expect(answer(page).locator(".card-answer")).toContainText(
     "Staffed pharmacy hours are not defined",
   );
   await page.getByRole("button", { name: "Evaluation", exact: false }).click();
@@ -367,10 +420,9 @@ test("order guidance exists before focus and remains after unrelated editing", a
   await page
     .getByRole("button", { name: "Recommendation", exact: false })
     .click();
-  await expect(page.locator(".caselog")).toContainText("Order Entry");
+  await expect(card(page, "Order Entry")).toHaveCount(1);
   await page
     .getByLabel("Assessment / plan", { exact: true })
     .fill("Observe clinically");
-  await expect(page.locator(".caselog")).toContainText("Order Entry");
+  await expect(card(page, "Order Entry")).toHaveCount(1);
 });
-

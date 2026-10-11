@@ -22,9 +22,25 @@ export function NudgeDock({
   onContacts,
   onReport,
   unavailable,
+  openRequest,
 }: NudgeDockProps) {
   const [dock, dispatch] = useReducer(dockReducer, initialDock);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (openRequest)
+      dispatch({ type: "OPEN", resultId: openRequest.resultId });
+  }, [openRequest]);
+
+  // Esc collapses the panel back to the pill, wherever focus is.
+  useEffect(() => {
+    if (dock.state !== "panel") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") dispatch({ type: "COLLAPSE" });
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [dock.state]);
 
   useEffect(() => {
     dispatch({ type: "RESULTS", results });
@@ -71,6 +87,7 @@ export function NudgeDock({
       className="nudge-dock"
       data-state={dock.state}
       data-testid="nudge-dock"
+      role="region"
       aria-label="Hospital guidance"
     >
       {dock.state === "peek" && peeked.length > 0 && (

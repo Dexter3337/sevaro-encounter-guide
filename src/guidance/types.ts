@@ -20,6 +20,9 @@ export interface NudgeDockProps {
   onReport: (r: Result) => void;
   /** Guidance could not be loaded; the caselog still works. */
   unavailable?: boolean;
+  /** Something outside the dock (a field marker, the storyboard card) asked
+   * to open it on a result. A new nonce is a new request. */
+  openRequest?: { resultId?: string; nonce: number };
 }
 
 export interface NudgeCardProps {

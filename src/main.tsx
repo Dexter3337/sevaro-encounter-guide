@@ -29,11 +29,17 @@ import {
 import {
   evaluate,
   ask,
+  answerField,
   gates,
   engineVersion,
-  ctaConcern,
-  nudgePriority,
 } from "./engine";
+import { NudgeDock } from "./guidance/NudgeDock";
+import { NudgeCard } from "./guidance/NudgeCard";
+import { FieldMarker } from "./guidance/FieldMarker";
+import { GateBanner } from "./encounter/GateBanner";
+import { StoryboardCard } from "./encounter/StoryboardCard";
+import { ChatPanel } from "./chat/ChatPanel";
+import { ContactsSheet } from "./contacts/ContactsSheet";
 import { clean, interpretation } from "./knowledge";
 import {
   previewImportBundle,
@@ -75,143 +81,36 @@ type Measure = {
   committed: boolean;
 };
 const signature = (r: Result) => `${r.id}:${r.message}:${r.primaryStatus}`;
-function Evidence({ r }: { r: Result }) {
-  return (
-    <details className="evidence">
-      <summary>
-        View source evidence · {r.citations.length || "absent field"}
-      </summary>
-      <div className="evidence-body">
-        {r.citations.map((s, i) => (
-          <div key={s.id + ":" + i} className="source">
-            <strong>
-              {s.hospitalId} · {s.field}
-            </strong>
-            <p>{s.raw}</p>
-            <small>
-              {s.sourceKind} · {s.version} · {s.locator || s.sourceName}
-              <br />
-              {s.lastVerified
-                ? `Verified ${s.lastVerified}`
-                : s.sourceKind === "storyboard"
-                  ? `Updated ${s.updatedAt || "unknown"} (not verification)`
-                  : "Verification date unknown"}
-            </small>
-          </div>
-        ))}
-        {r.missingEvidence && (
-          <p>
-            Searched {r.missingEvidence.hospitalId} ·{" "}
-            {r.missingEvidence.version} · {r.missingEvidence.field}.{" "}
-            {r.missingEvidence.absent
-              ? "Field absent."
-              : "Requested availability not documented."}{" "}
-            No fabricated source excerpt.
-          </p>
-        )}
-        <p className="muted">{r.rationale}</p>
-        <small>Evaluated instant {r.effectiveInstant}</small>
-      </div>
-    </details>
-  );
-}
-function Card({
-  r,
-  onDismiss,
-  onFix,
-}: {
-  r: Result;
-  onDismiss?: (r: Result) => void;
-  onFix?: (field: string) => void;
-}) {
-  return (
-    <article
-      className={`card ${r.tier} ${r.primaryStatus}`}
-      data-testid="guidance-card"
-    >
-      <div className="card-meta">
-        <span>{label(r.tier)}</span>
-        <span className="status">{label(r.primaryStatus)}</span>
-      </div>
-      <h3>{r.title}</h3>
-      <p>{r.message}</p>
-      <div className="flags">
-        {r.flags
-          .filter((x) => x !== r.primaryStatus)
-          .map((f) => (
-            <span key={f}>{label(f)}</span>
-          ))}
-      </div>
-      <small>
-        {r.hospitalId} · {r.version}
-      </small>
-      <small className="evaluated-time">
-        Evaluated {r.effectiveLocal || r.effectiveInstant}
-      </small>
-      <Evidence r={r} />
-      {r.blocksCompletion && onFix ? (
-        <button
-          className="link"
-          onClick={() => onFix(r.missingRequirements[0])}
-        >
-          Go to required field →
-        </button>
-      ) : r.tier === "advisory" && onDismiss ? (
-        <button className="link" onClick={() => onDismiss(r)}>
-          Acknowledge for this encounter
-        </button>
-      ) : null}
-    </article>
-  );
-}
-// Routine guidance stays one line until opened. Caveats that change how the
-// text should be read are shown on the closed row, never only once expanded.
-const caveats = ["stale", "time_dependent", "interpretation_review"];
-function ReferenceRow({ r }: { r: Result }) {
-  const shown = [
-    ...(r.primaryStatus === "not_in_guide" ? ["not_documented"] : []),
-    ...r.flags.filter((f) => caveats.includes(f)),
-  ];
-  return (
-    <details className="reference-row" data-testid="reference-row">
-      <summary>
-        <span className="reference-head">
-          <span className="reference-title">{r.title}</span>
-          {shown.map((f) => (
-            <span key={f} className={`reference-flag ${f}`}>
-              {label(f)}
-            </span>
-          ))}
-        </span>
-        <span className="reference-line">{r.message}</span>
-      </summary>
-      <div className="reference-body">
-        <p>{r.message}</p>
-        <small>
-          {r.hospitalId} · {r.version} · Evaluated{" "}
-          {r.effectiveLocal || r.effectiveInstant}
-        </small>
-        <Evidence r={r} />
-      </div>
-    </details>
-  );
-}
+// `?guidance-fail` makes every evaluation throw, to prove the caselog survives
+// a guidance failure (guardrail 14). Never set in normal use.
+const forcedGuidanceFailure =
+  typeof location !== "undefined" &&
+  new URLSearchParams(location.search).has("guidance-fail");
 function InputField({
   f,
   c,
   onChange,
   onFocus,
+  onBlur,
+  marker,
 }: {
   f: Field;
   c: Context;
   onChange: (id: string, v: Known) => void;
   onFocus: (id: string) => void;
+  onBlur: () => void;
+  marker?: React.ReactNode;
 }) {
   const v = value(c, f.id);
   const id = `field-${f.id}`;
+  // Focus is the doctor looking at a field; the dock leads with its guidance.
+  const watch = { onFocusCapture: () => onFocus(f.id), onBlurCapture: onBlur };
   return (
-    <div className="field" data-field={f.id}>
-      <label htmlFor={id}>{f.label}</label>
+    <div className="field" data-field={f.id} {...watch}>
+      <span className="field-label-row">
+        <label htmlFor={id}>{f.label}</label>
+        {marker}
+      </span>
       {f.type === "tri" ? (
         <select
           id={id}
@@ -224,7 +123,6 @@ function InputField({
                   ? "na"
                   : ""
           }
-          onFocus={() => onFocus(f.id)}
           onChange={(e) =>
             onChange(
               f.id,
@@ -319,19 +217,35 @@ function App() {
   )!;
   const [tab, setTab] = useState("encounter");
   const [outage, setOutage] = useState(false);
-  const [results, setResults] = useState<Result[]>(() =>
-    evaluate(h, c, makeEvent(c, "encounter_opened")),
-  );
+  const [results, setResults] = useState<Result[]>(() => {
+    try {
+      return evaluate(h, c, makeEvent(c, "encounter_opened"));
+    } catch {
+      return [];
+    }
+  });
+  const resultsRef = useRef<Result[]>(results);
   const [dismissed, setDismissed] = useState<string[]>([]);
   const [audit, setAudit] = useState<Audit[]>([]);
   const [measures, setMeasures] = useState<Measure[]>([]);
   const [completed, setCompleted] = useState(false);
   const [completionText, setCompletionText] = useState("");
   const [error, setError] = useState("");
-  const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState<Result>();
-  const [clarification, setClarification] = useState("");
-  const [candidates, setCandidates] = useState<string[]>([]);
+  // The doctor's escalation ladder: the dock, then the guide chat, then a person.
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatSeed, setChatSeed] = useState<Result>();
+  const [contactsFor, setContactsFor] = useState<{ reason?: string }>();
+  const [dockRequest, setDockRequest] = useState<{
+    resultId?: string;
+    nonce: number;
+  }>();
+  const [focusedField, setFocusedField] = useState<string>();
+  const blurTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  // The hard stop lives at the Complete button once the doctor has tried it.
+  const [gateShown, setGateShown] = useState(false);
+  const [released, setReleased] = useState<{ id: string; reason: string }[]>([]);
+  const [guidanceFailed, setGuidanceFailed] = useState(false);
+  const [notice, setNotice] = useState("");
   const [fixture, setFixture] = useState("N2");
   const [clock, setClock] = useState(c.instant);
   const [importText, setImportText] = useState("");
@@ -357,11 +271,6 @@ function App() {
   const visible = outage
     ? []
     : results.filter((r) => !dismissed.includes(signature(r)));
-  // One ranking decides prominence. Anything a clinician must act on or
-  // reconcile is a card; routine documentation stays collapsed below it, so an
-  // applicable rule is never dropped just because it is not urgent.
-  const actionable = visible.filter((r) => nudgePriority(r) >= 50);
-  const reference = visible.filter((r) => nudgePriority(r) < 50);
   useEffect(() => {
     if (
       !saveData({
@@ -412,13 +321,34 @@ function App() {
     if (e.type !== "completion_requested") lastCompletion.current = "";
     const updated = reduceEvent(next, e);
     latestC.current = updated;
-    const rs = outage && !forceAvailable ? [] : evaluate(guide, updated, e);
+    // Guidance failing must never stop the caselog: the value is recorded
+    // whatever the engine does, and the dock says guidance is unavailable.
+    let rs: Result[] = [];
+    if (!outage || forceAvailable)
+      try {
+        if (forcedGuidanceFailure)
+          throw new Error("Guidance failure forced for testing.");
+        // Passing the last results lets the engine tell new from already seen,
+        // so the panel does not reopen on every keystroke.
+        const fresh =
+          e.type === "encounter_opened" ||
+          e.type === "guide_changed" ||
+          guide.id !== h.id;
+        rs = evaluate(guide, updated, e, fresh ? [] : resultsRef.current);
+        setGuidanceFailed(false);
+      } catch {
+        rs = [];
+        setGuidanceFailed(true);
+      }
+    resultsRef.current = rs;
     pending.current.push({ start, event: e, cards: rs.length });
     setC(updated);
     setClock(updated.instant);
     setResults(rs);
-    setAnswer(undefined);
-    setClarification("");
+    if (e.type === "encounter_opened" || e.type === "guide_changed") {
+      setGateShown(false);
+      setReleased([]);
+    }
     setError("");
     setCompleted(false);
     setCompletionText("");
@@ -433,9 +363,16 @@ function App() {
   function change(id: string, val: Known) {
     commit(c, makeEvent(c, "field_changed", id, val));
   }
+  // Results are already per step, so focus needs no engine call: it only tells
+  // the dock which field's guidance to lead with. Leaving a field lets the dock
+  // settle after a moment rather than flicker between fields.
   function focus(id: string) {
-    if (id === "thrombolytic_order_placed")
-      commit(c, makeEvent(c, "field_focused", id));
+    clearTimeout(blurTimer.current);
+    setFocusedField(id);
+  }
+  function blur() {
+    clearTimeout(blurTimer.current);
+    blurTimer.current = setTimeout(() => setFocusedField(undefined), 1500);
   }
   function step(step: Step) {
     commit({ ...c, step }, makeEvent(c, "step_changed"));
@@ -443,8 +380,8 @@ function App() {
   function newHospital(hospital: Hospital) {
     const next = freshContext(hospital);
     setDismissed([]);
-    setQuestion("");
-    setAnswer(undefined);
+    setChatSeed(undefined);
+    setContactsFor(undefined);
     commit(next, makeEvent(next, "encounter_opened"), hospital);
   }
   function launch(id: string) {
@@ -454,47 +391,69 @@ function App() {
     setOutage(false);
     setDismissed([]);
     lastCompletion.current = "";
-    setQuestion(f.question || "");
     const rs = commit(
       next,
       makeEvent(next, f.event || "encounter_opened", f.field, known(f.val)),
       guide,
       true,
     );
-    if (f.kind === "question") setAnswer(ask(guide, next, f.question!).result);
-    if (f.block && f.kind === "nudge")
-      setCompletionText(
-        rs.some((r) => r.blocksCompletion)
-          ? "Completion blocked. Record the requirement below."
-          : "",
-      );
+    setContactsFor(undefined);
+    // A question scenario opens the guide chat on its answer.
+    if (f.kind === "question") {
+      setChatSeed(ask(guide, next, f.question!).result);
+      setChatOpen(true);
+    } else {
+      setChatSeed(undefined);
+      setChatOpen(false);
+    }
+    if (f.block && f.kind === "nudge" && rs.some((r) => r.blocksCompletion)) {
+      setGateShown(true);
+      setCompletionText("Completion blocked. Record the requirement below.");
+    }
     setTab("encounter");
   }
-  function complete() {
+  function complete(release = released) {
     const key = JSON.stringify([
       c.hospitalId,
       c.guideVersion,
       c.instant,
       c.values,
+      release,
     ]);
     if (lastCompletion.current === key) return;
     lastCompletion.current = key;
     const event = makeEvent(c, "completion_requested");
     const rs = commit({ ...c, step: "sign_off" }, event);
-    if (rs.some((r) => r.blocksCompletion)) {
+    // A gate clears only by recording the value, or — where the hospital's
+    // rule allows it — by an acknowledgement with a reason. Never silently.
+    const blocking = rs.filter(
+      (r) =>
+        r.blocksCompletion &&
+        !(
+          r.release === "acknowledge_with_reason" &&
+          release.some((x) => x.id === r.id)
+        ),
+    );
+    if (blocking.length) {
+      setGateShown(true);
       setCompletionText("Completion blocked. Record the required state below.");
       requestAnimationFrame(() =>
         document
-          .getElementById(
-            "field-" +
-              rs.find((r) => r.blocksCompletion)!.missingRequirements[0],
-          )
+          .getElementById("field-" + blocking[0].missingRequirements[0])
           ?.focus(),
       );
     } else {
+      setGateShown(false);
       setCompleted(true);
+      const acknowledged = rs
+        .filter((r) => r.blocksCompletion)
+        .map((r) => {
+          const why = release.find((x) => x.id === r.id)?.reason;
+          return ` ${r.title} acknowledged without confirmation: "${why}".`;
+        })
+        .join("");
       setCompletionText(
-        outage
+        (outage
           ? "Mock encounter completed. Guide requirements could not be verified during outage."
           : rs.some(
                 (r) =>
@@ -504,9 +463,25 @@ function App() {
                   ),
               )
             ? "Mock encounter completed with uncertain guide requirements. Review the source warnings."
-            : "Mock encounter completed. Known supported guide requirements are satisfied.",
+            : "Mock encounter completed. Known supported guide requirements are satisfied.") +
+          acknowledged,
       );
     }
+  }
+  function acknowledgeGate(r: Result, reason: string) {
+    const next = [...released.filter((x) => x.id !== r.id), { id: r.id, reason }];
+    setReleased(next);
+    setAudit((a) => [
+      ...a,
+      {
+        event: makeEvent(c, "completion_requested"),
+        hospitalId: h.id,
+        version: h.version,
+        results: [r],
+        action: `gate acknowledged with reason: ${reason}`,
+      },
+    ]);
+    complete(next);
   }
   function applyClock() {
     try {
@@ -518,18 +493,9 @@ function App() {
       setError(e instanceof Error ? e.message : String(e));
     }
   }
-  function askQuestion(q = question) {
-    if (outage) {
-      setClarification(
-        "Hospital guidance unavailable. No guide answer can be verified.",
-      );
-      setAnswer(undefined);
-      return;
-    }
-    const response = ask(h, c, q);
-    setAnswer(response.result);
-    setClarification(response.clarification || "");
-    setCandidates(response.candidates || []);
+  function openChat(seed?: Result) {
+    setChatSeed(seed);
+    setChatOpen(true);
   }
   function previewNow() {
     const pasted: ImportFile[] = importText.trim()
@@ -617,15 +583,51 @@ function App() {
   // skip both copies.
   const forField = (id: string) => visible.filter((r) => r.anchor === id);
   const fieldLabels = Object.fromEntries(fields.map((f) => [f.id, f.label]));
-  const blocking = visible.filter((r) => r.blocksCompletion);
-  // Which field the doctor is in. The dock leads with that field's guidance.
-  const [focusedField, setFocusedField] = useState<string>();
-  const [chatSeed, setChatSeed] = useState<Result>();
-  const [contactsReason, setContactsReason] = useState<string>();
-  const openDockOn = (resultId: string) => {
-    document
-      .querySelector(`[data-result="${CSS.escape(resultId)}"]`)
-      ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  const openDockOn = (resultId?: string) =>
+    setDockRequest({ resultId, nonce: Date.now() });
+  // The gate is re-read from the engine on every render once the doctor has
+  // tried to complete, so recording the value clears it as they type.
+  const gateResults = (() => {
+    if (!gateShown || outage || c.step !== "sign_off") return [];
+    try {
+      return gates(h, c).filter(
+        (r) =>
+          r.blocksCompletion &&
+          !(
+            r.release === "acknowledge_with_reason" &&
+            released.some((x) => x.id === r.id)
+          ),
+      );
+    } catch {
+      return [];
+    }
+  })();
+  // "See both sources" on the storyboard card: the dock entry when there is
+  // one at this step, otherwise the guide chat on that field.
+  const openConflict = (field: string) => {
+    const r = visible.find((x) => x.title === field);
+    if (r) openDockOn(r.id);
+    else
+      try {
+        openChat(answerField(h, c, field));
+      } catch {
+        openChat();
+      }
+  };
+  const reportNudge = (r: Result) => {
+    setAudit((a) => [
+      ...a,
+      {
+        event: makeEvent(c, "field_focused", r.anchor),
+        hospitalId: h.id,
+        version: h.version,
+        results: [r],
+        action: "reported as looking wrong",
+      },
+    ]);
+    setNotice(
+      `Flagged “${r.title}” for the guide owner. It is recorded in the local event log.`,
+    );
   };
   const acknowledge = (r: Result) => {
     setDismissed((a) => [...a, signature(r)]);
@@ -758,12 +760,58 @@ function App() {
                 {h.timezone}
               </small>
             </div>
+            {/* Every rule is read on the hospital's clock; the doctor's own
+                is shown beside it so the difference is never a surprise. */}
+            <div data-testid="provider-clock">
+              <small>Your clock</small>
+              <strong>
+                {localTime(c.instant, c.providerZone)
+                  .toPlainTime()
+                  .toString({ smallestUnit: "minute" })}
+              </strong>
+              <small>
+                {localTime(c.instant, c.providerZone).toPlainDate().toString()}{" "}
+                · {c.providerZone}
+              </small>
+            </div>
             <div>
               <small>Guide version</small>
               <strong>{h.version}</strong>
-              <small>{outage ? "Unavailable" : "Loaded · read-only"}</small>
+              <small>
+                {outage || guidanceFailed ? "Unavailable" : "Loaded · read-only"}
+              </small>
             </div>
           </section>
+          {tab === "encounter" && (
+            <>
+              <div className="companion-actions">
+                <button className="secondary" onClick={() => openChat()}>
+                  Ask this hospital’s guide
+                </button>
+                <button
+                  className="secondary"
+                  onClick={() => setContactsFor({})}
+                >
+                  Who to call
+                </button>
+              </div>
+              <GuidanceBoundary key={`sb:${h.id}:${h.version}`} quiet>
+                <StoryboardCard
+                  hospital={h}
+                  context={c}
+                  onOpenConflict={openConflict}
+                />
+              </GuidanceBoundary>
+            </>
+          )}
+          {notice && (
+            <div role="status" className="banner">
+              {notice}{" "}
+              <button className="link" onClick={() => setNotice("")}>
+                Dismiss
+              </button>
+            </div>
+          )}
           {newer && (
             <div className="banner">
               A newer guide version is available. This encounter is pinned to{" "}
@@ -842,6 +890,7 @@ function App() {
                         "America/Los_Angeles",
                         "UTC",
                         "Asia/Kolkata",
+                        "Asia/Tokyo",
                       ].map((z) => (
                         <option key={z}>{z}</option>
                       ))}
@@ -857,12 +906,11 @@ function App() {
                         checked={outage}
                         onChange={(e) => {
                           setOutage(e.target.checked);
-                          setAnswer(undefined);
-                          setResults(
-                            e.target.checked
-                              ? []
-                              : evaluate(h, c, makeEvent(c, "guide_changed")),
-                          );
+                          const rs = e.target.checked
+                            ? []
+                            : evaluate(h, c, makeEvent(c, "guide_changed"));
+                          resultsRef.current = rs;
+                          setResults(rs);
                         }}
                       />{" "}
                       Simulate guide outage
@@ -882,7 +930,10 @@ function App() {
                         setReport(undefined);
                         setImportText("");
                         setPreview(undefined);
-                        setQuestion("");
+                        setChatOpen(false);
+                        setChatSeed(undefined);
+                        setContactsFor(undefined);
+                        setNotice("");
                         setImportNotice("");
                         setSearch("");
                         setFixture("N2");
@@ -905,7 +956,7 @@ function App() {
                   </div>
                 </div>
               </details>
-              <div className="workspace" id="encounter-workspace">
+              <div className="workspace single" id="encounter-workspace">
                 <section className="caselog">
                   <div className="section-head">
                     <div>
@@ -994,30 +1045,19 @@ function App() {
                     </div>
                     {fields.map((f) => (
                       <div key={f.id} className="manual-field">
-                        {forField(f.id).length > 0 && (
-                          <div
-                            className="field-guidance"
-                            aria-live="polite"
-                            aria-atomic="false"
-                          >
-                            {forField(f.id).map((r) =>
-                              nudgePriority(r) >= 50 ? (
-                                <Card
-                                  key={r.id}
-                                  r={r}
-                                  onDismiss={acknowledge}
-                                />
-                              ) : (
-                                <ReferenceRow key={r.id} r={r} />
-                              ),
-                            )}
-                          </div>
-                        )}
                         <InputField
                           f={f}
                           c={c}
                           onChange={change}
                           onFocus={focus}
+                          onBlur={blur}
+                          marker={
+                            <FieldMarker
+                              results={forField(f.id)}
+                              fieldLabel={f.label}
+                              onOpen={openDockOn}
+                            />
+                          }
                         />
                         {f.id === "cta_done" && (
                           <small className="field-context">Record whether the scan was performed, including at another facility. Missing guide information does not mean CTA is unavailable.</small>
@@ -1043,9 +1083,16 @@ function App() {
                           Completion does not sign a note or submit a charge to
                           a hospital.
                         </p>
+                        <GateBanner
+                          gates={gateResults}
+                          onGoToField={(id) =>
+                            document.getElementById(`field-${id}`)?.focus()
+                          }
+                          onAcknowledge={acknowledgeGate}
+                        />
                         <button
                           className="primary"
-                          onClick={complete}
+                          onClick={() => complete()}
                           disabled={completed}
                         >
                           Complete mock encounter →
@@ -1078,69 +1125,42 @@ function App() {
                     </button>
                   </footer>
                 </section>
-                <aside className="ask-rail" aria-label="Ask the guide">
-                  <section className="ask-panel">
-                    <p className="eyebrow">ASK THE GUIDE · {h.id}</p>
-                    <h2>Just ask, “Bot…”</h2>
-                    <p className="muted">
-                      Ask aloud while listening, or type below. Every answer
-                      stays with this hospital.
-                    </p>
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        askQuestion();
-                      }}
-                    >
-                      <label className="sr-only" htmlFor="question">
-                        Guide question
-                      </label>
-                      <textarea
-                        id="question"
-                        value={question}
-                        onChange={(e) => setQuestion(e.target.value)}
-                        placeholder="e.g. Who mixes the TNK?"
-                        maxLength={2000}
-                      />
-                      <button className="secondary" type="submit">
-                        Ask this hospital’s guide →
-                      </button>
-                    </form>
-                    <label className="field-picker">
-                      Or choose a source field
-                      <select
-                        aria-label="Guide field picker"
-                        value=""
-                        onChange={(e) => {
-                          if (e.target.value) {
-                            setQuestion(e.target.value);
-                            askQuestion(e.target.value);
-                          }
-                        }}
-                      >
-                        <option value="">Select field…</option>
-                        {[...new Set(h.fields.map((s) => s.field))].map((f) => (
-                          <option key={f}>{f}</option>
-                        ))}
-                      </select>
-                    </label>
-                    {clarification && (
-                      <div role="status" className="banner">
-                        {clarification}
-                        {candidates.map((f) => (
-                          <button key={f} onClick={() => askQuestion(f)}>
-                            {f}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    {answer && <Card r={answer} />}
-                  </section>
-                  <small className="panel-foot">
-                    Same-hospital sources only · No model on the field-event
-                    path
-                  </small>
-                </aside>
+                <div className={`companion${chatOpen ? " chat-open" : ""}`}>
+                  <GuidanceBoundary key={`dock:${h.id}:${h.version}`}>
+                    <NudgeDock
+                      results={visible}
+                      focusedFieldId={focusedField}
+                      fieldLabels={fieldLabels}
+                      onAsk={openChat}
+                      onAcknowledge={acknowledge}
+                      onContacts={(reason) => setContactsFor({ reason })}
+                      onReport={reportNudge}
+                      unavailable={outage || guidanceFailed}
+                      openRequest={dockRequest}
+                    />
+                  </GuidanceBoundary>
+                  <GuidanceBoundary key={`chat:${h.id}:${h.version}`} quiet>
+                    <ChatPanel
+                      open={chatOpen && !outage}
+                      hospital={h}
+                      context={c}
+                      seed={chatSeed}
+                      onClose={() => setChatOpen(false)}
+                      onContacts={(reason) => setContactsFor({ reason })}
+                    />
+                  </GuidanceBoundary>
+                </div>
+                <GuidanceBoundary key={`contacts:${h.id}`} quiet>
+                  <ContactsSheet
+                    open={!!contactsFor}
+                    hospitalId={h.id}
+                    contacts={h.contacts ?? []}
+                    instant={c.instant}
+                    timezone={h.timezone}
+                    reason={contactsFor?.reason}
+                    onClose={() => setContactsFor(undefined)}
+                  />
+                </GuidanceBoundary>
               </div>
             </>
           )}
@@ -1581,7 +1601,11 @@ function App() {
                             </p>
                           ))}
                           {r.actual.map((a) => (
-                            <Card key={a.id} r={a} />
+                            <NudgeCard
+                              key={a.id}
+                              r={a}
+                              onAsk={() => launch(r.id)}
+                            />
                           ))}
                           {!r.actual.length && <p>No cards emitted.</p>}
                         </div>
@@ -1648,6 +1672,29 @@ function App() {
       </div>
     </>
   );
+}
+// Guidance is an addition to the caselog, never a dependency of it. If any
+// guidance surface throws while rendering, it is replaced by a quiet notice and
+// the form carries on. `quiet` renders nothing instead (secondary surfaces).
+class GuidanceBoundary extends React.Component<
+  { children: React.ReactNode; quiet?: boolean },
+  { error: boolean }
+> {
+  state = { error: false };
+  static getDerivedStateFromError() {
+    return { error: true };
+  }
+  render() {
+    if (!this.state.error) return this.props.children;
+    if (this.props.quiet) return null;
+    return (
+      <aside className="nudge-dock" data-state="pill" data-testid="nudge-dock">
+        <div className="dock-pill unavailable" role="status">
+          Guidance unavailable — the caselog still works
+        </div>
+      </aside>
+    );
+  }
 }
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
