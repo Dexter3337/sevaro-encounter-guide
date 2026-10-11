@@ -1,14 +1,30 @@
 # Encounter Guide
 
-## Proactive voice workspace
+A workflow companion for Sevaro Challenge 1. It sits inside the caselog and puts *this hospital's*
+rule in front of the teleneurologist at the step where it matters, at the hospital's own local
+time, without being asked — and stays quiet when nothing applies.
 
-The latest local version adds a redesigned clinical workspace and live browser microphone input. Say **“CTA is completed. LVO is present.”** to fill supported findings and surface hospital guidance automatically. Say **“Bot, what is the LVO pathway?”**, **“Bot, fill note body with…”**, or **“Bot, undo.”** There is also a typed transcript test, draft-review mode and an activity trail. [Voice workflow and demo](docs/VOICE_WORKFLOW.md).
+Proactive nudges are the primary deliverable. Typed questions, answered only from the selected
+hospital's guide, are the secondary one. When the guide cannot answer, the doctor is pointed at a
+person to call.
 
-Live speech requires a supported browser and microphone permission, and may use the browser provider's online speech service. Only synthetic speech should be used. This is a finite fact/command interpreter, not general clinical NLP or a video-call transcript connector. Orders, administration and completion prerequisites still require manual entry. The deterministic guidance core remains local and key-free.
+Every nudge and answer says four things: what the rule is, which hospital and guide field it came
+from, how sure we are (answered, not in guide, time-dependent, stale, conflict or hard stop), and
+what the doctor should do.
 
-The supplied developer-kit files are now included in `data/official/`. The hospital importer accepts their `local_timezone` key, and the encounter adapter applies their step, field event, provider zone and Boolean state. Updated verification is separate from the original baseline: [Proactive voice results](reports/PROACTIVE_VOICE_RESULTS.md).
+**Illustrative Synapse workflow companion · synthetic demo.** All hospitals, rules, destinations,
+contacts and encounter information are fictional. This is not clinical guidance.
 
-A working local Sevaro Challenge 1 prototype: interactive caselog, proactive hospital guidance, grounded free-text questions, explicit hospital/provider time zones, source-quality flags, completion gates, dynamic JSON/CSV imports, and an evaluation workbench. **Illustrative Synapse workflow companion · Synthetic demo.** All hospitals, rules, destinations and encounter information are fictional.
+## Building this
+
+The team is working to a one-day sprint plan: **[docs/sprint/README.md](docs/sprint/README.md)**
+is the entry point, and **[docs/sprint/HOW_TO_START.md](docs/sprint/HOW_TO_START.md)** walks
+through setup step by step. The longer-term design is in
+[docs/PRODUCTION_PLAN.md](docs/PRODUCTION_PLAN.md).
+
+The supplied developer-kit files are in `data/official/`. The importer accepts their
+`local_timezone` key, and the encounter adapter applies their step, field event, provider zone
+and Boolean completion state.
 
 ## Run
 

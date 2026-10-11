@@ -1,10 +1,21 @@
 # Sevaro team handoff
 
-## Local proactive voice update — October 10, 2026
+This repository is the working prototype for Challenge 1: hospital-specific workflow guidance as
+an addition to Sevaro Synapse. All encounters, hospital policies and contacts are fictional. It is
+not connected to Sevaro, hospital EHRs or real consultation transcripts.
 
-The current feature branch adds real browser microphone capture, supported current-fact auto-fill, “Bot” questions and field commands, undo/review, and a redesigned clinical workspace. It also fixes compatibility with the supplied developer kit. Read [VOICE_WORKFLOW.md](docs/VOICE_WORKFLOW.md) and [PROACTIVE_VOICE_RESULTS.md](reports/PROACTIVE_VOICE_RESULTS.md) for the new behavior, demonstration and verification. These changes are local; the hosted links below describe the previously published baseline until a new deployment is made. The microphone may use an online browser speech service; no real call connector or unrestricted clinical NLP is provided.
+## Current work — sprint to the demo
 
-This repository is the complete working prototype and supplied research handoff for Challenge 1: hospital-specific workflow guidance as an addition to Sevaro Synapse. All encounters and hospital policies are fictional. It is not connected to Sevaro, hospital EHRs or real consultation transcripts.
+The team is building to a one-day sprint plan on the `sprint/demo` branch. Start at
+[docs/sprint/README.md](docs/sprint/README.md), or
+[docs/sprint/HOW_TO_START.md](docs/sprint/HOW_TO_START.md) if you have not set the project up
+before. The longer-term design is [docs/PRODUCTION_PLAN.md](docs/PRODUCTION_PLAN.md).
+
+Scope was revised on 10 October 2026: voice capture, transcript drafting and caselog auto-fill are
+out. The deliverable is proactive nudges inside the caselog, typed questions answered from the
+selected hospital's guide, and hospital contacts as the final escalation step. The voice and
+transcript code is still present in the tree and is removed as part of the sprint's Machine C
+work; the hosted links below predate this revision.
 
 ## Links to share
 
