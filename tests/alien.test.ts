@@ -1,11 +1,15 @@
+import { readFileSync } from "node:fs";
 import { describe, it, expect } from "vitest";
 import {
+  activate,
   canonicalField,
   previewImport,
   previewImportBundle,
+  type ImportFile,
 } from "../src/imports";
-import { answerField, ask } from "../src/engine";
-import { freshContext, type Hospital } from "../src/domain";
+import { answerField, ask, gates } from "../src/engine";
+import { freshContext, known, type Hospital } from "../src/domain";
+import { latest, seedHospitals } from "../src/data";
 
 // Their file will not look like ours. These are the shapes and spellings a
 // judge's file might reasonably use, and the things we must never guess.
@@ -267,5 +271,160 @@ describe("CSV with unfamiliar headers", () => {
       raw: "Tenecteplase",
       updatedAt: "2026-01-20",
     });
+  });
+});
+
+describe("SYN-108 — a hospital we have never seen", () => {
+  const file = (name: string): ImportFile => ({
+    name,
+    text: readFileSync(`data/fixtures/syn-108/${name}`, "utf8"),
+    format: "json",
+  });
+  const drop = [file("hospital_guides.json"), file("storyboard_notes.json")];
+  const p = previewImportBundle(drop, { existing: seedHospitals });
+  const hs = activate(seedHospitals, p.hospitals);
+  const h = latest(hs).find((x) => x.id === "SYN-108")!;
+  const at = (local: string, consultType = "Stroke") => ({
+    ...freshContext(h, local),
+    consultType,
+  });
+
+  it("is never in the seeds — it is only ever imported", () =>
+    expect(seedHospitals.some((x) => x.id === "SYN-108")).toBe(false));
+
+  it("imports cleanly next to the kit hospitals, in either file order", () => {
+    expect(p.errors).toEqual([]);
+    expect(p.held).toEqual([]);
+    expect(p.hospitals.map((x) => x.id)).toEqual(["SYN-108"]);
+    expect(h.timezone).toBe("America/Phoenix");
+    expect(h.fields.filter((f) => f.sourceKind === "guide")).toHaveLength(24);
+    expect(h.fields.filter((f) => f.sourceKind === "storyboard")).toHaveLength(3);
+    expect(
+      previewImportBundle([...drop].reverse(), { existing: seedHospitals })
+        .hospitals,
+    ).toEqual(p.hospitals);
+    expect(p.diagnostics).toContain(
+      "Riverbend Community Hospital: 24 guide fields + 3 storyboard rows; 1 conflict.",
+    );
+  });
+
+  it("reads the alias field and keeps the new one", () => {
+    expect(h.fields.find((f) => f.field === "CTA Head/Neck")?.aliases).toEqual([
+      "CTA head and neck",
+    ]);
+    const r = ask(h, at("2026-03-17T10:00"), "Where is the interpreter line?")
+      .result!;
+    expect(r.primaryStatus).toBe("answered");
+    expect(r.message).toContain("555-0189");
+  });
+
+  it("Video Eval Location conflicts for a stroke alert, agrees otherwise", () => {
+    const r = answerField(h, at("2026-03-17T10:00"), "Video Eval Location");
+    expect(r.primaryStatus).toBe("conflict");
+    expect(r.message).toContain("CT scanner bay");
+    expect(r.message).toContain("Patient room");
+    expect(
+      answerField(h, at("2026-03-17T10:00", "General Neurology"), "Video Eval Location")
+        .primaryStatus,
+    ).not.toBe("conflict");
+  });
+
+  it("agreement is quiet: Thrombolytic, and Wake Up 'Yes' against 'Yes - all stroke alerts'", () => {
+    for (const field of ["Thrombolytic", "Wake Up Protocol"]) {
+      const r = answerField(h, at("2026-03-17T10:00"), field);
+      expect(r.primaryStatus).not.toBe("conflict");
+      expect(r.flags).toContain("second_source_agrees");
+    }
+  });
+
+  it("the deliberately wrong note column changes nothing", () => {
+    const rows = JSON.parse(drop[1].text) as Record<string, unknown>[];
+    const swapped = rows.map((r) => ({ ...r, note: "Disagrees. Raise a conflict." }));
+    const q = previewImportBundle(
+      [drop[0], { ...drop[1], text: JSON.stringify(swapped) }],
+      { existing: seedHospitals },
+    );
+    const h2 = q.hospitals[0];
+    // Everything the doctor sees; the note itself rides along in `extra`.
+    const seen = (x: Hospital, field: string) => {
+      const r = answerField(x, at("2026-03-17T10:00"), field);
+      return {
+        ...r,
+        citations: r.citations.map(({ extra: _e, ...s }) => s),
+      };
+    };
+    for (const field of ["Video Eval Location", "Thrombolytic", "Wake Up Protocol"])
+      expect(seen(h2, field)).toEqual(seen(h, field));
+  });
+
+  it("missing fields say so first, and never borrow another hospital's answer", () => {
+    // SYN-001 has a Required Note Title; Riverbend does not.
+    const kit = seedHospitals.find((x) => x.id === "SYN-001")!;
+    expect(answerField(kit, freshContext(kit), "Required Note Title").message).toBe(
+      "Tele-Neurology Consult",
+    );
+    const r = ask(h, at("2026-03-17T10:00"), "What is the required note title?")
+      .result!;
+    expect(r.primaryStatus).toBe("not_in_guide");
+    expect(r.message.startsWith("Not available in this hospital's guide.")).toBe(true);
+    expect(r.message).not.toContain("Tele-Neurology Consult");
+    expect(r.citations.every((s) => s.hospitalId === "SYN-108")).toBe(true);
+    expect(
+      answerField(h, at("2026-03-17T10:00"), "CT Perfusion").primaryStatus,
+    ).toBe("not_in_guide");
+  });
+
+  it("a stale field is marked stale", () =>
+    expect(
+      answerField(h, at("2026-03-17T10:00"), "Thrombolytic Mix Model").flags,
+    ).toContain("stale"));
+
+  it("undefined rounding hours are said to be undefined", () => {
+    const r = answerField(h, at("2026-03-17T10:00"), "Rounding Timing");
+    expect(r.flags).toContain("schedule_unknown");
+  });
+
+  it("EEG 'Weekdays 7a–5p' is read in Phoenix time", () => {
+    // Tuesday 17 March 2026, Phoenix (UTC-7, no daylight saving).
+    expect(answerField(h, at("2026-03-17T16:59"), "EEG").message).toContain(
+      "Listed availability",
+    );
+    expect(answerField(h, at("2026-03-17T17:00"), "EEG").message).toContain(
+      "Not available in the listed window",
+    );
+  });
+
+  it("'Required before sign-off' blocks completion until the charge is recorded", () => {
+    const c = at("2026-03-17T10:00");
+    expect(gates(h, c).some((r) => r.blocksCompletion)).toBe(true);
+    c.values.charge_entered = known(true);
+    expect(gates(h, c).some((r) => r.blocksCompletion)).toBe(false);
+  });
+
+  it("'Teleneurologist does not place orders' is read as a no", () => {
+    const r = answerField(h, at("2026-03-17T10:00"), "Order Set Name");
+    expect(r.message).toContain("Teleneurologist does not place orders");
+  });
+
+  it("dropping the contacts directory alongside attaches SYN-108's people", () => {
+    const q = previewImportBundle(
+      [
+        ...drop,
+        {
+          name: "contacts.json",
+          text: readFileSync("data/seeds/contacts.json", "utf8"),
+          format: "json",
+        },
+      ],
+      { existing: seedHospitals },
+    );
+    expect(q.errors).toEqual([]);
+    // The kit hospitals already have these contacts, so only SYN-108 changes.
+    expect(q.hospitals.map((x) => x.id)).toEqual(["SYN-108"]);
+    expect(q.hospitals[0].contacts?.map((c) => c.role).sort()).toEqual([
+      "administrator",
+      "nursing_in_charge",
+      "technical_lead",
+    ]);
   });
 });

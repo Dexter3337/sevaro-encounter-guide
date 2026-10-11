@@ -1,0 +1,133 @@
+{
+  "encounter_reference_date": "2026-03-17",
+  "stale_after_days": 180,
+  "hospitals": [
+    {
+      "hospital_id": "SYN-108",
+      "hospital_name": "Riverbend Community Hospital",
+      "local_timezone": "America/Phoenix",
+      "fields": [
+        {
+          "field": "Video Eval Location",
+          "value": "CT scanner bay for stroke alerts; patient room for other consults",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "Thrombolytic",
+          "value": "Tenecteplase",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "Thrombolytic Mix Model",
+          "value": "ED pharmacist mixes at the bedside",
+          "last_verified": "2025-07-01"
+        },
+        {
+          "field": "LVO Protocol",
+          "value": "Thrombectomy capable Tue/Thu 0800-1600; otherwise ED provider initiates transfer.",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "Wake Up Protocol",
+          "value": "Yes - all stroke alerts",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "Order Entry",
+          "value": "Teleneurologist does not place orders",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "Order Set Name",
+          "value": "Search \"Riverbend Stroke\" - \"RCH Acute Stroke TNK [SYN-50810]\"",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "Charge Entry",
+          "value": "Required before sign-off",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "Rounding Process",
+          "value": "Hospitalist service sends the daily census to the rounding queue by 0700 Mountain Standard Time",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "When Do We Round?",
+          "value": "Monday-Friday",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "Rounding Timing",
+          "value": "During hospitalist hours",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "Rounding Orders",
+          "value": "No routine orders",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "General Neurology",
+          "value": "Sevaro covers ED and inpatient tele-neurology; no local neurology group",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "Pediatric Neurology",
+          "value": "Not applicable - pediatric patients transfer to the synthetic regional children's center",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "EEG",
+          "value": "Weekdays 7a–5p",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "CT Head",
+          "value": "24/7",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "CTA head and neck",
+          "value": "24/7",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "MRI",
+          "value": "Mon-Fri 0800-1700",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "AI",
+          "value": "No",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "EHR",
+          "value": "Synthetic EHR, Riverbend instance",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "PACS",
+          "value": "Synthetic PACS viewer via the ED workstation",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "VPN",
+          "value": "Not required",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "Cardiac Monitoring",
+          "value": "Telemetry beds on 3 West",
+          "last_verified": "2026-02-14"
+        },
+        {
+          "field": "Interpreter Line",
+          "value": "Dial +1-555-0189 for the synthetic interpreter line; the video interpreter cart is in ED bay 2",
+          "last_verified": "2026-02-14"
+        }
+      ]
+    }
+  ]
+}

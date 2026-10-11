@@ -1,0 +1,22 @@
+[
+  {
+    "hospital_id": "SYN-108",
+    "field": "Video Eval Location",
+    "storyboard_value": "Patient room",
+    "storyboard_updated": "2025-08-30",
+    "note": "Matches the on-call guide. (Deliberately wrong: this row disagrees for stroke alerts. The note column must never be read.)"
+  },
+  {
+    "hospital_id": "SYN-108",
+    "field": "Thrombolytic",
+    "storyboard_value": "Tenecteplase",
+    "storyboard_updated": "2026-01-12",
+    "note": "Disagrees with the on-call guide. (Deliberately wrong: this row agrees.)"
+  },
+  {
+    "hospital_id": "SYN-108",
+    "field": "Wake Up Protocol",
+    "storyboard_value": "Yes",
+    "storyboard_updated": "2026-01-12"
+  }
+]
