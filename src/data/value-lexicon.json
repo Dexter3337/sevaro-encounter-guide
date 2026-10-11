@@ -1,0 +1,79 @@
+{
+  "version": "1.0",
+  "note": "What a guide value means as a yes/no/not-applicable, independent of the words a particular hospital chose. Ordered: the first rule whose pattern matches wins. Patterns are matched case-insensitively against the cleaned value. Anything unmatched is descriptive and flagged for review, and a value under review may be shown and answered but never drives a cascade or a gate.",
+  "rules": [
+    {
+      "kind": "not_applicable",
+      "why": "The field does not apply to this hospital's workflow at all.",
+      "patterns": [
+        "^not applicable\\b",
+        "^n/?a\\b",
+        "^none applicable\\b",
+        "^does not apply\\b"
+      ]
+    },
+    {
+      "kind": "negative",
+      "why": "A flat no. Anchored at the start, because a value may mention something being unavailable in a trailing clause while the field itself is available: 'Daily 0700-1900; continuous EEG unavailable' is a schedule, not a no.",
+      "patterns": [
+        "^no$",
+        "^none$",
+        "^no\\b",
+        "^not\\s+(?:\\w+\\s+){0,2}(available|offered|provided|performed|permitted|capable|stocked|supported)\\b",
+        "^un(available|supported)\\b",
+        "^never\\b",
+        "^nil\\b",
+        "\\b(?:does|do|may|can|will)\\s+not\\s+(?:enter|place|order|write|submit|perform|provide|initiate|activate)\\b",
+        "\\bis\\s+not\\s+(?:available|offered|permitted|capable)\\b",
+        "\\bno\\s+(?:medication\\s+)?orders\\s+(?:are\\s+)?(?:entered|placed|written)\\b"
+      ]
+    },
+    {
+      "kind": "conditional",
+      "why": "The answer branches on time, consult type or another condition, so no single value is correct on its own.",
+      "patterns": [
+        "\\bduring\\s+coverage\\b",
+        "\\boutside\\s+coverage\\b",
+        "\\bduring\\s+staffed\\b",
+        "\\botherwise\\b",
+        "\\bfor\\s+stroke\\s+(?:alerts?|activation)\\b.*;",
+        ";\\s*.*\\bfor\\s+other\\s+consults?\\b",
+        "\\bif\\s+.*\\bthen\\b",
+        "\\bdepend(?:s|ing)\\s+on\\b"
+      ]
+    },
+    {
+      "kind": "affirmative",
+      "why": "A yes, including a yes with a qualifier or a requirement stated as an instruction.",
+      "patterns": [
+        "^yes\\b",
+        "\\b24/?7\\b",
+        "^required\\b",
+        "^always\\b",
+        "^permitted\\b",
+        "^allowed\\b",
+        "^available\\b",
+        "^full\\b",
+        "\\bis\\s+required\\b",
+        "\\brequired\\s+(?:before|prior\\s+to|at|for)\\b",
+        "\\bmust\\s+be\\s+(?:entered|recorded|completed|confirmed)\\b",
+        "\\b(?:is\\s+)?(?:thrombectomy\\s+)?capable\\b",
+        "\\bpermitted\\b"
+      ]
+    },
+    {
+      "kind": "scheduled",
+      "why": "Availability is stated as days and/or hours. The schedule grammar in time.ts decides whether the window is open now; this only records that the value is a schedule.",
+      "patterns": [
+        "\\b(?:mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)\\b",
+        "\\bdaily\\b",
+        "\\bweekday|\\bweekend",
+        "\\b\\d{3,4}\\s*[-–—]\\s*\\d{3,4}\\b",
+        "\\b\\d{1,2}:\\d{2}\\s*[-–—]",
+        "\\b\\d{1,2}\\s*[ap]\\.?m\\.?\\s*[-–—]",
+        "\\bon-?call\\b",
+        "\\bovernight\\b"
+      ]
+    }
+  ]
+}

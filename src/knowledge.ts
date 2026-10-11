@@ -1,5 +1,6 @@
 import type { Hospital, Source } from "./domain";
 import { windows } from "./time";
+import lexicon from "./data/value-lexicon.json";
 export const concepts: Record<string, string[]> = {
   "Video Eval Location": [
     "video eval",
@@ -122,14 +123,18 @@ export function interpretation(
       ? "supported"
       : "needs_review"; // Syntax only; actual days come from the linked source.
   if (["EEG", "CT Perfusion", "MRI"].includes(c))
-    return windows(raw).length || /^(no|none|not applicable)\b/i.test(raw)
-      ? "supported"
-      : "needs_review";
-  if (c === "Charge Entry")
-    return /^(yes|no)\b/i.test(raw) &&
+    return windows(raw).length || meansNo(raw) ? "supported" : "needs_review";
+  // A charge requirement is readable when the lexicon settles it either way and
+  // nothing makes it conditional. Tying this to the words "yes" and "no" left a
+  // hospital that writes "Required prior to sign-off" unreadable, which quietly
+  // downgraded its gate to an advisory and let sign-off through.
+  if (c === "Charge Entry") {
+    const kind = semantics(raw).kind;
+    return (kind === "affirmative" || kind === "negative") &&
       !/\b(if|unless|except|only when)\b/i.test(raw)
       ? "supported"
       : "needs_review";
+  }
   if (c === "Consult Completion Rule")
     return /do not complete.*until.*hospital provider confirms.*plan/i.test(
       raw,
@@ -181,4 +186,52 @@ export function resolveConcept(
     ),
   ];
   return { field: candidates.length === 1 ? top.field : undefined, candidates };
+}
+
+// What a guide value means as a yes / no / not-applicable, independent of the
+// words a particular hospital chose. The seven kit hospitals write "No",
+// "Not applicable" and "No medication orders entered by teleneurologist"; an
+// unseen guide may write "Teleneurologist does not place orders" or "Required
+// prior to sign-off" and must be read the same way. The patterns live in
+// src/data/value-lexicon.json so a new phrasing is a data change.
+export type ValueKind =
+  | "affirmative"
+  | "negative"
+  | "not_applicable"
+  | "scheduled"
+  | "conditional"
+  | "descriptive";
+export type Semantics = {
+  kind: ValueKind;
+  // True when no rule matched. Such a value is still shown and answered, but
+  // must never drive a cascade or a gate: uncertainty may not block or release.
+  review: boolean;
+  matched?: string;
+};
+const lexiconRules: { kind: ValueKind; patterns: RegExp[] }[] =
+  lexicon.rules.map((r) => ({
+    kind: r.kind as ValueKind,
+    patterns: r.patterns.map((p) => new RegExp(p, "i")),
+  }));
+export function semantics(raw: string): Semantics {
+  const text = clean(String(raw ?? "")).trim();
+  if (!text) return { kind: "descriptive", review: true };
+  for (const rule of lexiconRules)
+    for (const pattern of rule.patterns)
+      if (pattern.test(text))
+        return { kind: rule.kind, review: false, matched: pattern.source };
+  return { kind: "descriptive", review: true };
+}
+// A value that means "no" or "not applicable" for the purpose of switching
+// another rule off. Review-flagged values deliberately return false: an
+// uncertain reading must not silently suppress guidance.
+export function meansNo(raw: string): boolean {
+  const s = semantics(raw);
+  return !s.review && (s.kind === "negative" || s.kind === "not_applicable");
+}
+// A value that means "yes" for the purpose of raising a gate. Review-flagged
+// values return false for the same reason: uncertainty must not block anyone.
+export function meansYes(raw: string): boolean {
+  const s = semantics(raw);
+  return !s.review && s.kind === "affirmative";
 }

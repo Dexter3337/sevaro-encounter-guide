@@ -16,6 +16,8 @@ import {
   scoped,
   interpretation,
   resolveConcept,
+  meansNo,
+  meansYes,
 } from "./knowledge";
 import {
   ageDays,
@@ -186,10 +188,11 @@ function resolveField(
     const permission = getSources(h, "Order Entry").find(
       (s) => s.sourceKind === "guide",
     );
-    if (
-      permission &&
-      /^No .*orders entered by teleneurologist/i.test(clean(permission.raw))
-    ) {
+    // Where the teleneurologist may not place orders, the order-set name is
+    // useless to them; the guide's permission rule is what they need to see.
+    // Read by meaning, not by phrasing, so "Teleneurologist does not place
+    // orders" is understood as well as "No orders entered by teleneurologist".
+    if (permission && meansNo(permission.raw)) {
       r.citations.push(permission);
       r.message = `${text}. ${clean(permission.raw)}.`;
     }
@@ -257,10 +260,10 @@ function resolveField(
         true,
       );
   }
-  if (
-    ["EEG", "CT Perfusion", "MRI"].includes(field) &&
-    !/^no\b|^none\b|^not applicable\b/i.test(text)
-  ) {
+  // A flat "No" needs no schedule evaluation. A value that merely mentions
+  // something being unavailable in a trailing clause is not a flat no:
+  // "Daily 0700-1900; continuous EEG unavailable" is a schedule.
+  if (["EEG", "CT Perfusion", "MRI"].includes(field) && !meansNo(text)) {
     const ws = windows(text);
     const now = localTime(instant, h.timezone);
     if (ws.length && !/24\/7/.test(text)) {
@@ -320,9 +323,13 @@ export function gates(h: Hospital, c: Context): Result[] {
     const ss = getSources(h, field).filter((s) => s.sourceKind === "guide");
     if (!ss.length) continue;
     const raw = clean(ss[0].raw),
+      // A hospital may write the charge requirement as "Yes", "Yes - encounter
+      // charge before sign-off" or "Required prior to sign-off". All three mean
+      // the same thing to the doctor. A value the lexicon cannot read stays
+      // under review and raises no gate: uncertainty must not block anyone.
       required =
         field === "Charge Entry"
-          ? /^Yes\b/i.test(raw)
+          ? meansYes(raw)
           : /do not complete.*until.*hospital provider confirms.*plan/i.test(
               raw,
             );
@@ -539,12 +546,11 @@ export function evaluate(h: Hospital, c: Context, e: Event): Result[] {
       const permission = getSources(h, "Order Entry").find(
         (s) => s.sourceKind === "guide",
       );
-      if (
-        permission &&
-        !/^No .*orders entered by teleneurologist/i.test(clean(permission.raw))
-      )
+      // Handbook issue 11: one rule switches another off. Showing an order-set
+      // name to a doctor who is not permitted to place orders would be wrong.
+      if (permission && !meansNo(permission.raw))
         add("Order Set Name", "advisory", "thrombolytic_order_placed");
-      else if (permission && /No medication orders/i.test(permission.raw)) {
+      else if (permission && meansNo(permission.raw)) {
         const hospitalSet = getSources(h, "Order Set Name").find(
           (s) => s.sourceKind === "guide",
         );
