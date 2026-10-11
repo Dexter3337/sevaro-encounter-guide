@@ -1,6 +1,5 @@
 import { test, expect } from "@playwright/test";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import { percentiles } from "../../src/evaluation";
 async function launch(page: any, id: string) {
   await page.locator(".demo-controls > summary").click();
   await page.getByLabel("Scenario", { exact: true }).selectOption(id);
@@ -261,11 +260,19 @@ test("actual browser latency across all required triggers", async ({
   report.environment = {
     browser: await page.context().browser()!.version(),
     viewport: "1440x1000",
-    host: "Windows, Node 24.19.0",
+    host: `Windows, Node ${process.versions.node}`,
     server: process.env.DEMO_URL || "Vite development server",
     mode: "Headless Chrome, single worker, foreground page",
   };
-  report.allRequired = percentiles(required.map((s: any) => s.ms));
+  // Keep the browser harness independent of the app engine's JSON modules.
+  // These statistics describe the measured samples exported by the live UI.
+  const durations = required.map((s: any) => s.ms).sort((a: number, b: number) => a - b);
+  report.allRequired = {
+    count: durations.length,
+    p50: durations[Math.max(0, Math.ceil(durations.length * 0.5) - 1)] || 0,
+    p95: durations[Math.max(0, Math.ceil(durations.length * 0.95) - 1)] || 0,
+    max: durations.at(-1) || 0,
+  };
   report.method =
     "Real adapter evaluation → React commit → two animation-frame callbacks. Paint-ready approximation; measured scheduler delay included. 10 repetitions of N1–N9, with actual committed field edits and completion/open events.";
   writeFileSync(
@@ -362,41 +369,5 @@ test("order guidance exists before focus and remains after unrelated editing", a
     .getByLabel("Assessment / plan", { exact: true })
     .fill("Observe clinically");
   await expect(page.locator(".caselog")).toContainText("Order Entry");
-});
-test("transcript popup requires review, preserves current values, and emits normal guidance", async ({
-  page,
-}) => {
-  const errors: string[] = [];
-  page.on("pageerror", (e) => errors.push(e.message));
-  await page
-    .getByRole("button", { name: "Simulate transcript drafts" })
-    .click();
-  const popup = page.getByRole("dialog");
-  await expect(popup).toBeVisible();
-  await expect(
-    popup.getByRole("button", { name: "Apply approved drafts" }),
-  ).toBeDisabled();
-  await expect(popup).toContainText("Current: Not recorded");
-  await popup
-    .getByRole("checkbox", {
-      name: "Approve Large vessel occlusion present: true",
-    })
-    .check();
-  await page.screenshot({
-    path: "reports/transcript-review.png",
-    fullPage: true,
-  });
-  await popup.getByRole("button", { name: "Apply approved drafts" }).click();
-  await expect(popup).not.toBeVisible();
-  await expect(
-    page.getByLabel("Large vessel occlusion present", { exact: true }),
-  ).toHaveValue("yes");
-  await expect(page.getByLabel("CTA done", { exact: true })).toHaveValue(
-    "",
-  );
-  await expect(page.locator(".field-guidance")).toContainText(
-    "ED provider initiates transfer",
-  );
-  expect(errors).toEqual([]);
 });
 

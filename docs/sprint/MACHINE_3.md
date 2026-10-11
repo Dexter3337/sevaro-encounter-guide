@@ -1,5 +1,10 @@
 # Machine 3 — the screen
 
+> Latest checkpoint: [Machine 3 and demo readiness review](../../reports/MACHINE3_DEMO_READINESS.md),
+> 10 October 2026. Components exist but most screen integration is unfinished. Fresh combined
+> checks pass: 294 unit tests, 29 sponsor cases and 11 browser workflows. See the task table and
+> prioritized demo blockers before treating any task below as complete.
+
 > In Claude Code, opened at the repository root, send:
 > **"Read `docs/sprint/MACHINE_3.md` and follow it. Start with task 1."**
 

@@ -1,5 +1,15 @@
 # Implementation status
 
+## Current sprint checkpoint (10 October 2026)
+
+The milestone completion below records the earlier prototype, not completion of the new
+three-machine sprint. See [Machine 3 and demo readiness review](../reports/MACHINE3_DEMO_READINESS.md)
+for the current task-level state and blockers. On Machine 3 combined with Machine 2 tasks 1-4,
+294 unit tests, all 29 sponsor cases, the production build and 11 browser workflows pass.
+The dock, gate banner, multi-file import UI and Machine 2 component mounts remain unfinished.
+
+## Earlier prototype milestones
+
 Source work in ../research and ../outputs is preserved. No AGENTS.md or existing application found; workspace is not a Git repository.
 
 - [x] Read plan and sponsor brief; inspect archive (two PDFs, no dataset or executable files).
