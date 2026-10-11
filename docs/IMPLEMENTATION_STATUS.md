@@ -2,11 +2,12 @@
 
 ## Current sprint checkpoint (10 October 2026)
 
-The milestone completion below records the earlier prototype, not completion of the new
-three-machine sprint. See [Machine 3 and demo readiness review](../reports/MACHINE3_DEMO_READINESS.md)
-for the current task-level state and blockers. On Machine 3 combined with Machine 2 tasks 1-5,
-295 unit tests, all 29 sponsor cases, the production build and 11 browser workflows pass.
-The dock, gate banner, multi-file import UI and Machine 2 component mounts remain unfinished.
+The milestones below describe the earlier prototype. The current combined audit is
+[Combined delivery review](../reports/SPRINT_COMPLETION_REVIEW.md), product commit `c778f26`.
+M1 and all nine M2 deliveries are present; M3 screen integration remains unfinished.
+Multi-file import is now delivered, with an uploaded-CSV mapping defect. Current checks:
+356 unit tests, 29 sponsor cases, production build and 14 browser workflows pass.
+The review records additional schedule defects, missing integration and demo freeze criteria.
 
 ## Earlier prototype milestones
 

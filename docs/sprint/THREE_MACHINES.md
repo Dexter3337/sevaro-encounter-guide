@@ -1,5 +1,9 @@
 # Three machines — who does what, and how we stay in step
 
+> Historical checkpoint: current delivery status and verification counts are in the
+> [combined review](../../reports/SPRINT_COMPLETION_REVIEW.md) (10 October 2026, product commit `c778f26`).
+
+
 This replaces the five-machine split in `SPRINT_PLAN.md`. The detailed task lists in the
 `MACHINE_*.md` files still apply; this says who owns which of them now.
 

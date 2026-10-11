@@ -1,5 +1,9 @@
 # Machine 3 and demo readiness review
 
+> Historical checkpoint: current delivery status and verification counts are in the
+> [combined review](SPRINT_COMPLETION_REVIEW.md) (10 October 2026, product commit `c778f26`).
+
+
 Reviewed 10 October 2026, America/New_York. The checkout initially used the older `main` (`eee509d`). During shipping, Machine 2 task 5 (`6236458`) arrived. Machine 3's existing `5154469` was rebased onto it as `2eb9eed`; the first review checkpoint shipped to both `sprint/m3-ui` and `sprint/demo` as `167d771`. This report includes task 5 and fresh checks of that combined work. This is a checkpoint review, not a declaration that the sprint is finished.
 
 **Verdict: the existing prototype can be demonstrated; the new sprint presentation is not ready yet.** The deterministic engine and import APIs work. Most remaining work is connecting the new UI components, delivering Machine 2's remaining screens, and rehearsing the exact judge-file workflow. Passing the old browser paths does not prove the unmounted dock works.

@@ -1,5 +1,9 @@
 # Measured verification results
 
+> Historical checkpoint: current delivery status and verification counts are in the
+> [combined review](SPRINT_COMPLETION_REVIEW.md) (10 October 2026, product commit `c778f26`).
+
+
 Generated from saved runner reports on 2026-10-10T17:43:31.665Z. Synthetic workflow engineering tests only; no clinical validation.
 
 | Check | Actual result |

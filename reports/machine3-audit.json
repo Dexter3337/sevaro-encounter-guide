@@ -1,7 +1,7 @@
 {
-  "reviewedAt": "2026-10-11T03:16:26.693Z",
+  "reviewedAt": "2026-10-11T03:47:04.882Z",
   "branch": "sprint/m3-ui",
-  "commit": "167d77137fa94161cea46d747cb051544b482eb7",
+  "commit": "c778f2655d3547a1f91c2573923b61cbf6ca1b76",
   "environment": {
     "node": "v24.20.0",
     "browser": "154.0.8037.98",
@@ -66,6 +66,24 @@
       "path": "data/field-aliases.json",
       "bytes": 2831,
       "sha256": "537d8fc2a997bab65ebb212ba32247b1a738d303608221ab2e8be55f64d70f2d",
+      "kind": "text"
+    },
+    {
+      "path": "data/fixtures/syn-108/README.md",
+      "bytes": 1566,
+      "sha256": "0f34da8afe6215d411f86d3050776c9c1e35a3bae91884184ca886386cfa289e",
+      "kind": "text"
+    },
+    {
+      "path": "data/fixtures/syn-108/hospital_guides.json",
+      "bytes": 4157,
+      "sha256": "b6e4a276fb4ae5bbff691c0dd06da22c68526f5a20fed98e12898080de7b1a3b",
+      "kind": "text"
+    },
+    {
+      "path": "data/fixtures/syn-108/storyboard_notes.json",
+      "bytes": 694,
+      "sha256": "49eba3820ce98038bb85b830f3115564dc74177fdb1ccec3609111e703b379fc",
       "kind": "text"
     },
     {
@@ -868,8 +886,8 @@
     },
     {
       "path": "reports/MACHINE3_DEMO_READINESS.md",
-      "bytes": 12937,
-      "sha256": "0ce3e90f3cf8920685c9f08cc32ecd06300f407e39d45ce22045178e6ddd2eef",
+      "bytes": 12950,
+      "sha256": "ec1794c373762f18c5dde530921b9911e29545f6c906791229abcf106d6d6483",
       "kind": "text"
     },
     {
@@ -880,20 +898,20 @@
     },
     {
       "path": "reports/machine3-audit.json",
-      "bytes": 45194,
-      "sha256": "a37bd54295fadf79adc470f2880a557cc0a052932cbb247ae72598e4f0406ec0",
+      "bytes": 46649,
+      "sha256": "0617c602e5a9d21e1e16f459d55caac95db6d6b1e1e036177d616af8cc6aa92a",
       "kind": "text"
     },
     {
       "path": "reports/machine3-desktop.png",
-      "bytes": 345072,
-      "sha256": "b5312a481b8a2aa3a97f491e56a5cc16a25a83ace41ec7d2dbb043cee700b8cb",
+      "bytes": 344739,
+      "sha256": "4f784954ebd7e43d82937ad8305cbf9f3a1315b816152f3935cc66ee93b6de37",
       "kind": "binary-or-config"
     },
     {
       "path": "reports/machine3-mobile.png",
-      "bytes": 161739,
-      "sha256": "9d08eb28189507e14ebc3a99ec2f3af9c546cf7bbdc8588a48c4520e4ac6fe4c",
+      "bytes": 161806,
+      "sha256": "b1e5e36fe305de4e21f36bba8d752961e8f7c852a7c651bf94e81faed67eb5b3",
       "kind": "binary-or-config"
     },
     {
@@ -1072,14 +1090,32 @@
     },
     {
       "path": "src/chat/ChatPanel.tsx",
-      "bytes": 530,
-      "sha256": "450c706670d0615ad0727946b32278f33609e6033a15382e73dbc0a373e0bff1",
+      "bytes": 6941,
+      "sha256": "26b141bdc9cc1d0893ce9f1b81752ca2beb5068f288e94693210996565cb86a8",
+      "kind": "text"
+    },
+    {
+      "path": "src/chat/suggestions.ts",
+      "bytes": 2256,
+      "sha256": "11c7eee4daa0ee919babdd011fb243bdf19ca6727744b138233437dd571ec948",
+      "kind": "text"
+    },
+    {
+      "path": "src/chat/thread.ts",
+      "bytes": 3538,
+      "sha256": "b115853f22da62ab9ef90fccd8e3b0a9a60000e1009591f674dcdf4c1313c924",
       "kind": "text"
     },
     {
       "path": "src/contacts/ContactsSheet.tsx",
-      "bytes": 683,
-      "sha256": "8f3251fbe0a2d0d9308f0b00b8cb0998a66604842345e29b913873f31929ad7e",
+      "bytes": 4611,
+      "sha256": "ebcb4ebf8da0e75c950e642b505b6f31951772292a6f150858205b2e998fe7b5",
+      "kind": "text"
+    },
+    {
+      "path": "src/contacts/availability.ts",
+      "bytes": 3099,
+      "sha256": "17a4f69915f9b81ffc5d99488e098a3a6ec051f24b104c791e964c7e0243d9cd",
       "kind": "text"
     },
     {
@@ -1114,8 +1150,8 @@
     },
     {
       "path": "src/encounter/StoryboardCard.tsx",
-      "bytes": 481,
-      "sha256": "83a6ebfa434d6b58415520645947988b9dbf8858c9163e0a445efe8dd31aa7be",
+      "bytes": 6270,
+      "sha256": "6cd7e58d5e84ea936b41867c2b736aca99d9fa521d84cf66b4991d779959f23d",
       "kind": "text"
     },
     {
@@ -1180,8 +1216,14 @@
     },
     {
       "path": "src/main.tsx",
-      "bytes": 57209,
-      "sha256": "d17b3913512fb6092554773de509e68b620d5bd3aa790f59486cfb7b1a13ea21",
+      "bytes": 63683,
+      "sha256": "e30c8441f3a3d5655dcb47460fbb2d1ea22385bee78823fd677acdccbb957d97",
+      "kind": "text"
+    },
+    {
+      "path": "src/sprint.css",
+      "bytes": 740,
+      "sha256": "91557165b1bdc00bcda27963151672a1a1eee77d7e4496d1aef02a61a721246e",
       "kind": "text"
     },
     {
@@ -1228,8 +1270,14 @@
     },
     {
       "path": "tests/alien.test.ts",
-      "bytes": 10349,
-      "sha256": "62ae7d94f1e169c02291dee41045a6d48540ccc7e6624c9d792e50b441f51f91",
+      "bytes": 16882,
+      "sha256": "5be9c77fc074b8d3efa629bff238fc05ccd0a965c6b29ba1453860c264f13e40",
+      "kind": "text"
+    },
+    {
+      "path": "tests/chat.test.ts",
+      "bytes": 9519,
+      "sha256": "abc8ac2bda73fa374a2885308a81d8b36fc990fd93b7fcdff033dcd21162128c",
       "kind": "text"
     },
     {
@@ -1239,9 +1287,21 @@
       "kind": "text"
     },
     {
+      "path": "tests/contacts.test.ts",
+      "bytes": 7230,
+      "sha256": "49f500b1d76bc980cb1d42daafb264650f81338def59df0430928ff13fefe8f5",
+      "kind": "text"
+    },
+    {
       "path": "tests/dock.test.ts",
       "bytes": 5591,
       "sha256": "575fcf0b22910f8b294180b75a2a04be16ffea78ce5a323d98db4699960ecfa9",
+      "kind": "text"
+    },
+    {
+      "path": "tests/e2e/import.spec.ts",
+      "bytes": 3687,
+      "sha256": "9c507002f929c8fc899d6fe69ddfe740c6c54557bc037ebb756743c7cb8ec3ec",
       "kind": "text"
     },
     {
@@ -1290,6 +1350,12 @@
       "path": "tests/semantics.test.ts",
       "bytes": 7245,
       "sha256": "d00f3efc26f4e6c22074f44e85dc692cb6d6c4d00463c1417535ec7056af9fda",
+      "kind": "text"
+    },
+    {
+      "path": "tests/storyboard-card.test.ts",
+      "bytes": 6043,
+      "sha256": "9ec40a60b5b9fff5a858859a347b855abebb15b58639c435b6365c999344f33f",
       "kind": "text"
     },
     {
@@ -1394,7 +1460,7 @@
       "gateBannerCount": 0
     },
     "importer": {
-      "multiple": false
+      "multiple": true
     },
     "errors": []
   }
