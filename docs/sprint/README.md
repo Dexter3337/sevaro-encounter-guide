@@ -7,13 +7,15 @@ Five developers, five machines, demo tomorrow.
 ```bash
 git clone https://github.com/hsa70-ui/sevaro-encounter-guide.git
 cd sevaro-encounter-guide
+corepack enable           # if `pnpm` is not found; otherwise: npm i -g pnpm@11
 git checkout sprint/demo
 pnpm install --frozen-lockfile
-pnpm test        # must show 110 passing before you change anything
-pnpm dev         # http://127.0.0.1:5173
+pnpm test                 # must show 110 passing before you change anything
+pnpm dev                  # http://127.0.0.1:5173
 ```
 
 If `pnpm test` does not pass, stop and fix your environment first. Node 24, pnpm 11.
+Playwright browsers for e2e: `pnpm exec playwright install chromium` (Machine E needs this).
 
 ## 2. Read the plan
 
