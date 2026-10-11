@@ -68,7 +68,10 @@ export function answerField(
   r.effectiveLocal = `${localTime(instant, h.timezone).toPlainDate()} ${localTime(instant, h.timezone).toPlainTime().toString({ smallestUnit: "minute" })} · ${h.timezone}`;
   if (!guide.length) {
     r.primaryStatus = "not_in_guide";
-    r.message = `${field} is not documented in ${h.name}'s guide. Availability is unknown; no other hospital was searched.`;
+    // The sponsor's sentence leads, verbatim; the clarification follows it.
+    // An absent field means the guide has no record, not that the hospital
+    // lacks the capability — and no other hospital is ever consulted.
+    r.message = `Not available in this hospital's guide. This does not mean ${h.name} lacks it — the field is absent from the guide, and no other hospital was searched.`;
     r.missingEvidence = {
       hospitalId: h.id,
       version: h.version,
