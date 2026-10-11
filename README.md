@@ -2,7 +2,10 @@
 
 A synthetic teleneurology workflow prototype: large consultation video, compact captions, contextual hospital guidance, completion gates, and a conversational assistant.
 
-- **Live demo:** https://dynamic-cat-513c19.netlify.app/
+**Try it live:** https://dynamic-cat-513c19.netlify.app/
+
+AI runs on the deployed site with the key held server-side; local runs need `GEMINI_API_KEY` in ignored `.env.local` (see [docs/LLM_SETUP.md](docs/LLM_SETUP.md)).
+
 - **Mentor presentation:** https://dynamic-cat-513c19.netlify.app/presentation.html
 - **Repository:** https://github.com/Dexter3337/sevaro-encounter-guide
 
