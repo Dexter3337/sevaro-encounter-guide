@@ -107,8 +107,6 @@ function providers(opts: LlmServerOptions): ProviderCall[] {
 }
 export async function handleLlm(req: Request, opts: LlmServerOptions): Promise<Response> {
   if (req.method !== "POST") return json(405, { code: "method", error: "Use POST." });
-  if (opts.allowedOrigins.length && !opts.allowedOrigins.includes(req.headers.get("origin") ?? ""))
-    return json(403, { code: "origin", error: "AI requests are accepted from this site only." });
   if (opts.accessCode && req.headers.get("x-llm-access") !== opts.accessCode)
     return json(401, { code: "access_code_required", error: "Enter the AI access code to continue." });
   const available = providers(opts);
@@ -133,6 +131,10 @@ export async function handleLlm(req: Request, opts: LlmServerOptions): Promise<R
     if (input.task === "suggest" && !input.transcript.length) throw Error();
     if (input.task === "chat" && !input.question.trim()) throw Error();
   } catch { return json(400, { code: "invalid_input", error: "The AI request is invalid." }); }
+  // Invalid-input probes need no browser Origin and never reach the provider.
+  // Valid AI requests still require this site's origin.
+  if (opts.allowedOrigins.length && !opts.allowedOrigins.includes(req.headers.get("origin") ?? ""))
+    return json(403, { code: "origin", error: "AI requests are accepted from this site only." });
   const start = performance.now();
   // Every secret the server holds is masked, whichever provider answered.
   const secrets = [...available.map(p => p.key), ...(opts.maskedSecrets ?? [])].filter(Boolean);

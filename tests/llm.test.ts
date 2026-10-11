@@ -58,6 +58,13 @@ describe("LLM extraction and server boundary", () => {
     const r = await handleLlm(req(),{allowedOrigins:[]});
     expect(r.status).toBe(503);expect((await r.json()).code).toBe("not_configured");
   });
+  it("returns invalid_input for a bare health probe without calling the provider", async () => {
+    const fetchImpl = vi.fn();
+    const probe = new Request("http://localhost/api/llm", {method:"POST",headers:{"content-type":"application/json"},body:"{}"});
+    const r = await handleLlm(probe,{...opts,fetchImpl});
+    expect(r.status).toBe(400);expect((await r.json()).code).toBe("invalid_input");
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
   it("bounds chunked request bodies and rejects duplicate transcript IDs", async () => {
     expect((await handleLlm(req({...input(),question:"x".repeat(120001)}),opts)).status).toBe(413);
     expect((await handleLlm(req({...input(),transcript:[transcript[0],transcript[0]]}),opts)).status).toBe(400);
