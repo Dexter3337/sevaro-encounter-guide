@@ -2,6 +2,10 @@
 
 Five developers, five machines, demo tomorrow.
 
+> **New to this? Read [`HOW_TO_START.md`](HOW_TO_START.md) instead.** It walks through every step
+> in plain language: getting access, cloning, which file to point Claude at, and the order to do
+> things in. The rest of this page is the short version for people who already know the setup.
+
 ## 1. Set up (10 minutes)
 
 ```bash
@@ -22,9 +26,14 @@ Playwright browsers for e2e: `pnpm exec playwright install chromium` (Machine E 
 [`SPRINT_PLAN.md`](SPRINT_PLAN.md) — everyone reads this. It has the timetable, the file-ownership
 table, the frozen integration contracts, the 13 guardrails and the demo script.
 
-## 3. Open your prompt
+## 3. Point Claude Code at your prompt
 
-Pick your machine, open Claude Code in the repository root, and paste the whole file:
+Open Claude Code inside the `sevaro-encounter-guide` folder and send it one line, using your own
+machine's filename:
+
+> Read `docs/sprint/MACHINE_A_INGESTION.md` and follow it. Start with the first task.
+
+You do not need to copy the file's contents — it is already in the repo.
 
 | Machine | Prompt | You own |
 |---|---|---|
