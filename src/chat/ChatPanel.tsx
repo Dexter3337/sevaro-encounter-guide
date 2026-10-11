@@ -1,17 +1,18 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, useMemo } from "react";
+import { createChatSession } from "./session";
+import type { QuestionInterpreter } from "./adapter";
+import type { QuestionTurn } from "./questions";
 import type { Context, Hospital, Result } from "../domain";
 import { Evidence, NudgeCard } from "../guidance/NudgeCard";
 import { suggestionsFor } from "./suggestions";
 import {
   askField,
-  askGuide,
   escalationReason,
   seedFits,
   threadFor,
   threadKey,
   withTurn,
   type Thread,
-  type Turn,
 } from "./thread";
 
 // Machine 2 owns this file. Machine 3 created it so the mount point and the
@@ -22,6 +23,7 @@ export interface ChatPanelProps {
   context: Context;
   /** The nudge the doctor clicked, if they arrived from one. */
   seed?: Result;
+  interpreter?: QuestionInterpreter;
   onClose: () => void;
   onContacts: (reason: string) => void;
 }
@@ -65,7 +67,7 @@ export function TurnView({
   onPick,
   onContacts,
 }: {
-  turn: Turn;
+  turn: QuestionTurn;
   onAsk: (r: Result) => void;
   onPick: (field: string) => void;
   onContacts: (reason: string) => void;
@@ -77,6 +79,9 @@ export function TurnView({
         <span className="sr-only">You asked: </span>
         {turn.question}
       </p>
+      {turn.interpreted && (
+        <p className="chat-interpreted">{turn.interpreted}</p>
+      )}
       {turn.result && <NudgeCard r={turn.result} onAsk={onAsk} />}
       {reason && (
         <button
@@ -115,6 +120,7 @@ export function ChatPanel({
   hospital,
   context,
   seed,
+  interpreter,
   onClose,
   onContacts,
 }: ChatPanelProps) {
@@ -124,6 +130,24 @@ export function ChatPanel({
   const thread = threadFor(stored, key);
   const text = draft.key === key ? draft.text : "";
   const nextId = useRef(1);
+  const latest = useRef({ hospital, context });
+  latest.current = { hospital, context };
+  const session = useMemo(
+    () => createChatSession(() => latest.current, { interpreter }),
+    [interpreter],
+  );
+  const [pending, setPending] = useState(false);
+  const [mode, setMode] = useState("Local guide answers");
+  const [failure, setFailure] = useState("");
+  const lastRequest = useRef(0);
+  useEffect(() => {
+    setPending(false);
+    setFailure("");
+    return () => {
+      lastRequest.current++;
+      session.dispose();
+    };
+  }, [session, key, open]);
   const input = useRef<HTMLTextAreaElement>(null);
   const inputId = useId();
   const shownSeed = seedFits(seed, hospital) ? seed : undefined;
@@ -134,11 +158,41 @@ export function ChatPanel({
 
   if (!open) return null;
 
-  const submit = (q: string) => {
+  const submit = async (q: string) => {
     if (!q.trim()) return;
-    const turn = askGuide(hospital, context, q, nextId.current++);
-    setStored((t) => withTurn(t, key, turn));
-    setDraft({ key, text: "" });
+    const ticket = ++lastRequest.current;
+    setPending(true);
+    setFailure("");
+    try {
+      const reply = await session.submit(
+        q,
+        thread.turns.at(-1)?.result?.title || shownSeed?.title,
+      );
+      if (!reply || ticket !== lastRequest.current) return;
+      const turns = reply.turns.map((turn) => ({
+        ...turn,
+        id: nextId.current++,
+      }));
+      setStored((t) =>
+        turns.reduce(
+          (state, turn) => withTurn(state, key, turn),
+          threadFor(t, key),
+        ),
+      );
+      setDraft({ key, text: "" });
+      setMode(
+        reply.mode === "interpreted"
+          ? "AI-assisted interpretation; guide-sourced answers"
+          : reply.mode === "fallback"
+            ? "AI unavailable; local guide answers"
+            : "Local guide answers",
+      );
+    } catch {
+      if (ticket === lastRequest.current)
+        setFailure("The guide could not be searched. Please try again.");
+    } finally {
+      if (ticket === lastRequest.current) setPending(false);
+    }
   };
   const pick = (field: string) => {
     const turn = askField(hospital, context, field, nextId.current++);
@@ -188,7 +242,11 @@ export function ChatPanel({
           <ul>
             {suggestionsFor(shownSeed?.title).map((s) => (
               <li key={s}>
-                <button type="button" className="link" onClick={() => submit(s)}>
+                <button
+                  type="button"
+                  className="link"
+                  onClick={() => submit(s)}
+                >
                   {s}
                 </button>
               </li>
@@ -207,6 +265,9 @@ export function ChatPanel({
           />
         ))}
       </div>
+      <p className="chat-mode" role="status">
+        {pending ? "Checking this hospital's guide..." : failure || mode}
+      </p>
       <form
         className="chat-form"
         onSubmit={(e) => {
@@ -226,14 +287,24 @@ export function ChatPanel({
           placeholder="Ask about this hospital's guide…"
           onChange={(e) => setDraft({ key, text: e.target.value })}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
+            if (
+              e.key === "Enter" &&
+              !e.shiftKey &&
+              !e.nativeEvent.isComposing
+            ) {
               e.preventDefault();
               submit(text);
             }
           }}
         />
-        <small className="muted">Don't include patient names or identifiers.</small>
-        <button className="secondary" type="submit" disabled={!text.trim()}>
+        <small className="muted">
+          Don't include patient names or identifiers.
+        </small>
+        <button
+          className="secondary"
+          type="submit"
+          disabled={!text.trim() || pending}
+        >
           Ask
         </button>
       </form>

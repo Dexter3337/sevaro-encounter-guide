@@ -885,6 +885,8 @@ column is never read (GR-10).
 
 ### 16.2 Clinician layout
 
+**11 October 2026 user clarification:** The requested demo now uses video consultation on the left half, the form on the right half, and a bottom-right guide companion. This supersedes the full-width form layout below and the layout portion of M2.10. See `DESIGN.md` and `docs/PRODUCTION_PROGRESS_REVIEW.md`; production host/video integration remains pending.
+
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
 │ Highland Valley Hospital · SYN-006   Hospital 19:30 Tue CST · You 20:30 EST   Stroke · Acute │

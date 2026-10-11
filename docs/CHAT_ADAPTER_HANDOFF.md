@@ -1,6 +1,6 @@
 # Chat interpretation adapter — 11 October 2026
 
-Scope agreed with the user: AI/chatbot logic only. M3 owns the consultation layout, field-following dock and mounting/styling chat. No M3 implementation files were changed for this delivery. Provider selection is deferred at the user's request.
+The initial delivery covered AI/chatbot logic only. The user's subsequent UI request authorized the consultation redesign and ChatPanel integration, now delivered on `sprint/consultation-ui`. Provider selection remains deferred at the user's request.
 
 ## Delivered
 
@@ -9,9 +9,9 @@ Scope agreed with the user: AI/chatbot logic only. M3 owns the consultation layo
 - `src/chat/session.ts`: cancel previous requests, suppress late replies, reject responses after hospital/version/encounter/revision/clock changes, and clean up on unmount.
 - `tests/chat-adapter.test.ts`: sponsor parity, typo/format/multiple-question cases, model contract rejection, timeout/failure fallback and request-race cases.
 
-No provider, credentials, SDK, paid request or external network call is configured. This is an adapter and tested local fallback, not a claim of live LLM performance or broad natural-language coverage. The existing ChatPanel still calls its old synchronous resolver until its owner adopts this API.
+No provider, credentials, SDK, paid request or external network call is configured. This is an adapter and tested local fallback, not a claim of live LLM performance or broad natural-language coverage. ChatPanel now uses this session API, renders all returned turns and corrected interpretations, and shows local/fallback mode. Browser coverage verifies a misspelled three-part submission.
 
-## M3 / chat owner integration
+## Integration pattern (now mounted in ChatPanel)
 
 Create one session per mounted chat, with a callback that reads the latest hospital and encounter from refs:
 
@@ -57,4 +57,4 @@ A timeout (8 seconds by default), malformed response or provider error falls bac
 
 The contract tests use an injected test interpreter; they do not evaluate a real provider. After selection, measure intent accuracy and latency on sponsor cases, unseen hospital fields, noisy spelling, multi-part questions, pronoun follow-ups, ambiguous times, out-of-scope requests and prompt-injection attempts. A schema-valid intent can still identify the wrong field; show its interpretation and require clarification when uncertain. Keyword-based local scope checks are conservative helpers, not a comprehensive clinical safety classifier.
 
-Run `pnpm exec vitest run tests/chat-adapter.test.ts`, then the full unit suite and build. No browser/UI readiness claim follows from this backend-only delivery.
+Run `pnpm exec vitest run tests/chat-adapter.test.ts`, then the full unit suite and build. See `docs/PRODUCTION_PROGRESS_REVIEW.md` for the subsequent UI integration and browser validation.

@@ -1,5 +1,11 @@
 import React from "react";
 const paths: Record<string, React.ReactNode> = {
+  camera: (
+    <>
+      <rect x="3" y="6" width="12" height="12" rx="3" />
+      <path d="m15 10 6-3v10l-6-3" />
+    </>
+  ),
   spark: (
     <>
       <path d="m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4Z" />

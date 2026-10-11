@@ -1,4 +1,5 @@
 import { useEffect, useReducer, useRef } from "react";
+import { AssistantOrb } from "./AssistantOrb";
 import { nudgePriority } from "../engine";
 import { NudgeCard, ReferenceRow } from "./NudgeCard";
 import {
@@ -26,10 +27,10 @@ export function NudgeDock({
 }: NudgeDockProps) {
   const [dock, dispatch] = useReducer(dockReducer, initialDock);
   const panelRef = useRef<HTMLDivElement>(null);
+  const pillRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (openRequest)
-      dispatch({ type: "OPEN", resultId: openRequest.resultId });
+    if (openRequest) dispatch({ type: "OPEN", resultId: openRequest.resultId });
   }, [openRequest]);
 
   // Esc collapses the panel back to the pill, wherever focus is.
@@ -63,6 +64,22 @@ export function NudgeDock({
       ?.querySelector(`[data-result="${CSS.escape(dock.focusResultId)}"]`)
       ?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [dock.state, dock.focusResultId]);
+
+  // Reserve space in layout and keep the focused field inside its scroll area.
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      const active = document.activeElement;
+      const form = active?.closest(".caselog");
+      if (!(active instanceof HTMLElement) || !(form instanceof HTMLElement))
+        return;
+      const a = active.getBoundingClientRect(),
+        box = form.getBoundingClientRect();
+      if (a.bottom > box.bottom - 16)
+        form.scrollTop += a.bottom - box.bottom + 20;
+      else if (a.top < box.top + 16) form.scrollTop -= box.top - a.top + 20;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [dock.state, focusedFieldId]);
 
   if (unavailable)
     return (
@@ -102,15 +119,27 @@ export function NudgeDock({
       {dock.state === "panel" ? (
         <section className="dock-panel" data-testid="dock-panel">
           <header className="dock-header">
-            <div>
-              <p className="eyebrow">
-                <span className="live-dot" /> HOSPITAL GUIDANCE · {summary.count}
-              </p>
-              <h2>{focusedLabel ? `For ${focusedLabel}` : "This step"}</h2>
+            <div className="dock-title-group">
+              <AssistantOrb small />
+              <div>
+                <p className="eyebrow">
+                  <span className="live-dot" /> HOSPITAL GUIDANCE ·{" "}
+                  {summary.count}
+                </p>
+                <h2>
+                  {focusedLabel ? `For ${focusedLabel}` : "Hospital guidance"}
+                </h2>
+                <span className="dock-subtitle">
+                  Guide companion ? {summary.label}
+                </span>
+              </div>
             </div>
             <button
               className="dock-collapse"
-              onClick={() => dispatch({ type: "COLLAPSE" })}
+              onClick={() => {
+                dispatch({ type: "COLLAPSE" });
+                requestAnimationFrame(() => pillRef.current?.focus());
+              }}
               aria-label="Collapse guidance"
             >
               Hide
@@ -141,14 +170,19 @@ export function NudgeDock({
         </section>
       ) : (
         <button
+          ref={pillRef}
           className={`dock-pill ${summary.tier}`}
           onClick={() => dispatch({ type: "TOGGLE" })}
           data-testid="dock-pill"
           aria-expanded={false}
         >
+          <AssistantOrb />
           <span className="dock-pill-count">{summary.count}</span>
           {/* Tier is said in words as well as shown in colour. */}
-          <span className="dock-pill-label">{summary.label}</span>
+          <span className="dock-pill-copy">
+            <strong>Guide companion</strong>
+            <span className="dock-pill-label">{summary.label}</span>
+          </span>
         </button>
       )}
     </aside>

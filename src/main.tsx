@@ -26,13 +26,7 @@ import {
   latest,
   download,
 } from "./data";
-import {
-  evaluate,
-  ask,
-  answerField,
-  gates,
-  engineVersion,
-} from "./engine";
+import { evaluate, ask, answerField, gates, engineVersion } from "./engine";
 import { NudgeDock } from "./guidance/NudgeDock";
 import { NudgeCard } from "./guidance/NudgeCard";
 import { FieldMarker } from "./guidance/FieldMarker";
@@ -60,6 +54,9 @@ import "./style.css";
 import { Icon } from "./Icon";
 import "./workspace.css";
 import "./sprint.css";
+import "./consultation.css";
+import { ConsultationPane } from "./encounter/ConsultationPane";
+import { AssistantOrb } from "./guidance/AssistantOrb";
 
 const label = (s: string) =>
   s.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -244,7 +241,9 @@ function App() {
   const blurTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   // The hard stop lives at the Complete button once the doctor has tried it.
   const [gateShown, setGateShown] = useState(false);
-  const [released, setReleased] = useState<{ id: string; reason: string }[]>([]);
+  const [released, setReleased] = useState<{ id: string; reason: string }[]>(
+    [],
+  );
   const [guidanceFailed, setGuidanceFailed] = useState(false);
   const [notice, setNotice] = useState("");
   const [fixture, setFixture] = useState("N2");
@@ -470,7 +469,10 @@ function App() {
     }
   }
   function acknowledgeGate(r: Result, reason: string) {
-    const next = [...released.filter((x) => x.id !== r.id), { id: r.id, reason }];
+    const next = [
+      ...released.filter((x) => x.id !== r.id),
+      { id: r.id, reason },
+    ];
     setReleased(next);
     setAudit((a) => [
       ...a,
@@ -708,7 +710,7 @@ function App() {
             <small>Engine {engineVersion}</small>
           </div>
         </nav>
-        <main>
+        <main className={`page-${tab}`}>
           <div className="page-heading">
             <div>
               <p className="eyebrow">
@@ -720,7 +722,7 @@ function App() {
               </p>
               <h1>
                 {tab === "encounter"
-                  ? "Less documenting. More presence."
+                  ? "Consultation workspace"
                   : tab === "guides"
                     ? "Source records, made inspectable."
                     : "Evidence before claims."}
@@ -779,7 +781,9 @@ function App() {
               <small>Guide version</small>
               <strong>{h.version}</strong>
               <small>
-                {outage || guidanceFailed ? "Unavailable" : "Loaded · read-only"}
+                {outage || guidanceFailed
+                  ? "Unavailable"
+                  : "Loaded · read-only"}
               </small>
             </div>
           </section>
@@ -958,6 +962,7 @@ function App() {
                 </div>
               </details>
               <div className="workspace single" id="encounter-workspace">
+                <ConsultationPane hospital={h.name} />
                 <section className="caselog">
                   <div className="section-head">
                     <div>
@@ -1061,7 +1066,11 @@ function App() {
                           }
                         />
                         {f.id === "cta_done" && (
-                          <small className="field-context">Record whether the scan was performed, including at another facility. Missing guide information does not mean CTA is unavailable.</small>
+                          <small className="field-context">
+                            Record whether the scan was performed, including at
+                            another facility. Missing guide information does not
+                            mean CTA is unavailable.
+                          </small>
                         )}
                       </div>
                     ))}
@@ -1127,6 +1136,17 @@ function App() {
                   </footer>
                 </section>
                 <div className={`companion${chatOpen ? " chat-open" : ""}`}>
+                  <button
+                    className="assistant-idle"
+                    onClick={() => openChat()}
+                    aria-label="Open guide companion"
+                  >
+                    <AssistantOrb />
+                    <span>
+                      <strong>Guide companion</strong>
+                      <small>Here when you need me</small>
+                    </span>
+                  </button>
                   <GuidanceBoundary key={`dock:${h.id}:${h.version}`}>
                     <NudgeDock
                       results={visible}
@@ -1281,7 +1301,8 @@ function App() {
                       have never seen; the mapping is shown, never guessed. */}
                   {importFiles
                     .filter(
-                      (f) => f.format === "csv" && csvKind(f.text) === "records",
+                      (f) =>
+                        f.format === "csv" && csvKind(f.text) === "records",
                     )
                     .map((f) => {
                       const headers = csvHeaders(f.text).headers;
@@ -1299,10 +1320,15 @@ function App() {
                                   aria-label={`${f.name} ${k}`}
                                   value={map[k] || ""}
                                   onChange={(e) => {
-                                    const next = { ...map, [k]: e.target.value };
+                                    const next = {
+                                      ...map,
+                                      [k]: e.target.value,
+                                    };
                                     setImportFiles((p) =>
                                       p.map((x) =>
-                                        x.name === f.name ? { ...x, map: next } : x,
+                                        x.name === f.name
+                                          ? { ...x, map: next }
+                                          : x,
                                       ),
                                     );
                                     setPreview(undefined);
@@ -1407,7 +1433,10 @@ function App() {
                     {preview.files.length > 1 && (
                       <ul className="preview-files" data-testid="preview-files">
                         {preview.files.map((f, i) => (
-                          <li key={i} className={f.errors.length ? "rejected" : ""}>
+                          <li
+                            key={i}
+                            className={f.errors.length ? "rejected" : ""}
+                          >
                             <strong>{f.name}</strong> ·{" "}
                             {f.errors.length
                               ? "rejected"
@@ -1425,7 +1454,11 @@ function App() {
                     )}
                     <p>{importSummary(preview)}</p>
                     {preview.diagnostics
-                      .filter((d) => /guide field|held|added to the active|nothing new/.test(d))
+                      .filter((d) =>
+                        /guide field|held|added to the active|nothing new/.test(
+                          d,
+                        ),
+                      )
                       .map((d, i) => (
                         <p key={i} className="preview-summary">
                           {d}
@@ -1488,7 +1521,9 @@ function App() {
                     };
                     const opened = (last.identities || [])
                       .map((x) =>
-                        hs.find((y) => y.id === x.id && y.version === x.version),
+                        hs.find(
+                          (y) => y.id === x.id && y.version === x.version,
+                        ),
                       )
                       .filter((x): x is Hospital => !!x);
                     return opened.length ? (
