@@ -283,6 +283,99 @@ describe("Storyboard import (sponsor format)", () => {
   });
 });
 
+describe("Contacts", () => {
+  const directory = readFileSync("data/seeds/contacts.json", "utf8");
+  const ROLES = ["administrator", "nursing_in_charge", "technical_lead"];
+
+  it("the seed directory covers three roles at every kit hospital and SYN-108", () => {
+    const p = previewImport(directory, "json", undefined, {
+      fileName: "contacts.json",
+    });
+    expect(p.errors).toEqual([]);
+    const all = p.held.flatMap((h) => h.contacts);
+    const ids = [
+      ...["001", "002", "003", "004", "005", "006", "007"].map((n) => `SYN-${n}`),
+      "SYN-108",
+    ];
+    for (const id of ids)
+      expect(
+        all.filter((c) => c.hospitalId === id).map((c) => c.role).sort(),
+      ).toEqual(ROLES);
+    // Fictional numbers only, and nothing warned about.
+    expect(all.every((c) => /^\+1-555-01\d\d$/.test(c.phone))).toBe(true);
+    expect(p.diagnostics.join("\n")).not.toContain("555-01xx");
+    expect(all.every((c) => c.name.endsWith("(synthetic)"))).toBe(true);
+    // Varied on purpose, so the sheet has something to show.
+    const hours = all.map((c) => c.availability);
+    expect(hours).toContain("24/7");
+    expect(hours).toContain("Mon-Fri 0700-1900");
+    expect(hours).toContain("As scheduled");
+    expect(
+      all.some((c) => c.lastVerified && c.lastVerified < "2025-09-18"),
+    ).toBe(true);
+  });
+
+  it("attaches to active hospitals as a new version and holds the rest", () => {
+    const bare = seedHospitals.map(({ contacts: _c, ...h }) => h as Hospital);
+    const p = previewImport(directory, "json", undefined, {
+      existing: bare,
+      fileName: "contacts.json",
+    });
+    expect(p.errors).toEqual([]);
+    expect(p.hospitals).toHaveLength(7);
+    const highland = pick(p.hospitals, "SYN-006");
+    expect(highland.version).toBe("Challenge v2 +contacts 2026-02-02");
+    expect(highland.contacts?.find((c) => c.role === "technical_lead")).toMatchObject({
+      id: "SYN-006:contact:technical_lead",
+      hospitalId: "SYN-006",
+      name: "Priya Raman (synthetic)",
+      phone: "+1-555-0177",
+      altChannel: "Teams: hvh-telehealth",
+      availability: "Mon-Fri 0700-1900",
+      lastVerified: "2026-02-02",
+      source: "contacts.json",
+    });
+    // Each hospital carries only its own people.
+    for (const h of p.hospitals)
+      expect(h.contacts!.every((c) => c.hospitalId === h.id)).toBe(true);
+    expect(p.held.map((h) => h.hospitalId)).toEqual(["SYN-108"]);
+  });
+
+  it("reads contacts from CSV, and replaces a role rather than duplicating it", () => {
+    const csv = [
+      "Hospital ID,Role,Name,Phone,Availability,Last Verified",
+      "SYN-006,Technical Lead,Robin Example (synthetic),555-0190,24/7,2026-03-01",
+    ].join("\n");
+    const base = previewImport(directory, "json", undefined, {
+      existing: seedHospitals.map(({ contacts: _c, ...h }) => h as Hospital),
+    }).hospitals;
+    const p = previewImport(csv, "csv", undefined, {
+      existing: base,
+      fileName: "update.csv",
+    });
+    expect(p.errors).toEqual([]);
+    const [h] = p.hospitals;
+    expect(h.version).toBe("Challenge v2 +contacts 2026-03-01");
+    expect(h.contacts!.filter((c) => c.role === "technical_lead")).toHaveLength(1);
+    expect(h.contacts!.find((c) => c.role === "technical_lead")?.name).toBe(
+      "Robin Example (synthetic)",
+    );
+    expect(h.contacts).toHaveLength(3);
+  });
+
+  it("refuses a contact without a phone, naming the row", () => {
+    const p = previewImport(
+      JSON.stringify({
+        contacts: [{ hospital_id: "SYN-006", role: "administrator", name: "No Phone", phone: "" }],
+      }),
+      "json",
+      undefined,
+      { fileName: "contacts.json" },
+    );
+    expect(p.errors).toEqual(["contacts.json, contact 1: No Phone has no phone number."]);
+  });
+});
+
 describe("Multi-file drop", () => {
   const contacts: ImportFile = {
     name: "directory.json",

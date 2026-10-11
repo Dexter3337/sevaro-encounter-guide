@@ -1,0 +1,36 @@
+{
+  "$comment": "Synthetic escalation contacts: the person to call when the guide cannot answer. Every name, number and channel is fictional; phones are in the 555-01xx range. Availability and verification dates vary on purpose: 24/7, weekday hours, hours the directory does not define, and entries verified more than 180 days before 2026-03-17.",
+  "contacts": [
+    { "hospital_id": "SYN-001", "role": "technical_lead", "name": "Avery Stone (synthetic)", "title": "Telemedicine technical lead", "phone": "+1-555-0101", "alt_channel": "Teams: crmc-telehealth", "availability": "Mon-Fri 0700-1900", "last_verified": "2026-02-02" },
+    { "hospital_id": "SYN-001", "role": "nursing_in_charge", "name": "Jordan Vale (synthetic)", "title": "ED charge nurse", "phone": "+1-555-0102", "availability": "24/7", "last_verified": "2026-02-02" },
+    { "hospital_id": "SYN-001", "role": "administrator", "name": "Morgan Reyes (synthetic)", "title": "House supervisor", "phone": "+1-555-0103", "availability": "24/7", "last_verified": "2026-01-15" },
+
+    { "hospital_id": "SYN-002", "role": "technical_lead", "name": "Casey Holt (synthetic)", "title": "Clinical systems analyst", "phone": "+1-555-0111", "alt_channel": "Teams: brh-video-support", "availability": "Weekdays 0800-1700", "last_verified": "2026-01-20" },
+    { "hospital_id": "SYN-002", "role": "nursing_in_charge", "name": "Riley Brook (synthetic)", "title": "Stroke unit charge nurse", "phone": "+1-555-0112", "availability": "24/7", "last_verified": "2026-01-20" },
+    { "hospital_id": "SYN-002", "role": "administrator", "name": "Quinn Marsh (synthetic)", "title": "Administrator on duty", "phone": "+1-555-0113", "alt_channel": "Pager: 555-0119", "availability": "As scheduled", "last_verified": "2026-01-20" },
+
+    { "hospital_id": "SYN-003", "role": "technical_lead", "name": "Sasha Lin (synthetic)", "title": "Telehealth engineer", "phone": "+1-555-0121", "availability": "24/7", "last_verified": "2026-02-10" },
+    { "hospital_id": "SYN-003", "role": "nursing_in_charge", "name": "Drew Okafor (synthetic)", "title": "Neuro ICU charge nurse", "phone": "+1-555-0122", "availability": "24/7", "last_verified": "2026-02-10" },
+    { "hospital_id": "SYN-003", "role": "administrator", "name": "Elliot Park (synthetic)", "title": "Nursing administrator", "phone": "+1-555-0123", "availability": "Mon-Fri 0800-1800", "last_verified": "2026-02-10" },
+
+    { "hospital_id": "SYN-004", "role": "technical_lead", "name": "Harper Quill (synthetic)", "title": "IT support lead", "phone": "+1-555-0131", "alt_channel": "Teams: mch-it", "availability": "Mon-Fri 0700-1900", "last_verified": "2026-01-08" },
+    { "hospital_id": "SYN-004", "role": "nursing_in_charge", "name": "Rowan Ellis (synthetic)", "title": "ED charge nurse", "phone": "+1-555-0132", "availability": "24/7", "last_verified": "2026-01-08" },
+    { "hospital_id": "SYN-004", "role": "administrator", "name": "Kendall Frost (synthetic)", "title": "Administrator on call", "phone": "+1-555-0133", "availability": "Mon-Fri 0800-1700", "last_verified": "2025-06-30" },
+
+    { "hospital_id": "SYN-005", "role": "technical_lead", "name": "Logan Pierce (synthetic)", "title": "Telemedicine coordinator", "phone": "+1-555-0141", "availability": "Weekdays 7a-5p", "last_verified": "2026-02-02" },
+    { "hospital_id": "SYN-005", "role": "nursing_in_charge", "name": "Emery Shah (synthetic)", "title": "Charge nurse", "phone": "+1-555-0142", "availability": "24/7", "last_verified": "2026-02-02" },
+    { "hospital_id": "SYN-005", "role": "administrator", "name": "Parker Lowe (synthetic)", "title": "Administrator on duty", "phone": "+1-555-0143", "availability": "24/7", "last_verified": "2026-02-02" },
+
+    { "hospital_id": "SYN-006", "role": "technical_lead", "name": "Priya Raman (synthetic)", "title": "Telemedicine technical lead", "phone": "+1-555-0177", "alt_channel": "Teams: hvh-telehealth", "availability": "Mon-Fri 0700-1900", "last_verified": "2026-02-02" },
+    { "hospital_id": "SYN-006", "role": "nursing_in_charge", "name": "Sam Whitlock (synthetic)", "title": "ED charge nurse", "phone": "+1-555-0152", "availability": "24/7", "last_verified": "2026-02-02" },
+    { "hospital_id": "SYN-006", "role": "administrator", "name": "Taylor Brandt (synthetic)", "title": "House supervisor", "phone": "+1-555-0153", "availability": "During business hours", "last_verified": "2026-02-02" },
+
+    { "hospital_id": "SYN-007", "role": "technical_lead", "name": "Alex Moreau (synthetic)", "title": "Clinical engineering lead", "phone": "+1-555-0161", "alt_channel": "Teams: sohc-clinical-eng", "availability": "Mon-Fri 0600-1800", "last_verified": "2025-08-01" },
+    { "hospital_id": "SYN-007", "role": "nursing_in_charge", "name": "Jamie Cole (synthetic)", "title": "Stroke coordinator", "phone": "+1-555-0162", "availability": "24/7", "last_verified": "2026-01-25" },
+    { "hospital_id": "SYN-007", "role": "administrator", "name": "Reese Navarro (synthetic)", "title": "Administrator on duty", "phone": "+1-555-0163", "availability": "24/7", "last_verified": "2026-01-25" },
+
+    { "hospital_id": "SYN-108", "role": "technical_lead", "name": "Dakota Wren (synthetic)", "title": "Telehealth technician", "phone": "+1-555-0181", "alt_channel": "Teams: rch-telehealth", "availability": "Mon-Fri 0700-1700", "last_verified": "2026-02-14" },
+    { "hospital_id": "SYN-108", "role": "nursing_in_charge", "name": "Blair Castillo (synthetic)", "title": "ED charge nurse", "phone": "+1-555-0182", "availability": "24/7", "last_verified": "2026-02-14" },
+    { "hospital_id": "SYN-108", "role": "administrator", "name": "Shawn Iverson (synthetic)", "title": "Administrator on call", "phone": "+1-555-0183", "availability": "As scheduled", "last_verified": "2025-05-20" }
+  ]
+}
