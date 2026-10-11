@@ -13,7 +13,10 @@ export function daySet(raw: string): number[] | undefined {
   const s = raw
     .toLowerCase()
     .replace(/[–—]/g, "-")
-    .replace(/\bthrough\b|\bto\b/g, "-");
+    // "thru" is as common as "through" in a hand-written guide, and missing it
+    // turns "Mon thru Fri" into Monday and Friday only — which would tell a
+    // doctor the service is closed on the Wednesday it is actually open.
+    .replace(/\bthrough\b|\bthru\b|\bto\b/g, "-");
   if (/daily|24\/7|every day/.test(s)) return [1, 2, 3, 4, 5, 6, 7];
   if (/weekdays/.test(s)) return [1, 2, 3, 4, 5];
   if (/weekend/.test(s)) return [6, 7];
@@ -44,11 +47,13 @@ export type Window = {
 };
 function minute(s: string): number | undefined {
   s = s.trim().toLowerCase();
-  const m = s.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/);
+  // Accepts "7am", "7 a.m.", "7:30pm" and the compact "7a" / "5p" that turns up
+  // in hand-written guides.
+  const m = s.match(/^(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m?\.?$/);
   if (m) {
     const hr = Number(m[1]);
     if (hr < 1 || hr > 12) return;
-    return (hr % 12) * 60 + (m[3] === "pm" ? 720 : 0) + Number(m[2] || 0);
+    return (hr % 12) * 60 + (m[3] === "p" ? 720 : 0) + Number(m[2] || 0);
   }
   const x = s.replace(":", "");
   if (!/^\d{4}$/.test(x)) return;
@@ -57,24 +62,57 @@ function minute(s: string): number | undefined {
   if (h > 23 || n > 59) return;
   return h * 60 + n;
 }
+const TIME = "(?:\\d{1,2}(?::\\d{2})?\\s*(?:[ap]m?)|\\d{2}:?\\d{2})";
+const RANGE = new RegExp(`(${TIME})\\s*(?:-|–|—|to)\\s*(${TIME})`, "gi");
+// Sentences are split on full stops, so "7 a.m.-7 p.m." has to lose its dots
+// before the split or the time is torn in half.
+const tidy = (raw: string) =>
+  raw.replace(/(\d\s*)([ap])\.\s*m\.?/gi, "$1$2m").replace(/\s+/g, " ");
 export function windows(raw: string, defaultDays?: number[]): Window[] {
   if (/24\/7/.test(raw))
     return [{ days: [1, 2, 3, 4, 5, 6, 7], start: 0, end: 1440, raw: "24/7" }];
   const out: Window[] = [];
-  const time = "(?:\\d{1,2}(?::\\d{2})?\\s*(?:am|pm)|\\d{2}:?\\d{2})";
-  for (const part of raw.split(/[;.]\s*/)) {
-    const ds = daySet(part) || defaultDays;
-    if (!ds) continue;
-    for (const m of part.matchAll(
-      new RegExp(`(${time})\\s*(?:-|–|—|to)\\s*(${time})`, "gi"),
-    )) {
+  for (const part of tidy(raw).split(/[;.]\s*/)) {
+    const whole = daySet(part) || defaultDays;
+    let cursor = 0;
+    for (const m of part.matchAll(RANGE)) {
       const a = minute(m[1]),
         b = minute(m[2]);
-      if (a !== undefined && b !== undefined)
+      // Each time range belongs to the days named just before it, not to every
+      // day mentioned anywhere in the sentence. In "Mon-Fri 0700-1900 and Sat
+      // 0800-1200" the Saturday window opens at 0800, and reading the whole
+      // sentence at once would have claimed it opens at 0700.
+      const preceding = part.slice(cursor, m.index);
+      const ds = daySet(preceding) || whole;
+      cursor = m.index! + m[0].length;
+      if (a !== undefined && b !== undefined && ds)
         out.push({ days: ds, start: a, end: b, raw: part });
     }
   }
   return out;
+}
+// Things we noticed in a schedule but cannot resolve. The handbook asks us to
+// say what is unknown rather than quietly answer as though it were not there.
+export function scheduleNotes(raw: string): string[] {
+  const notes: string[] = [];
+  // We have no holiday calendar, and a guide that excludes holidays is telling
+  // us its own window is wrong on days we cannot identify.
+  if (/\bholidays?\b/i.test(raw) && /\bexcept|\bexcluded|\bexcluding|\bno\b/i.test(raw))
+    notes.push("holidays_unknown");
+  // A clause that offers a service without saying when: "weekends on request",
+  // "overnight on-call". The parsed windows do not cover it, so answering from
+  // them alone would report the service as unavailable then.
+  for (const part of tidy(raw).split(/[;,.]\s*/)) {
+    if (!part.trim()) continue;
+    if (RANGE.test(part)) {
+      RANGE.lastIndex = 0;
+      continue;
+    }
+    RANGE.lastIndex = 0;
+    if (/\bon[- ]?call\b|\bon request\b|\bby arrangement\b|\bas scheduled\b|\bas needed\b|\bas required\b/i.test(part))
+      notes.push("conditional_cover");
+  }
+  return [...new Set(notes)];
 }
 export function matchWindow(ws: Window[], instant: string, zone: string) {
   const t = localTime(instant, zone),

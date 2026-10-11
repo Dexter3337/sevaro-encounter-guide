@@ -27,6 +27,7 @@ import {
   daySet,
   untilOpen,
   queryInstant,
+  scheduleNotes,
 } from "./time";
 export const engineVersion = "1.0";
 // The handbook asks four things of every nudge: the answer, where it came
@@ -385,9 +386,12 @@ function resolveField(
           field: `${field} on requested weekday`,
           absent: false,
         };
-      } else if (/on-call|overnight call/i.test(text))
+      } else if (scheduleNotes(text).includes("conditional_cover"))
+        // The listed window has closed, but the guide offers cover outside it
+        // without saying when — "weekend on-call", "weekends on request".
+        // Reporting this as simply unavailable would be wrong.
         timeDependent(
-          `${text}. Outside the listed staffed window; on-call availability requires confirmation.`,
+          `${text}. Outside the listed staffed window; the guide offers cover outside it without stating hours, so this requires confirmation.`,
           true,
         );
       else
@@ -400,6 +404,14 @@ function resolveField(
         true,
       );
     }
+  }
+  // A guide that excludes holidays is telling us its own window is wrong on
+  // days it does not identify. We have no holiday calendar, so the honest
+  // answer is to say the window holds except on a day we cannot determine.
+  if (scheduleNotes(text).includes("holidays_unknown")) {
+    r.flags.push("holidays_unknown");
+    r.message +=
+      " The guide excludes holidays but does not list them; confirm whether today is one.";
   }
   if (r.flags.includes("stale"))
     r.message += ` Possibly out of date (last verified ${guide[0].lastVerified}).`;
