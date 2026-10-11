@@ -36,13 +36,15 @@ import {
 } from "./engine";
 import { clean, interpretation } from "./knowledge";
 import {
-  previewImport,
+  previewImportBundle,
   activate,
   csvHeaders,
   suggestMap,
   columnKeys,
   importSummary,
   type ColumnMap,
+  type Held,
+  type ImportFile,
   type Preview,
 } from "./imports";
 import { challengeFixtures } from "./fixtures";
@@ -50,6 +52,7 @@ import { runEvaluation, fixtureContext, percentiles } from "./evaluation";
 import "./style.css";
 import { Icon } from "./Icon";
 import "./workspace.css";
+import "./sprint.css";
 
 const label = (s: string) =>
   s.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -339,6 +342,12 @@ function App() {
   const [importHistory, setImportHistory] = useState<unknown[]>(
     initial.current?.imports || [],
   );
+  // Files dropped or chosen together; the pasted text joins them as one more.
+  const [importFiles, setImportFiles] = useState<ImportFile[]>([]);
+  // Storyboard rows and contacts for a hospital not loaded yet. Kept between
+  // drops so the guide can arrive second.
+  const [held, setHeld] = useState<Held[]>(initial.current?.held || []);
+  const [dragging, setDragging] = useState(false);
   const lastCompletion = useRef("");
   const [search, setSearch] = useState("");
   const [report, setReport] = useState<ReturnType<typeof runEvaluation>>();
@@ -364,12 +373,13 @@ function App() {
         ),
         context: c,
         imports: importHistory,
+        held,
       })
     )
       setError(
         "Local persistence unavailable or full; export data before reloading.",
       );
-  }, [hs, c, importHistory]);
+  }, [hs, c, importHistory, held]);
   useLayoutEffect(() => {
     const batch = pending.current.splice(0);
     if (!batch.length) return;
@@ -522,9 +532,43 @@ function App() {
     setCandidates(response.candidates || []);
   }
   function previewNow() {
+    const pasted: ImportFile[] = importText.trim()
+      ? [
+          {
+            name: "",
+            text: importText,
+            format,
+            map: format === "csv" ? mapping : undefined,
+          },
+        ]
+      : [];
     setPreview(
-      previewImport(importText, format, format === "csv" ? mapping : undefined),
+      previewImportBundle([...importFiles, ...pasted], { existing: hs, held }),
     );
+    setImportNotice("");
+  }
+  async function addFiles(list: FileList | null) {
+    const files = [...(list || [])];
+    if (!files.length) return;
+    const tooBig = files.filter((f) => f.size > 1_000_000);
+    if (tooBig.length) {
+      setImportNotice(
+        `${tooBig.map((f) => f.name).join(", ")} exceeds the 1 MB limit.`,
+      );
+      return;
+    }
+    const read: ImportFile[] = await Promise.all(
+      files.map(async (f) => ({
+        name: f.name,
+        text: await f.text(),
+        format: f.name.toLowerCase().endsWith(".csv") ? "csv" : "json",
+      })),
+    );
+    setImportFiles((prev) => [
+      ...prev.filter((p) => !read.some((r) => r.name === p.name)),
+      ...read,
+    ]);
+    setPreview(undefined);
     setImportNotice("");
   }
   function activateNow() {
@@ -532,6 +576,9 @@ function App() {
     try {
       const next = activate(hs, preview.hospitals);
       setHs(next);
+      setHeld(preview.held);
+      setImportFiles([]);
+      setPreview(undefined);
       setImportHistory((a) => [
         ...a,
         {
@@ -546,7 +593,9 @@ function App() {
         },
       ]);
       setImportNotice(
-        `Activated ${preview.hospitals.length} hospital version(s). Select a new hospital or refresh the active version explicitly.`,
+        preview.hospitals.length
+          ? `Activated ${preview.hospitals.length} hospital version(s). Select a new hospital or refresh the active version explicitly.`
+          : "Nothing new to activate. Held rows are kept until their hospital's guide is imported.",
       );
     } catch (e) {
       setImportNotice(e instanceof Error ? e.message : String(e));
@@ -828,6 +877,8 @@ function App() {
                         setAudit([]);
                         setMeasures([]);
                         setImportHistory([]);
+                        setImportFiles([]);
+                        setHeld([]);
                         setReport(undefined);
                         setImportText("");
                         setPreview(undefined);
@@ -1146,33 +1197,78 @@ function App() {
               </section>
               <section className="panel importer">
                 <p className="eyebrow">DYNAMIC DATA · NO RESTART</p>
-                <h2>Import a synthetic guide</h2>
+                <h2>Import hospital files</h2>
                 <p className="muted">
-                  Create an immutable guide version. Preview validation and
-                  interpretation before activation.
+                  Drop guides, storyboards and contact directories together, in
+                  any order. Each file is read by its shape, previewed, and
+                  activated all at once or not at all.
                 </p>
-                <label>
-                  Upload JSON or CSV
-                  <input
-                    type="file"
-                    accept=".json,.csv,application/json,text/csv"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      if (file.size > 1_000_000) {
-                        setImportNotice("File exceeds 1 MB.");
-                        return;
-                      }
-                      const text = await file.text();
-                      const fmt = file.name.endsWith(".csv") ? "csv" : "json";
-                      setFormat(fmt);
-                      setImportText(text);
-                      setPreview(undefined);
-                      if (fmt === "csv")
-                        setMapping(suggestMap(csvHeaders(text).headers));
-                    }}
-                  />
-                </label>
+                <div
+                  className={`drop-zone${dragging ? " dragging" : ""}`}
+                  data-testid="drop-zone"
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setDragging(true);
+                  }}
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDragging(false);
+                    void addFiles(e.dataTransfer.files);
+                  }}
+                >
+                  <p>
+                    <strong>Drop files here</strong> — JSON or CSV, up to 1 MB
+                    each
+                  </p>
+                  <label>
+                    Choose files
+                    <input
+                      type="file"
+                      multiple
+                      aria-label="Choose import files"
+                      accept=".json,.csv,application/json,text/csv"
+                      onChange={(e) => {
+                        void addFiles(e.target.files);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                  {importFiles.length > 0 && (
+                    <ul className="drop-files">
+                      {importFiles.map((f) => (
+                        <li key={f.name}>
+                          {f.name} · {f.format.toUpperCase()} ·{" "}
+                          {(f.text.length / 1024).toFixed(1)} KB{" "}
+                          <button
+                            className="link"
+                            aria-label={`Remove ${f.name}`}
+                            onClick={() => {
+                              setImportFiles((p) =>
+                                p.filter((x) => x.name !== f.name),
+                              );
+                              setPreview(undefined);
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                {held.length > 0 && (
+                  <p className="banner" data-testid="held-rows">
+                    Holding{" "}
+                    {held
+                      .map(
+                        (x) =>
+                          `${[x.storyboard.length && `${x.storyboard.length} storyboard row(s)`, x.contacts.length && `${x.contacts.length} contact(s)`].filter(Boolean).join(" and ")} for ${x.hospitalId}`,
+                      )
+                      .join("; ")}
+                    . They attach when that hospital's guide is imported.
+                  </p>
+                )}
                 <label>
                   Format
                   <select
@@ -1245,7 +1341,33 @@ function App() {
                         {x}
                       </p>
                     ))}
+                    {preview.files.length > 1 && (
+                      <ul className="preview-files" data-testid="preview-files">
+                        {preview.files.map((f, i) => (
+                          <li key={i} className={f.errors.length ? "rejected" : ""}>
+                            <strong>{f.name}</strong> ·{" "}
+                            {f.errors.length
+                              ? "rejected"
+                              : [
+                                  f.hospitals && `${f.hospitals} guide(s)`,
+                                  f.storyboardRows &&
+                                    `${f.storyboardRows} storyboard row(s)`,
+                                  f.contacts && `${f.contacts} contact(s)`,
+                                ]
+                                  .filter(Boolean)
+                                  .join(" · ")}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                     <p>{importSummary(preview)}</p>
+                    {preview.diagnostics
+                      .filter((d) => /guide field|held|added to the active|nothing new/.test(d))
+                      .map((d, i) => (
+                        <p key={i} className="preview-summary">
+                          {d}
+                        </p>
+                      ))}
                     {preview.hospitals.map((h) => (
                       <div key={h.id}>
                         <strong>
@@ -1283,15 +1405,46 @@ function App() {
                     <button
                       className="primary"
                       disabled={
-                        preview.errors.length > 0 || !preview.hospitals.length
+                        preview.errors.length > 0 ||
+                        (!preview.hospitals.length && !preview.held.length)
                       }
                       onClick={activateNow}
                     >
-                      Activate validated bundle
+                      {preview.hospitals.length || !preview.held.length
+                        ? "Activate validated bundle"
+                        : "Hold rows for later"}
                     </button>
                   </div>
                 )}
                 {importNotice && <p role="status">{importNotice}</p>}
+                {!preview &&
+                  importHistory.length > 0 &&
+                  (() => {
+                    const last = importHistory.at(-1) as {
+                      identities?: { id: string; version: string }[];
+                    };
+                    const opened = (last.identities || [])
+                      .map((x) =>
+                        hs.find((y) => y.id === x.id && y.version === x.version),
+                      )
+                      .filter((x): x is Hospital => !!x);
+                    return opened.length ? (
+                      <div className="button-row">
+                        {opened.map((x) => (
+                          <button
+                            key={x.id + x.version}
+                            className="secondary"
+                            onClick={() => {
+                              newHospital(x);
+                              setTab("encounter");
+                            }}
+                          >
+                            Open {x.name} in an encounter
+                          </button>
+                        ))}
+                      </div>
+                    ) : null;
+                  })()}
                 <small>
                   Unknown fields are retained and searchable. Unsupported
                   conditional wording requires review; it cannot create

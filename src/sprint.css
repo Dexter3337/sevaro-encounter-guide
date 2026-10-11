@@ -1,0 +1,38 @@
+/* Sprint surfaces: import drop zone, dock, chat, contacts, storyboard, gate. */
+
+/* ---- Import ---------------------------------------------------------- */
+.drop-zone {
+  border: 2px dashed #b9cdd1;
+  border-radius: 12px;
+  padding: 16px;
+  background: #fbfdfd;
+  display: grid;
+  gap: 10px;
+}
+.drop-zone.dragging {
+  border-color: var(--teal);
+  background: #eef8f6;
+}
+.drop-zone p {
+  margin: 0;
+}
+.drop-files,
+.preview-files {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.drop-files li,
+.preview-files li {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.preview-files li.rejected {
+  color: #a23b2a;
+}
+.preview-summary {
+  margin: 4px 0;
+  font-weight: 600;
+}
