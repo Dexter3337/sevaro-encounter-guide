@@ -89,7 +89,7 @@ function providers(opts: LlmServerOptions): ProviderCall[] {
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: INSTRUCTIONS }] },
           contents: [{ role: "user", parts: [{ text: JSON.stringify(input) }] }],
-          generationConfig: { responseFormat: { text: { mimeType: "application/json", schema: geminiSchema(schema) } }, maxOutputTokens: 3500 },
+          generationConfig: { responseMimeType: "application/json", responseJsonSchema: geminiSchema(schema), maxOutputTokens: 3500 },
         }),
       });
       if (!response.ok) throw new ProviderError(response.status);

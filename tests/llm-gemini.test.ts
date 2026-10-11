@@ -34,8 +34,8 @@ describe("Gemini provider", () => {
     expect(init.headers["x-goog-api-key"]).toBe(G.apiKey);
     const body = JSON.parse(init.body);
     expect(body.systemInstruction.parts[0].text).toBe(INSTRUCTIONS);
-    expect(body.generationConfig.responseFormat.text.mimeType).toBe("application/json");
-    const schema = JSON.stringify(body.generationConfig.responseFormat.text.schema);
+    expect(body.generationConfig.responseMimeType).toBe("application/json");
+    const schema = JSON.stringify(body.generationConfig.responseJsonSchema);
     expect(schema).toContain('"suggestions"');
     expect(schema).not.toMatch(/maxLength|minLength|\$schema/);
     const out = await r.json();
