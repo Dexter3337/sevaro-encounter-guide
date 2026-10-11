@@ -4,7 +4,7 @@ import {
   MAX_SHARED_HOSPITALS,
   sharedKey,
   validateForSharing,
-} from "../../src/sharedLibrary";
+} from "../src/sharedLibrary";
 
 // GET  /api/hospitals  → every hospital version in the team library
 // POST /api/hospitals  → publish validated hospital versions (never overwrites)
@@ -46,16 +46,17 @@ export default async (req: Request) => {
     if (error) return json({ error }, 400);
 
     const { blobs } = await store.list();
-    const existing = new Set(blobs.map((b) => b.key));
     let stored = 0,
       already = 0;
     for (const h of hospitals) {
       const key = sharedKey(h);
-      if (existing.has(key)) {
+      // Ask the store about this exact key: listed keys come back decoded,
+      // so comparing against the list would miss "Challenge%20v2".
+      if (await store.getMetadata(key)) {
         already++;
         continue;
       }
-      if (existing.size + stored >= MAX_SHARED_HOSPITALS)
+      if (blobs.length + stored >= MAX_SHARED_HOSPITALS)
         return json({ error: "The shared library is full.", stored }, 507);
       await store.setJSON(key, h);
       stored++;
@@ -66,4 +67,3 @@ export default async (req: Request) => {
   return json({ error: "Method not allowed." }, 405);
 };
 
-export const config = { path: "/api/hospitals" };

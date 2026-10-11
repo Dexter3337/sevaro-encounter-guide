@@ -5,6 +5,17 @@
 [build.environment]
   NODE_VERSION = "24"
 
+# Functions are pre-bundled by scripts/build-functions.mjs (part of
+# `pnpm build`) from functions-src/ into self-contained files here; Netlify's
+# packager does not follow pnpm's linked node_modules.
+[functions]
+  directory = "netlify/functions"
+
+[[redirects]]
+  from = "/api/hospitals"
+  to = "/.netlify/functions/hospitals"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]

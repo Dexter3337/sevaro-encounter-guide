@@ -263,24 +263,34 @@ function App() {
   // drops so the guide can arrive second.
   const [held, setHeld] = useState<Held[]>(initial.current?.held || []);
   const [dragging, setDragging] = useState(false);
-  // Hospitals published by teammates, pulled from the cloud library on load.
+  // The team's cloud library. Loading from it and sharing to it are explicit
+  // actions: a hospital someone else rehearsed with never appears unasked, so
+  // importing an unseen hospital stays a clean, repeatable demonstration.
   const [sharedStatus, setSharedStatus] = useState("");
-  useEffect(() => {
-    let live = true;
-    void fetchShared().then((shared) => {
-      if (!live || !shared) return;
-      setHs((prev) => {
-        const add = newFromShared(prev, shared);
-        setSharedStatus(
-          `Team library connected · ${shared.length} shared hospital version(s)${add.length ? `, ${add.length} added here` : ""}.`,
-        );
-        return add.length ? [...prev, ...add] : prev;
-      });
-    });
-    return () => {
-      live = false;
-    };
-  }, []);
+  const [shareable, setShareable] = useState<Hospital[]>([]);
+  async function loadShared() {
+    setSharedStatus("Contacting the team library…");
+    const shared = await fetchShared();
+    if (!shared) {
+      setSharedStatus("The team library is not reachable — working on this device only.");
+      return;
+    }
+    const add = newFromShared(hs, shared);
+    if (add.length) setHs((prev) => [...prev, ...newFromShared(prev, add)]);
+    setSharedStatus(
+      `Team library: ${shared.length} hospital version(s) · ${add.length ? `${add.length} added to this device` : "nothing new for this device"}.`,
+    );
+  }
+  async function shareNow() {
+    setSharedStatus("Sharing with the team library…");
+    const r = await publishShared(shareable);
+    setSharedStatus(
+      r
+        ? `Shared with the team library (${r.stored} new, ${r.existing} already there).`
+        : "The team library is not reachable — saved on this device only.",
+    );
+    if (r) setShareable([]);
+  }
   const lastCompletion = useRef("");
   const [search, setSearch] = useState("");
   const [report, setReport] = useState<ReturnType<typeof runEvaluation>>();
@@ -585,16 +595,9 @@ function App() {
           ? `Activated ${preview.hospitals.length} hospital version(s). Select a new hospital or refresh the active version explicitly.`
           : "Nothing new to activate. Held rows are kept until their hospital's guide is imported.",
       );
-      // Share the new versions with the team. If the library is unreachable
-      // the activation still stands on this device.
-      if (preview.hospitals.length)
-        void publishShared(preview.hospitals).then((r) =>
-          setSharedStatus(
-            r
-              ? `Shared with the team library (${r.stored} new, ${r.existing} already there).`
-              : "Saved on this device only — the shared library is not reachable.",
-          ),
-        );
+      // Offer to share what was just activated; never share it unasked.
+      setShareable(preview.hospitals);
+      setSharedStatus("");
     } catch (e) {
       setImportNotice(e instanceof Error ? e.message : String(e));
     }
@@ -961,6 +964,8 @@ function App() {
                         setImportHistory([]);
                         setImportFiles([]);
                         setHeld([]);
+                        setShareable([]);
+                        setSharedStatus("");
                         setReport(undefined);
                         setImportText("");
                         setPreview(undefined);
@@ -1543,8 +1548,18 @@ function App() {
                   </div>
                 )}
                 {importNotice && <p role="status">{importNotice}</p>}
+                <div className="button-row team-library">
+                  <button className="secondary" onClick={() => void loadShared()}>
+                    Load hospitals from the team library
+                  </button>
+                  {shareable.length > 0 && (
+                    <button className="secondary" onClick={() => void shareNow()}>
+                      Share {shareable.length} activated version(s) with the team
+                    </button>
+                  )}
+                </div>
                 {sharedStatus && (
-                  <p className="muted" data-testid="shared-status">
+                  <p className="muted" role="status" data-testid="shared-status">
                     {sharedStatus}
                   </p>
                 )}

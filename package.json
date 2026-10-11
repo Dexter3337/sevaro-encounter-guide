@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && node scripts/build-functions.mjs",
+    "build:functions": "node scripts/build-functions.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:acceptance": "vitest run tests/acceptance.test.ts",
@@ -32,6 +33,7 @@
     "@types/papaparse": "^5.3.16",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "esbuild": "^0.28.2",
     "prettier": "^3.9.9",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0",

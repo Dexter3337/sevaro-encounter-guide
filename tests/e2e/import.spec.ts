@@ -101,7 +101,7 @@ test("one broken file rejects the whole drop and names the file", async ({ page 
   ).toHaveCount(7);
 });
 
-test("the team library: shared hospitals arrive on load, new activations are published", async ({
+test("the team library: loading and sharing are explicit, never automatic", async ({
   page,
 }) => {
   const shared = JSON.parse(readFileSync("src/data/seeds.json", "utf8"))[1];
@@ -112,31 +112,40 @@ test("the team library: shared hospitals arrive on load, new activations are pub
     fields: shared.fields.map((f: any) => ({ ...f, hospitalId: "TEAM-01" })),
     contacts: [],
   };
+  const calls: string[] = [];
   const published: any[] = [];
   await page.route("**/api/hospitals", async (route) => {
+    calls.push(route.request().method());
     if (route.request().method() === "POST") {
       published.push(...JSON.parse(route.request().postData() || "[]"));
       await route.fulfill({ json: { stored: 1, existing: 0 } });
     } else await route.fulfill({ json: [remote] });
   });
   await page.reload();
-  await expect(page.getByLabel("Hospital", { exact: true }).locator("option")).toHaveCount(8);
   await page.getByRole("button", { name: "Guide library" }).click();
-  await expect(page.getByTestId("shared-status")).toContainText("Team library connected");
+  // Nothing is pulled in unasked.
+  await expect(page.getByLabel("Hospital", { exact: true }).locator("option")).toHaveCount(7);
+  await page.getByRole("button", { name: "Load hospitals from the team library" }).click();
+  await expect(page.getByTestId("shared-status")).toContainText("1 added to this device", { timeout: 15_000 });
+  await expect(page.getByLabel("Hospital", { exact: true }).locator("option")).toHaveCount(8);
+  // Activating does not publish; sharing is a separate click.
   await page.getByLabel("Choose import files").setInputFiles([guide, storyboard]);
   await page.getByRole("button", { name: "Preview & validate" }).click();
   await page.getByRole("button", { name: "Activate validated bundle" }).click();
-  await expect(page.getByTestId("shared-status")).toContainText("Shared with the team library");
+  expect(calls).toEqual(["GET"]);
+  await page.getByRole("button", { name: "Share 1 activated version(s) with the team" }).click();
+  await expect(page.getByTestId("shared-status")).toContainText("Shared with the team library", { timeout: 15_000 });
   expect(published.map((h) => h.id)).toEqual(["SYN-108"]);
 });
 
 test("without the library the app works exactly as before", async ({ page }) => {
   await page.route("**/api/hospitals", (route) => route.abort());
   await page.reload();
-  await expect(page.getByLabel("Hospital", { exact: true }).locator("option")).toHaveCount(7);
   await page.getByRole("button", { name: "Guide library" }).click();
+  await page.getByRole("button", { name: "Load hospitals from the team library" }).click();
+  await expect(page.getByTestId("shared-status")).toContainText("not reachable", { timeout: 15_000 });
   await page.getByLabel("Choose import files").setInputFiles([guide, storyboard]);
   await page.getByRole("button", { name: "Preview & validate" }).click();
   await page.getByRole("button", { name: "Activate validated bundle" }).click();
-  await expect(page.getByTestId("shared-status")).toContainText("this device only");
+  await expect(page.getByLabel("Hospital", { exact: true }).locator("option")).toHaveCount(8);
 });
